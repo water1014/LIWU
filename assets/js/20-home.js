@@ -482,9 +482,8 @@ HOME.Home = {
         const dock = document.querySelector('.dock');
         const dots = document.querySelector('.dots-nav');
         let h = el.clientHeight;
-        /* 底栏浮在页面之上，要从可用高度里扣掉 */
-        const reserve = (dock ? dock.offsetHeight : 74) + (dots ? dots.offsetHeight : 18) + 92;
-        if (h > reserve + 160) h -= reserve;
+        /* pages 是 flex:1，底栏高度已经被扣过，这里只留一点透气的余量 */
+        h -= 6;
         if (h > 60 && Math.abs(h - this.areaH) > 2) this.areaH = h;
         const w = window.innerWidth || 390;
         const row = w < 380 ? 72 : 76, gap = w < 380 ? 9 : 10;
@@ -712,6 +711,7 @@ HOME.Home = {
             </div>
           </div>
         </div>
+      </div>
       <div class="home-foot">
         <div class="dots-nav">
           <i v-for="(p,i) in homePages" :key="i" :class="{on:S.homePage===i}" @click="gotoPage(i)"></i>
