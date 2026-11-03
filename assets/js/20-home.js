@@ -3,6 +3,15 @@
    ============================================================ */
 const HOME = {};
 
+/* 桌面网格：4 列，一格 = 一枚图标的高度 */
+const GRID = { cols: 4, row: 76, gap: 10 };
+/* 每个组件的格位：[列, 行] */
+const WSIZE = {
+  postcard: [4, 2], diary: [4, 2],
+  polaroid: [2, 3], music: [2, 3], calendar: [2, 3],
+  dialog: [2, 2], anniv: [2, 2], level: [2, 2], reading: [2, 2], clock: [2, 2]
+};
+
 HOME.Postcard = {
   props: { item: Object },
   computed: {
@@ -292,6 +301,7 @@ HOME.Home = {
     return {
       S, editing: false, press: null, drag: null, dragStyle: {}, scrolled: false, scrolling: false,
       sheet: '', postForm: null, tick: null, suppressClick: false, pageTimer: 0, areaH: 0, appsH: 0, rh: {},
+      gridRow: 76, gridGap: 10,
       clock: '', dateText: '', _ct: 0
     };
   },
@@ -317,48 +327,71 @@ HOME.Home = {
       return out.sort((a, b) => rank(a.kind) - rank(b.kind));
     },
     fullWidth() { return ['postcard', 'diary', 'clock', 'calendar']; },
-    /* 按「行」装箱再按页高切分：左右翻页，但每页都不会溢出 */
-    homePages() {
-      const H = Math.max(240, this.areaH || 560);
-      const RH = { postcard: 176, polaroid: 214, dialog: 164, music: 184, anniv: 148, level: 148, reading: 157, calendar: 199, diary: 140, clock: 130 };
-      const GAP = 13;
-      const rows = [];
-      let cur = null;
-      this.widgets.forEach((it) => {
-        const wide = this.fullWidth.indexOf(it.kind) >= 0 || it.w >= 3;
-        const h = this.rh[it.kind] || RH[it.kind] || 150;
-        if (wide) { rows.push({ h, items: [it] }); cur = null; }
-        else if (cur && cur.items.length === 1) { cur.items.push(it); cur.h = Math.max(cur.h, h); cur = null; }
-        else { cur = { h, items: [it] }; rows.push(cur); }
-      });
-
-      const pages = [];
-      let page = [], used = 0, first = true;
-      const cap = () => Math.max(180, H - (first ? this.appsH : 0));
-      const flush = () => {
-        pages.push({ apps: first, rows: page.slice(), items: page.reduce((a, r) => a.concat(r.items), []) });
-        page = []; used = 0; first = false;
-      };
-      rows.forEach((r) => {
-        const need = page.length ? used + GAP + r.h : r.h;
-        if (need > cap() && (page.length || first)) flush();
-        used = page.length ? used + GAP + r.h : r.h;
-        page.push(r);
-      });
-      if (page.length) flush();
-
-      /* 均衡：末页太空就往回搬几行，别让最后只剩两张卡孤零零漂着 */
-      const hOf = (rs) => rs.reduce((s, r, i) => s + r.h + (i ? GAP : 0), 0);
-      for (let g = 0; g < 4 && pages.length > 1; g++) {
-        const last = pages[pages.length - 1], prev = pages[pages.length - 2];
-        if (hOf(last.rows) >= H * 0.72 || prev.rows.length < 3) break;
-        const row = prev.rows.pop();
-        last.rows.unshift(row);
-        if (hOf(last.rows) > H) { prev.rows.push(row); last.rows.shift(); break; }
-        [prev, last].forEach((p) => { p.items = p.rows.reduce((a, r) => a.concat(r.items), []); });
+    /* 图标与组件混在同一条流里：拖过就以保存的顺序为准 */
+    flow() {
+      const apps = this.allApps.map((a) => ({ key: 'app:' + a, type: 'app', appId: a }));
+      const ws = this.widgets.map((it) => ({ key: it.id, type: 'w', it }));
+      const saved = S.cfg.flow || [];
+      if (saved.length) {
+        const map = new Map();
+        [...apps, ...ws].forEach((x) => map.set(x.key, x));
+        const out = [];
+        saved.forEach((k) => { const x = map.get(k); if (x) { out.push(x); map.delete(k); } });
+        map.forEach((x) => out.push(x));
+        return out;
       }
+      // 默认：四枚图标打底，之后卡片与图标交替，形成错落
+      const out = []; let ai = 0;
+      const putApps = (n) => { for (let i = 0; i < n && ai < apps.length; i++) out.push(apps[ai++]); };
+      putApps(4);
+      ws.forEach((w, i) => { out.push(w); if (i % 2 === 1) putApps(4); });
+      putApps(99);
+      return out;
+    },
+    /* 4 列网格装箱：图标 1×1，组件 2×2 / 2×3 / 4×2，按格位找空 */
+    homePages() {
+      const H = Math.max(260, this.areaH || 560);
+      const { cols, row, gap } = GRID;
+      const occ = [];
+      const fits = (r, c, w, h) => {
+        for (let i = 0; i < h; i++) {
+          for (let j = 0; j < w; j++) if (occ[r + i] && occ[r + i][c + j]) return false;
+        }
+        return true;
+      };
+      const take = (r, c, w, h) => {
+        for (let i = 0; i < h; i++) { occ[r + i] = occ[r + i] || []; for (let j = 0; j < w; j++) occ[r + i][c + j] = 1; }
+      };
 
-      if (!pages.length) pages.push({ apps: true, rows: [], items: [] });
+      const placed = [];
+      let r = 0, c = 0;
+      this.flow.forEach((x) => {
+        const [w, h] = x.type === 'app' ? [1, 1] : (WSIZE[x.it.kind] || [2, 2]);
+        let guard = 0;
+        while (guard++ < 400) {
+          if (c + w > cols) { r++; c = 0; continue; }
+          if (fits(r, c, w, h)) break;
+          c++;
+        }
+        take(r, c, w, h);
+        placed.push(Object.assign({}, x, { r: r, c: c, w: w, h: h }));
+        c += w;
+      });
+
+      // 一页最多几行
+      const per = Math.max(2, Math.floor((H + gap) / (row + gap)));
+      const pages = [];
+      let i = 0;
+      while (i < placed.length) {
+        const base = placed[i].r;
+        const cells = [];
+        while (i < placed.length && placed[i].r + placed[i].h - base <= per) { cells.push(placed[i]); i++; }
+        if (!cells.length) { cells.push(placed[i]); i++; }
+        const rel = cells.map((p) => Object.assign({}, p, { r: p.r - base }));
+        const rows = rel.reduce((m, p) => Math.max(m, p.r + p.h), 0);
+        pages.push({ cells: rel, rows: rows });
+      }
+      if (!pages.length) pages.push({ cells: [], rows: 0 });
       return pages;
     },
     allApps() {
@@ -409,10 +442,16 @@ HOME.Home = {
       this.dateText = (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 · 周' + '日一二三四五六'[d.getDay()];
     },
     meta(id) { return window.appMeta(id); },
-    cellStyle(it) {
-      const full = this.fullWidth.indexOf(it.kind) >= 0 || it.w >= 3;
-      return { gridColumn: 'span ' + (full ? 2 : 1) };
+    gridStyle(cell) {
+      const g = this.gridGap, row = this.gridRow;
+      return {
+        left: 'calc(' + cell.c + ' * (100% + ' + g + 'px) / 4)',
+        width: 'calc(' + cell.w + ' * (100% - ' + (3 * g) + 'px) / 4 + ' + ((cell.w - 1) * g) + 'px)',
+        top: (cell.r * (row + g)) + 'px',
+        height: 'calc(' + cell.h + ' * ' + row + 'px + ' + ((cell.h - 1) * g) + 'px)'
+      };
     },
+    pageH(pg) { return Math.max(0, pg.rows * (this.gridRow + this.gridGap) - this.gridGap); },
     dragStyleFor(id, appId) {
       if (!this.drag) return {};
       const same = id ? this.drag.id === id : this.drag.appId === appId;
@@ -433,6 +472,9 @@ HOME.Home = {
       if (el) {
         const h = el.clientHeight;
         if (h > 60 && Math.abs(h - this.areaH) > 2) this.areaH = h;
+        const w = window.innerWidth || 390;
+        const row = w < 380 ? 72 : 76, gap = w < 380 ? 9 : 10;
+        if (row !== this.gridRow) { this.gridRow = row; this.gridGap = gap; }
       }
       const a = document.querySelector('.home-apps');
       if (a) {
@@ -465,9 +507,9 @@ HOME.Home = {
       el.scrollTo({ left: i * el.clientWidth, behavior: 'smooth' });
     },
     /* ---------- press / long press / drag ---------- */
-    downGrid(e, it, pi) {
+    downGrid(e, cell, pi) {
       if (e.button && e.button !== 0) return;
-      this.beginPress(e, { from: 'grid', it, pi });
+      this.beginPress(e, { from: 'grid', it: cell.it, key: cell.key, pi });
     },
     downDock(e, appId, index) {
       if (e.button && e.button !== 0) return;
@@ -497,7 +539,7 @@ HOME.Home = {
         clearTimeout(p.timer);
       }
       if (!this.drag && p.moved && (this.editing || p.long) && dist > 7) {
-        this.drag = Object.assign({ dx: 0, dy: 0 }, p.it ? { id: p.it.id } : { appId: p.appId });
+        this.drag = Object.assign({ dx: 0, dy: 0 }, { id: p.key || (p.it && p.it.id) });
       }
       if (this.drag) {
         this.drag.dx = dx; this.drag.dy = dy;
@@ -518,28 +560,23 @@ HOME.Home = {
     drop(x, y) {
       const d = this.drag;
       if (!d || !d.id) { this.resetDrag(); return; }
-      const list = this.widgets;
-      const from = list.findIndex((i) => i.id === d.id);
       const pages = document.querySelectorAll('.hp');
       const pageEl = pages[Math.min(S.homePage || 0, pages.length - 1)];
       const cells = pageEl ? Array.from(pageEl.querySelectorAll('.cell')) : [];
-      if (from < 0 || !cells.length) { this.resetDrag(); return; }
-      // 只在本页内比较落点，避免跳到别的页
-      let to = from, best = 1e9;
+      if (!cells.length) { this.resetDrag(); return; }
+      // 只在本页内找落点，避免拖到别的页去
+      let bestKey = null, best = 1e9;
       cells.forEach((c) => {
         const r = c.getBoundingClientRect();
         const dist = Math.abs(y - (r.top + r.height / 2)) + Math.abs(x - (r.left + r.width / 2)) * 0.3;
-        if (dist < best) {
-          best = dist;
-          const idx = list.findIndex((it) => it.id === c.dataset.id);
-          if (idx >= 0) to = idx;
-        }
+        if (dist < best) { best = dist; bestKey = c.dataset.id; }
       });
-      if (to === from) { this.resetDrag(); return; }
-      const ids = list.map((i) => i.id);
+      const ids = this.flow.map((i) => i.key);
+      const from = ids.indexOf(d.id), to = ids.indexOf(bestKey);
+      if (from < 0 || to < 0 || from === to) { this.resetDrag(); return; }
       const [moved] = ids.splice(from, 1);
       ids.splice(to, 0, moved);
-      S.cfg.widgetOrder = ids;
+      S.cfg.flow = ids;
       S.layoutKey++;
       saveCfg();
       this.resetDrag();
@@ -605,7 +642,7 @@ HOME.Home = {
     resetPage() {
       if (!confirm('恢复默认桌面布局？自定义位置会丢失。')) return;
       S.cfg.layout = { pages: [JSON.parse(JSON.stringify(HOME.defaultPage())), []], dock: ['store', 'notices', 'beauty', 'settings'] };
-      S.cfg.widgetOrder = [];
+      S.cfg.widgetOrder = []; S.cfg.flow = [];
       S.layoutKey++;
       saveCfg();
     }
@@ -634,38 +671,33 @@ HOME.Home = {
         </div>
       </div>
       <div class="pages" ref="pages" @scroll.passive="onScroll">
-        <div class="hp" v-for="(pg,pi) in homePages" :key="'hp'+pi" :data-page="pi" :class="{top:pg.apps}">
-          <section class="home-apps" v-if="pg.apps">
-            <div class="ha-head"><span class="ha-t">应用</span><span class="ha-n">{{allApps.length}}</span></div>
-            <div class="ha-grid">
-              <button v-for="a in allApps" :key="a" class="app" @click.stop="openApp(a)">
-                <span class="app-icon" :style="{'--tint':meta(a).tint}"><ico :name="meta(a).icon" :size="25" :sw="1.5"/></span>
-                <span class="app-label">{{meta(a).name}}</span>
+        <div class="hp" v-for="(pg,pi) in homePages" :key="'hp'+pi" :data-page="pi">
+          <div class="page-grid" :style="{height:pageH(pg)+'px','--cell-r':gridRow+'px','--cell-gap':gridGap+'px'}">
+            <div v-for="cell in pg.cells" :key="cell.key" :data-id="cell.key" :data-kind="cell.type==='w'?cell.it.kind:'app'"
+                 :class="['cell', cell.type==='app'?'c-app':'c-w', drag&&drag.id===cell.key?'dragging':'', drag&&drag.id&&drag.id!==cell.key?'dim':'']"
+                 :style="[gridStyle(cell), dragStyleFor(cell.key)]"
+                 @pointerdown="downGrid($event,cell,pi)">
+              <button v-if="cell.type==='app'" class="app" @click.stop="openApp(cell.appId)">
+                <span class="app-icon" :style="{'--tint':meta(cell.appId).tint}"><ico :name="meta(cell.appId).icon" :size="24" :sw="1.5"/></span>
+                <span class="app-label">{{meta(cell.appId).name}}</span>
               </button>
-            </div>
-          </section>
-
-          <div class="page-grid">
-            <div v-for="it in pg.items" :key="it.id" :data-id="it.id" :data-kind="it.kind" :class="['cell', fullWidth.indexOf(it.kind)>=0||it.w>=3?'wide':'', drag&&drag.id===it.id?'dragging':'', drag&&drag.id!==it.id?'dim':'' ]"
-                 :style="[cellStyle(it), dragStyleFor(it.id)]"
-                 @pointerdown="downGrid($event,it,pi)">
-              <template v-if="it.kind==='postcard'"><pc-card :item="it"/></template>
-              <template v-else-if="it.kind==='polaroid'"><pol-card :item="it"/></template>
-              <template v-else-if="it.kind==='music'"><music-card :item="it"/></template>
-              <template v-else-if="it.kind==='dialog'"><dlg-card :item="it"/></template>
-              <template v-else-if="it.kind==='anniv'"><anniv-card :item="it"/></template>
-              <template v-else-if="it.kind==='level'"><lv-card :item="it"/></template>
-              <template v-else-if="it.kind==='calendar'"><cal-card :item="it"/></template>
-              <template v-else-if="it.kind==='reading'"><read-card :item="it"/></template>
-              <template v-else-if="it.kind==='diary'"><diary-card :item="it"/></template>
-              <template v-else-if="it.kind==='clock'"><clock-card :item="it"/></template>
-              <button v-if="editing" class="del-badge" @click.stop="delWidget(it)"><ico name="x" :size="10" :sw="2.6"/></button>
-              <div v-if="editing" class="widget-edit"></div>
+              <template v-else>
+                <template v-if="cell.it.kind==='postcard'"><pc-card :item="cell.it"/></template>
+                <template v-else-if="cell.it.kind==='polaroid'"><pol-card :item="cell.it"/></template>
+                <template v-else-if="cell.it.kind==='music'"><music-card :item="cell.it"/></template>
+                <template v-else-if="cell.it.kind==='dialog'"><dlg-card :item="cell.it"/></template>
+                <template v-else-if="cell.it.kind==='anniv'"><anniv-card :item="cell.it"/></template>
+                <template v-else-if="cell.it.kind==='level'"><lv-card :item="cell.it"/></template>
+                <template v-else-if="cell.it.kind==='calendar'"><cal-card :item="cell.it"/></template>
+                <template v-else-if="cell.it.kind==='reading'"><read-card :item="cell.it"/></template>
+                <template v-else-if="cell.it.kind==='diary'"><diary-card :item="cell.it"/></template>
+                <template v-else-if="cell.it.kind==='clock'"><clock-card :item="cell.it"/></template>
+                <button v-if="editing" class="del-badge" @click.stop="delWidget(cell.it)"><ico name="x" :size="10" :sw="2.6"/></button>
+                <div v-if="editing" class="widget-edit"></div>
+              </template>
             </div>
           </div>
         </div>
-      </div>
-
       <div class="home-foot">
         <div class="dots-nav">
           <i v-for="(p,i) in homePages" :key="i" :class="{on:S.homePage===i}" @click="gotoPage(i)"></i>
