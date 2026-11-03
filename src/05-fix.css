@@ -1,0 +1,46 @@
+/* ============================================================
+   layout fixes & responsive
+   ============================================================ */
+#app{height:100%}
+.cell{position:relative;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;touch-action:manipulation}
+.cell.dim{opacity:.55;transition:opacity .2s}
+.cell .widget,.cell > .app{width:100%;height:100%}
+.dock-slot{flex:1;display:flex;align-items:center;justify-content:center;height:100%;min-width:0}
+.home{font-family:var(--home-font,inherit)}
+.home .app-label{font-family:var(--home-font,inherit)}
+
+.btn.txt,.nav-act .txt{height:32px;padding:0 8px}
+button.txt{font-size:12.5px;font-weight:600;color:var(--ink)}
+
+.backdrop{animation:fadeIn .2s var(--ease)}
+.sheet{will-change:transform}
+
+input[type=range]{-webkit-appearance:none;appearance:none;height:22px;background:transparent}
+input[type=range]::-webkit-slider-runnable-track{height:3px;border-radius:3px;background:rgba(23,23,27,.12)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--ink);margin-top:-6.5px;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+
+.f.g6::-webkit-scrollbar{display:none}
+.f.g6{scrollbar-width:none}
+
+/* moments status bar */
+.screen .moments ~ *{}
+
+/* small phones */
+@media (max-width:520px), (max-height:720px){
+  .device{width:100vw;height:100vh;height:100dvh;padding:0;border-radius:0;box-shadow:none}
+  .device:before,.device:after{display:none}
+  .screen{border-radius:0}
+  .brand,.stage-side,.stage-hint{display:none}
+  .stage:after{display:none}
+  .island{top:7px;width:100px;height:27px}
+  .statusbar{padding:0 22px 0 26px}
+}
+@media (max-width:360px){
+  .app-icon{width:52px;height:52px;border-radius:15px}
+  .dock .app-icon{width:48px;height:48px}
+  .page-grid{grid-auto-rows:86px;gap:10px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+}
