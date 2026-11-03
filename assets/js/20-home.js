@@ -349,8 +349,8 @@ HOME.Home = {
       card('postcard');
       putApps(2); card('polaroid');
       putApps(4);
-      card('dialog'); card('anniv');
       putApps(99);
+      card('dialog'); card('anniv');
       // 其余卡片按「小卡、竖卡、全宽」交替，避免一页全是同尺寸
       ['level', 'music', 'reading', 'calendar', 'diary', 'clock'].forEach(card);
       ws.forEach((w) => { if (!used[w.key]) out.push(w); });
@@ -479,10 +479,12 @@ HOME.Home = {
       const el = this.$refs.pages;
       if (el) {
         /* 可用高度 = 页容器顶到底栏顶，别把 dock 也算进去 */
-        const foot = document.querySelector('.home-foot');
+        const dock = document.querySelector('.dock');
+        const dots = document.querySelector('.dots-nav');
         let h = el.clientHeight;
-        /* 底栏是浮在页面之上的，要从可用高度里扣掉 */
-        if (foot && foot.offsetHeight) h -= foot.offsetHeight + 4;
+        /* 底栏浮在页面之上，要从可用高度里扣掉 */
+        const reserve = (dock ? dock.offsetHeight : 74) + (dots ? dots.offsetHeight : 18) + 92;
+        if (h > reserve + 160) h -= reserve;
         if (h > 60 && Math.abs(h - this.areaH) > 2) this.areaH = h;
         const w = window.innerWidth || 390;
         const row = w < 380 ? 72 : 76, gap = w < 380 ? 9 : 10;
