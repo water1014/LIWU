@@ -331,7 +331,7 @@ HOME.Home = {
     flow() {
       const apps = this.allApps.map((a) => ({ key: 'app:' + a, type: 'app', appId: a }));
       const ws = this.widgets.map((it) => ({ key: it.id, type: 'w', it }));
-      const saved = S.cfg.flow || [];
+      const saved = S.cfg.flowVer === 2 ? (S.cfg.flow || []) : [];
       if (saved.length) {
         const map = new Map();
         [...apps, ...ws].forEach((x) => map.set(x.key, x));
@@ -340,12 +340,20 @@ HOME.Home = {
         map.forEach((x) => out.push(x));
         return out;
       }
-      // 默认：四枚图标打底，之后卡片与图标交替，形成错落
+      // 默认版式：照 iOS 桌面 —— 全宽横条 + 两枚图标贴着竖卡 + 小卡穿插
       const out = []; let ai = 0;
+      const used = {};
       const putApps = (n) => { for (let i = 0; i < n && ai < apps.length; i++) out.push(apps[ai++]); };
+      const card = (kind) => { const w = ws.find((x) => x.it.kind === kind && !used[x.key]); if (w) { used[w.key] = 1; out.push(w); } };
+      // 第一屏：横条 → 两枚图标 + 竖卡（占三行）→ 两枚图标 → 剩下图标垫底
+      card('postcard');
+      putApps(2); card('polaroid');
       putApps(4);
-      ws.forEach((w, i) => { out.push(w); if (i % 2 === 1) putApps(4); });
+      card('dialog'); card('anniv');
       putApps(99);
+      // 其余卡片按「小卡、竖卡、全宽」交替，避免一页全是同尺寸
+      ['level', 'music', 'reading', 'calendar', 'diary', 'clock'].forEach(card);
+      ws.forEach((w) => { if (!used[w.key]) out.push(w); });
       return out;
     },
     /* 4 列网格装箱：图标 1×1，组件 2×2 / 2×3 / 4×2，按格位找空 */
@@ -470,7 +478,11 @@ HOME.Home = {
       if (this.editing) return;
       const el = this.$refs.pages;
       if (el) {
-        const h = el.clientHeight;
+        /* 可用高度 = 页容器顶到底栏顶，别把 dock 也算进去 */
+        const foot = document.querySelector('.home-foot');
+        let h = el.clientHeight;
+        /* 底栏是浮在页面之上的，要从可用高度里扣掉 */
+        if (foot && foot.offsetHeight) h -= foot.offsetHeight + 4;
         if (h > 60 && Math.abs(h - this.areaH) > 2) this.areaH = h;
         const w = window.innerWidth || 390;
         const row = w < 380 ? 72 : 76, gap = w < 380 ? 9 : 10;
@@ -576,7 +588,7 @@ HOME.Home = {
       if (from < 0 || to < 0 || from === to) { this.resetDrag(); return; }
       const [moved] = ids.splice(from, 1);
       ids.splice(to, 0, moved);
-      S.cfg.flow = ids;
+      S.cfg.flow = ids; S.cfg.flowVer = 2;
       S.layoutKey++;
       saveCfg();
       this.resetDrag();
