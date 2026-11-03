@@ -388,3 +388,7 @@
 
 /* 明信片边界更清楚，避免和浅壁纸粘在一起 */
 .pc{box-shadow:0 16px 34px -26px rgba(20,20,24,.6),0 0 0 1px rgba(255,255,255,.55) inset}
+
+/* 分组标题加一条延伸细线，和卡片分层 */
+.ha-sub{justify-content:flex-start;gap:10px}
+.ha-sub:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(23,23,27,.14),rgba(23,23,27,.03));border-radius:1px}
