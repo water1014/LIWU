@@ -301,7 +301,7 @@ HOME.Home = {
     dock() { return this.layout.dock; },
     home() { return S.cfg.home; },
     dayNo() { return A.dayNo(); },
-    annivLabel() { const m = A.mainAnniv(); return (m && m.label) || 'days'; },
+    annivLabel() { const m = A.mainAnniv(); return (m && m.label) || '陪伴'; },
     wallStyle() {
       const k = S.cfg.ui.wallpaperKey;
       if (k && S.imgCache[k]) return { backgroundImage: 'url(' + S.imgCache[k] + ')' };

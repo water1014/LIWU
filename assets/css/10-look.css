@@ -83,7 +83,7 @@
   overflow:hidden;
 }
 .app-icon:before{
-  content:"";position:absolute;inset:0;background:var(--tint,#D9D8D4);opacity:.26;
+  content:"";position:absolute;inset:0;background:var(--tint,#D9D8D4);opacity:.34;
   transition:opacity .2s;
 }
 .app-icon:after{
