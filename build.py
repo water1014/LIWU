@@ -7,6 +7,7 @@
 用法：python3 build.py
 产物：dist/liwu.standalone.html
 """
+import base64
 import pathlib
 import re
 
@@ -18,7 +19,7 @@ JS_DIR = ROOT / 'assets' / 'js'
 
 CSS_ORDER = [
     '01-tokens.css', '02-shell.css', '03-chat.css',
-    '04-apps.css', '05-life.css', '06-parts.css', '07-us.css', '09-fix.css',
+    '04-apps.css', '05-life.css', '06-parts.css', '07-us.css', '09-fix.css', '10-look.css',
 ]
 JS_ORDER = [
     '10-icons.js', '11-db.js', '12-core.js', '13-api.js', '14-ui.js',
@@ -39,6 +40,14 @@ def main():
     css = '\n'.join(bundle(CSS_DIR, f) for f in CSS_ORDER)
     js = '\n'.join(bundle(JS_DIR, f) for f in JS_ORDER)
     vue = (ROOT / 'vendor' / 'vue.global.prod.js').read_text(encoding='utf-8')
+
+    # 壁纸内联为 data URI，单文件也能带着桌面背景走
+    for name in ('wall-window', 'wall-curtain', 'wall-fog'):
+        f = ROOT / 'assets' / 'img' / (name + '.jpg')
+        if f.exists():
+            b64 = base64.b64encode(f.read_bytes()).decode()
+            css = css.replace(f'url(assets/img/{name}.jpg)', f'url(data:image/jpeg;base64,{b64})')
+            js = js.replace(f'url(assets/img/{name}.jpg)', f'url(data:image/jpeg;base64,{b64})')
 
     # 去掉外链，换成内联
     html = re.sub(r'\n<link rel="stylesheet"[^>]*>', '', html)
