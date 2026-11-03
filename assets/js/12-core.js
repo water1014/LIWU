@@ -59,7 +59,8 @@ function defaultCfg() {
           { id: 'w_level', x: 2, y: 0, w: 2, h: 2, kind: 'level' },
           { id: 'w_cal', x: 0, y: 2, w: 4, h: 2, kind: 'calendar' },
           { id: 'w_read', x: 0, y: 4, w: 2, h: 2, kind: 'reading' },
-          { id: 'w_diary', x: 2, y: 4, w: 2, h: 2, kind: 'diary' }
+          { id: 'w_diary', x: 2, y: 4, w: 2, h: 2, kind: 'diary' },
+          { id: 'w_clock', x: 0, y: 6, w: 2, h: 2, kind: 'clock' }
         ]
       ],
       dock: ['store', 'notices', 'beauty', 'settings']
@@ -75,7 +76,7 @@ function defaultCfg() {
         { text: '普通就很好。', who: 'me' }
       ]
     },
-    ui: { wallpaperKey: '', fontKey: '', css: '', js: '' },
+    ui: { theme: 'milk', wallpaperKey: '', fontKey: '', css: '', js: '' },
     removedApps: [],
     moments: [],
     momentsCoverKey: '',

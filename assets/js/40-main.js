@@ -321,7 +321,7 @@ const Root = {
       return p ? { backgroundImage: p.css } : {};
     }
   },
-  template: `<div class="stage">
+  template: `<div class="stage" :class="['theme-'+(S.cfg.ui.theme||'milk'),{'on-home':!top}]">
     <div class="brand">
       <div class="b1">LIWU</div>
       <div class="b2">imitation mobile phone</div>

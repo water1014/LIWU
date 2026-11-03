@@ -4,11 +4,11 @@
 const HOME = {};
 
 /* 桌面网格：4 列，一格 = 一枚图标的高度 */
-const GRID = { cols: 4, row: 76, gap: 10 };
-/* 每个组件的格位：[列, 行] */
+const GRID = { cols: 4, row: 78, gap: 10 };
+/* 每个组件的格位：[列, 行]。一页只安排一个视觉主角。 */
 const WSIZE = {
-  postcard: [4, 2], diary: [4, 2],
-  polaroid: [2, 3], music: [2, 3], calendar: [2, 3],
+  postcard: [4, 2], diary: [2, 2],
+  polaroid: [2, 3], music: [4, 2], calendar: [2, 3],
   dialog: [2, 2], anniv: [2, 2], level: [2, 2], reading: [2, 2], clock: [2, 2]
 };
 
@@ -16,7 +16,10 @@ HOME.Postcard = {
   props: { item: Object },
   computed: {
     h() { return S.cfg.home; },
-    dateText() { const d = new Date(); return (d.getMonth() + 1) + ' / ' + d.getDate(); }
+    dateText() { const d = new Date(); return (d.getMonth() + 1) + ' / ' + d.getDate(); },
+    talks() { return (S.stats && S.stats.total) || 0; },
+    memories() { return (S.memories || []).length; },
+    me() { return S.account || {}; }
   },
   data() { return { url: '' }; },
   watch: { 'h.bgKey': { immediate: true, handler(k) { this.load(k); } } },
@@ -31,18 +34,26 @@ HOME.Postcard = {
     <div class="pc-date">{{dateText}}</div>
     <div class="pc-mark">L I W U</div>
     <div class="pc-inner">
-      <div class="pc-av-wrap"><av :file-key="h.avatarKey" :name="h.name" :size="56" radius="20px"/></div>
+      <div class="pc-people">
+        <div class="pc-av-wrap"><av :file-key="me.avatarKey" :name="me.name||h.name" :size="52" radius="18px"/></div>
+        <span class="pc-heart"><ico name="heart" :size="11" :sw="1.8"/></span>
+        <div class="pc-av-wrap"><av :file-key="h.avatarKey" :name="h.name" :size="52" radius="18px"/></div>
+      </div>
       <div class="pc-text">
+        <div class="pc-overline">MY SPACE</div>
         <div class="pc-name">{{h.name}}</div>
         <div class="pc-sign">{{h.sign}}</div>
       </div>
     </div>
-    <div class="pc-foot"><span>DAY {{A.dayNo()}}</span><span>{{A.mainAnniv() ? A.mainAnniv().label : '还没有纪念日'}}</span></div>
+    <div class="pc-foot"><span><b>{{A.dayNo()}}</b> DAYS</span><span><b>{{talks}}</b> TALKS</span><span><b>{{memories}}</b> MEMORIES</span></div>
   </div>`
 };
 
 HOME.Polaroid = {
-  computed: { h() { return S.cfg.home; } },
+  computed: {
+    h() { return S.cfg.home; },
+    photo() { return this.url || (S.cfg.ui.theme === 'glass' ? 'assets/img/wall-window.jpg' : 'assets/img/wall-fog.jpg'); }
+  },
   data() { return { url: '' }; },
   watch: { 'h.polaroidKey': { immediate: true, handler(k) { this.load(k); } } },
   methods: {
@@ -54,8 +65,8 @@ HOME.Polaroid = {
     <div class="pol-front">
       <div class="pol-tape"></div>
       <div class="pol-img">
-        <img v-if="url" :src="url" style="width:100%;height:100%;object-fit:cover;display:block">
-        <ico v-else name="image" :size="22" :sw="1.3"/>
+        <img :src="photo" alt="我们的照片" style="width:100%;height:100%;object-fit:cover;display:block">
+        <span class="pol-shine"></span>
       </div>
       <div class="pol-cap">{{h.polaroidCap || 'no caption'}}</div>
     </div>
@@ -66,32 +77,35 @@ HOME.Music = {
   data() { return { wave: [6, 11, 17, 9, 22, 14, 7, 19, 25, 12, 8, 16, 21, 10, 6, 14, 23, 17, 9, 13, 6] }; },
   computed: {
     m() { return S.cfg.home.music; },
-    pct() { return Math.min(100, (this.m.played / this.m.dur) * 100); },
+    track() { return A.musicTrack((S.cfg.life.music || {}).cur) || null; },
+    pct() { return Math.min(100, (this.m.played / Math.max(1, this.m.dur)) * 100); },
     now() { return this.fmt(this.m.played); },
     total() { return this.fmt(this.m.dur); }
   },
   methods: {
     fmt(s) { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + U.pad(s % 60); },
-    toggle(e) { e.stopPropagation(); S.musicPlaying = !S.musicPlaying; },
-    open() { if (!S.editing) this.$parent.editWidget('music'); }
+    toggle(e) { e.stopPropagation(); A.toggleMusic(); },
+    skip(e, n) { e.stopPropagation(); A.nextTrack(n); },
+    open() { if (!S.editing) A.go('music'); }
   },
   template: `<div class="widget music" @click="open">
+    <div class="music-kicker"><span>NOW PLAYING</span><span class="music-live"><i></i>{{S.musicPlaying?'ON AIR':'PAUSED'}}</span></div>
     <div class="music-top">
-      <div class="music-art" :class="{playing:S.musicPlaying}"></div>
+      <div class="music-art" :class="{playing:S.musicPlaying}"><span>LIWU</span></div>
       <div class="music-meta">
-        <div class="music-name">{{m.title || '未命名曲目'}}</div>
-        <div class="music-artist">{{m.artist || 'LIWU RADIO'}}</div>
+        <div class="music-name">{{track ? track.title : (m.title || 'Soft Static')}}</div>
+        <div class="music-artist">{{track ? track.artist : (m.artist || 'LIWU RADIO')}}</div>
       </div>
+      <ico name="music" :size="15" :sw="1.5"/>
     </div>
-    <div class="music-wave" :class="{playing:S.musicPlaying}">
-      <i v-for="(h,i) in wave" :key="i" :style="{height:h+'px',animationDelay:(i*0.07)+'s'}"></i>
+    <div class="music-track">
+      <div class="music-bar"><i :style="{width:pct+'%'}"></i></div>
+      <div class="music-time"><span>{{now}}</span><span>{{total}}</span></div>
     </div>
     <div class="music-bot">
-      <button class="music-play" @click="toggle"><ico :name="S.musicPlaying?'pause':'play'" :size="12"/></button>
-      <div class="music-track">
-        <div class="music-bar"><i :style="{width:pct+'%'}"></i></div>
-        <div class="music-time"><span>{{now}}</span><span>{{total}}</span></div>
-      </div>
+      <button class="music-skip" @click="skip($event,-1)" aria-label="上一首"><ico name="prev" :size="15"/></button>
+      <button class="music-play" @click="toggle" :aria-label="S.musicPlaying?'暂停':'播放'"><ico :name="S.musicPlaying?'pause':'play'" :size="15"/></button>
+      <button class="music-skip" @click="skip($event,1)" aria-label="下一首"><ico name="next" :size="15"/></button>
     </div>
   </div>`
 };
@@ -331,7 +345,7 @@ HOME.Home = {
     flow() {
       const apps = this.allApps.map((a) => ({ key: 'app:' + a, type: 'app', appId: a }));
       const ws = this.widgets.map((it) => ({ key: it.id, type: 'w', it }));
-      const saved = S.cfg.flowVer === 2 ? (S.cfg.flow || []) : [];
+      const saved = S.cfg.flowVer === 3 ? (S.cfg.flow || []) : [];
       if (saved.length) {
         const map = new Map();
         [...apps, ...ws].forEach((x) => map.set(x.key, x));
@@ -350,16 +364,16 @@ HOME.Home = {
       putApps(2); card('polaroid');
       putApps(4);
       putApps(99);
-      card('dialog'); card('anniv');
-      // 其余卡片按「小卡、竖卡、全宽」交替，避免一页全是同尺寸
-      ['level', 'music', 'reading', 'calendar', 'diary', 'clock'].forEach(card);
+      // 第二屏：横向音乐卡是主角，日历与小对话、纪念日贴边混排
+      card('music'); card('calendar'); card('dialog'); card('anniv');
+      ['level', 'reading', 'diary', 'clock'].forEach(card);
       ws.forEach((w) => { if (!used[w.key]) out.push(w); });
       return out;
     },
     /* 4 列网格装箱：图标 1×1，组件 2×2 / 2×3 / 4×2，按格位找空 */
     homePages() {
       const H = Math.max(260, this.areaH || 560);
-      const { cols, row, gap } = GRID;
+      const cols = GRID.cols, row = this.gridRow, gap = this.gridGap;
       const occ = [];
       const fits = (r, c, w, h) => {
         for (let i = 0; i < h; i++) {
@@ -486,7 +500,7 @@ HOME.Home = {
         h -= 6;
         if (h > 60 && Math.abs(h - this.areaH) > 2) this.areaH = h;
         const w = window.innerWidth || 390;
-        const row = w < 380 ? 72 : 76, gap = w < 380 ? 9 : 10;
+        const row = window.innerHeight < 780 ? 68 : (w < 380 ? 72 : 78), gap = w < 380 ? 9 : 10;
         if (row !== this.gridRow) { this.gridRow = row; this.gridGap = gap; }
       }
       const a = document.querySelector('.home-apps');
@@ -589,7 +603,7 @@ HOME.Home = {
       if (from < 0 || to < 0 || from === to) { this.resetDrag(); return; }
       const [moved] = ids.splice(from, 1);
       ids.splice(to, 0, moved);
-      S.cfg.flow = ids; S.cfg.flowVer = 2;
+      S.cfg.flow = ids; S.cfg.flowVer = 3;
       S.layoutKey++;
       saveCfg();
       this.resetDrag();
@@ -654,8 +668,8 @@ HOME.Home = {
     },
     resetPage() {
       if (!confirm('恢复默认桌面布局？自定义位置会丢失。')) return;
-      S.cfg.layout = { pages: [JSON.parse(JSON.stringify(HOME.defaultPage())), []], dock: ['store', 'notices', 'beauty', 'settings'] };
-      S.cfg.widgetOrder = []; S.cfg.flow = [];
+      S.cfg.layout = { pages: [JSON.parse(JSON.stringify(HOME.defaultPage())), JSON.parse(JSON.stringify(HOME.defaultPage2()))], dock: ['store', 'notices', 'beauty', 'settings'] };
+      S.cfg.widgetOrder = []; S.cfg.flow = []; S.cfg.flowVer = 3;
       S.layoutKey++;
       saveCfg();
     }
@@ -798,7 +812,8 @@ HOME.defaultPage2 = function () {
     { id: 'w_level', x: 2, y: 0, w: 2, h: 2, kind: 'level' },
     { id: 'w_cal', x: 0, y: 2, w: 4, h: 2, kind: 'calendar' },
     { id: 'w_read', x: 0, y: 4, w: 2, h: 2, kind: 'reading' },
-    { id: 'w_diary', x: 2, y: 4, w: 2, h: 2, kind: 'diary' }
+    { id: 'w_diary', x: 2, y: 4, w: 2, h: 2, kind: 'diary' },
+    { id: 'w_clock', x: 0, y: 6, w: 2, h: 2, kind: 'clock' }
   ];
 };
 

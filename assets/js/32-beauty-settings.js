@@ -28,6 +28,13 @@ BEAUTY.Page = {
   },
   mounted() { this.css = S.cfg.ui.css || ''; this.js = S.cfg.ui.js || ''; },
   methods: {
+    setTheme(t) {
+      S.cfg.ui.theme = t;
+      /* 自定义照片始终保留；使用预设时随整套风格切换背景。 */
+      if (!S.cfg.ui.wallpaperKey) S.cfg.ui.wallpaperPreset = t === 'glass' ? 9 : 0;
+      saveCfg(true);
+      A.toast(t === 'glass' ? '已换成雾灰玻璃' : '已换成奶油浅粉');
+    },
     pickPreset(i) {
       S.cfg.ui.wallpaperPreset = i;
       if (S.cfg.ui.wallpaperKey) {
@@ -110,7 +117,20 @@ BEAUTY.Page = {
         </div>
 
         <template v-if="tab==='wall'">
-          <div class="section-head" style="padding-left:2px"><span class="section-title">预设</span>
+          <div class="section-head" style="padding-left:2px"><span class="section-title">整套风格</span><span class="section-act">桌面与内页一起切换</span></div>
+          <div class="theme-picks">
+            <button class="theme-pick glass" :class="{on:(S.cfg.ui.theme||'milk')==='glass'}" @click="setTheme('glass')">
+              <span class="tp-preview"><i></i><i></i><i></i></span>
+              <span class="tp-name">雾灰玻璃</span><span class="tp-desc">冷调 · 半透明 · 照片感</span>
+              <span class="tp-check"><ico name="check" :size="11" :sw="2.2"/></span>
+            </button>
+            <button class="theme-pick milk" :class="{on:(S.cfg.ui.theme||'milk')==='milk'}" @click="setTheme('milk')">
+              <span class="tp-preview"><i></i><i></i><i></i></span>
+              <span class="tp-name">奶油浅粉</span><span class="tp-desc">柔白 · 浅粉 · 纸张感</span>
+              <span class="tp-check"><ico name="check" :size="11" :sw="2.2"/></span>
+            </button>
+          </div>
+          <div class="section-head" style="padding-left:2px;margin-top:22px"><span class="section-title">壁纸预设</span>
             <span class="section-act" v-if="S.cfg.ui.wallpaperKey" @click="removeWall">使用预设并删除图片</span>
           </div>
           <div class="wp-grid">
