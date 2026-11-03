@@ -154,6 +154,8 @@ window.A = {
     state.cfg.prompts = Object.assign(defaultCfg().prompts, state.cfg.prompts || {});
     state.cfg.layout = state.cfg.layout && state.cfg.layout.pages ? state.cfg.layout : defaultCfg().layout;
     state.cfg.home = Object.assign(defaultCfg().home, state.cfg.home || {});
+    // 新账号第一次进来时，明信片跟着昵称走，避免一直显示「未命名」
+    if (!state.cfg.home.name || state.cfg.home.name === '未命名') state.cfg.home.name = acc.name || '未命名';
     state.cfg.ui = Object.assign(defaultCfg().ui, state.cfg.ui || {});
     state.msgs = {};
     state.typing = {};
