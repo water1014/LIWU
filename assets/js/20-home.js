@@ -561,11 +561,11 @@ HOME.Home = {
       if (!p) return;
       const dx = e.clientX - p.sx, dy = e.clientY - p.sy;
       const dist = Math.hypot(dx, dy);
-      if (dist > 7) {
+      if (dist > 10) {
         p.moved = true;
         clearTimeout(p.timer);
       }
-      if (!this.drag && p.moved && (this.editing || p.long) && dist > 7) {
+      if (!this.drag && p.moved && (this.editing || p.long) && dist > 10) {
         this.drag = Object.assign({ dx: 0, dy: 0 }, { id: p.key || (p.it && p.it.id) });
       }
       if (this.drag) {

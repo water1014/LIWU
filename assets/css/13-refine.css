@@ -319,6 +319,10 @@
   .dock .app-icon{width:45px;height:45px;border-radius:14px}
   .cell.c-w .cal-grid{grid-auto-rows:19px}
 }
+/* 编辑态：让组件吞掉滚动手势，避免手指拖动被判定为翻页滑动而中断 */
+.home.editing .cell,
+.home.editing .cell *{touch-action:none}
+.home.editing .pages{scroll-snap-type:none}
 @media (max-width:370px){
   .home-inner{padding-left:15px;padding-right:15px}
   .cell.c-w .pc-inner{gap:9px;padding-left:12px;padding-right:12px}
