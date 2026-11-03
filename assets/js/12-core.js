@@ -66,7 +66,7 @@ function defaultCfg() {
     },
     home: {
       avatarKey: '', name: '未命名', sign: '在这里写下你的签名。',
-      bgKey: '', base: '#EFEBE3',
+      bgKey: '', base: '#F3F2EE',
       polaroidKey: '', polaroidCap: 'slow morning',
       music: { title: 'Soft Static', artist: 'LIWU RADIO', dur: 214, played: 62 },
       anniv: { date: '', label: '在一起' },

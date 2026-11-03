@@ -2,6 +2,9 @@
    Beauty · Settings · API · Prompts · Data
    ============================================================ */
 const WALLS = [
+  { name: '窗', css: "url(assets/img/wall-window.jpg)", img: 1 },
+  { name: '帘', css: "url(assets/img/wall-curtain.jpg)", img: 1 },
+  { name: '雾', css: "url(assets/img/wall-fog.jpg)", img: 1 },
   { name: '纸', css: 'radial-gradient(90% 60% at 16% 4%,#FDFBF5 0%,rgba(253,251,245,0) 58%),radial-gradient(70% 50% at 92% 16%,#E9E1D0 0%,rgba(233,225,208,0) 62%),radial-gradient(80% 60% at 46% 108%,#D3CBB8 0%,rgba(211,203,184,0) 66%),linear-gradient(168deg,#F6F3EB,#E4DDCD)' },
   { name: '雾', css: 'radial-gradient(80% 50% at 18% 6%,#F6F7F4 0%,rgba(246,247,244,0) 56%),radial-gradient(70% 54% at 86% 28%,#C3CBC4 0%,rgba(195,203,196,0) 60%),radial-gradient(90% 60% at 40% 106%,#9FAAA0 0%,rgba(159,170,160,0) 62%),linear-gradient(170deg,#E7E9E4,#C4CCC3)' },
   { name: '潮', css: 'radial-gradient(76% 48% at 82% 6%,#DCE4EA 0%,rgba(220,228,234,0) 58%),radial-gradient(66% 52% at 20% 34%,#F0EEE7 0%,rgba(240,238,231,0) 60%),radial-gradient(90% 60% at 56% 108%,#A9B6BE 0%,rgba(169,182,190,0) 64%),linear-gradient(160deg,#EAE9E2,#C2CDD2)' },

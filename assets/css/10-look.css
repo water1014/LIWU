@@ -1,0 +1,253 @@
+/* ============================================================
+   LOOK · 玻璃与留白
+   参考：手机主屏的层次（壁纸 / 大时钟 / 悬浮卡片 / 底部胶囊）
+   只做视觉层，不改任何结构与交互。
+   ============================================================ */
+
+/* ---------- 1. tokens 微调：更冷、更亮、更薄 ---------- */
+:root{
+  --stage:#E4E3DF;
+  --paper:#F2F1EE;
+  --paper-2:#EDECE8;
+  --surface:#FFFFFF;
+  --surface-2:#F6F5F2;
+  --surface-3:#EEEDEA;
+  --line:rgba(20,20,24,.065);
+  --line-2:rgba(20,20,24,.12);
+  --muted:#8A8A90;
+  --muted-2:#ACACB2;
+  --r-xl:32px;
+  --r-lg:24px;
+  --glass:rgba(255,255,255,.46);
+  --glass-2:rgba(255,255,255,.64);
+  --glass-line:rgba(255,255,255,.66);
+  --shadow-glass:0 18px 38px -30px rgba(20,20,24,.55), inset 0 1px 0 rgba(255,255,255,.72);
+  --shadow-card:0 1px 2px rgba(20,20,24,.03), 0 14px 34px -34px rgba(20,20,24,.5);
+}
+
+.stage{background:
+  radial-gradient(90% 70% at 12% 0%,#F7F6F2 0%,rgba(247,246,242,0) 58%),
+  radial-gradient(80% 60% at 92% 100%,#D8D7D2 0%,rgba(216,215,210,0) 62%),
+  var(--stage)}
+
+/* ---------- 2. 主屏：大时钟 ---------- */
+.home{background:#E8E7E3}
+.home-clock{
+  flex:none;display:flex;align-items:flex-end;justify-content:space-between;
+  padding:0 4px 15px;color:#1C1C22;pointer-events:none;
+}
+.hc-l{display:flex;flex-direction:column;min-width:0}
+.hc-time{
+  font-size:46px;font-weight:200;line-height:1;letter-spacing:-.05em;
+  font-variant-numeric:tabular-nums;color:#1B1B21;
+  text-shadow:0 1px 0 rgba(255,255,255,.55);
+}
+.hc-date{font-size:10.5px;letter-spacing:.14em;color:rgba(23,23,27,.5);margin-top:5px}
+.hc-r{display:flex;flex-direction:column;align-items:flex-end;gap:3px;padding-bottom:2px}
+.hc-cap{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:rgba(23,23,27,.42);font-weight:600;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hc-n{font-size:25px;font-weight:300;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:#24242A}
+.home-scrim{
+  background:linear-gradient(180deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,0) 18%,rgba(255,255,255,0) 68%,rgba(18,18,22,.10) 100%);
+}
+
+/* 桌面：一行 = 一格的分数高度，随屏幕自适应 */
+.home-inner{padding:var(--status-h) 18px 0}
+.pages{align-items:stretch}
+.page-grid{
+  grid-template-rows:repeat(6,minmax(0,1fr));
+  grid-auto-rows:minmax(0,1fr);
+  height:100%;gap:1.35%;padding:0;
+}
+.home-foot{padding:12px 0 20px;gap:10px}
+
+/* dock：更薄的一层玻璃 */
+.dock{
+  height:74px;border-radius:24px;
+  background:rgba(255,255,255,.52);
+  border:1px solid rgba(255,255,255,.6);
+  backdrop-filter:blur(30px) saturate(1.6);-webkit-backdrop-filter:blur(30px) saturate(1.6);
+  box-shadow:0 16px 40px -28px rgba(20,20,24,.6), inset 0 1px 0 rgba(255,255,255,.6);
+}
+.dots-nav i{background:rgba(23,23,27,.18)}
+.dots-nav i.on{background:rgba(23,23,27,.55)}
+.dots-nav{height:6px}
+
+/* ---------- 3. 玻璃图标 ---------- */
+.app-icon{
+  width:56px;height:56px;border-radius:18px;
+  background:rgba(255,255,255,.62);
+  border:1px solid rgba(255,255,255,.8);
+  color:#28282E;
+  box-shadow:0 12px 24px -20px rgba(20,20,24,.75), inset 0 1px 0 rgba(255,255,255,.85);
+  backdrop-filter:blur(18px) saturate(1.5);-webkit-backdrop-filter:blur(18px) saturate(1.5);
+  overflow:hidden;
+}
+.app-icon:before{
+  content:"";position:absolute;inset:0;background:var(--tint,#D9D8D4);opacity:.26;
+  transition:opacity .2s;
+}
+.app-icon:after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(158deg,rgba(255,255,255,.55),rgba(255,255,255,.02) 56%);
+}
+.app-icon > *{position:relative;z-index:2}
+.app-label{
+  font-size:9.5px;color:#3B3B41;letter-spacing:.02em;font-weight:500;
+  text-shadow:0 1px 2px rgba(255,255,255,.55);
+}
+.dock .app-icon{width:52px;height:52px;border-radius:17px}
+.dock .app-label{display:none}
+.home.editing .app-icon{animation:none}
+
+/* 编辑态：虚线框贴合玻璃 */
+.home.editing .widget-edit{border-color:rgba(255,255,255,.9)}
+.home.editing .cell .widget,.home.editing .cell .app-icon{box-shadow:0 0 0 1px rgba(255,255,255,.5),0 12px 24px -20px rgba(20,20,24,.7)}
+
+/* ---------- 4. 桌面组件：统一一层雾面 ---------- */
+.glassw{
+  background:rgba(255,255,255,.74);
+  background-image:linear-gradient(158deg,rgba(255,255,255,.82),rgba(255,255,255,.34) 62%);
+  border:1px solid rgba(255,255,255,.78);
+  border-radius:24px;
+  box-shadow:0 22px 44px -34px rgba(18,18,22,.62), inset 0 1px 0 rgba(255,255,255,.85);
+  backdrop-filter:blur(30px) saturate(1.6);-webkit-backdrop-filter:blur(30px) saturate(1.6);
+}
+.home:not(.wallimg) .glassw,
+.home:not(.wallimg) .dlg,
+.home:not(.wallimg) .music{-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px)}
+.gw-cap{letter-spacing:.22em;color:rgba(23,23,27,.5)}
+.music,.dlg{
+  border-radius:24px;border-color:rgba(255,255,255,.78);
+  background:rgba(255,255,255,.74);
+  box-shadow:0 22px 44px -34px rgba(18,18,22,.62), inset 0 1px 0 rgba(255,255,255,.85);
+}
+.pc{
+  border-radius:26px;
+  box-shadow:0 20px 40px -32px rgba(20,20,24,.62),0 0 0 1px rgba(255,255,255,.45) inset;
+  display:flex;flex-direction:column;
+}
+.pc-inner{
+  flex:1;min-height:0;display:flex;flex-direction:row;align-items:center;gap:12px;
+  padding:18px 16px 0;justify-content:flex-start;
+}
+.pc-av-wrap{
+  position:relative;top:auto;left:auto;transform:none;flex:none;
+  width:58px;height:58px;border-radius:22px;padding:2px;
+  background:rgba(255,255,255,.82);box-shadow:0 8px 20px -14px rgba(20,20,24,.55);
+}
+.pc-av{width:100%;height:100%;border-radius:20px}
+.pc-text{min-width:0;flex:1}
+.pc-name{font-size:17px;font-weight:600;letter-spacing:.03em;line-height:1.2;color:#22222A}
+.pc-sign{
+  font-size:10px;color:#7E7C77;margin-top:5px;letter-spacing:.02em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;
+}
+.pc-foot{
+  position:relative;z-index:3;display:flex;align-items:center;justify-content:space-between;
+  padding:8px 16px 13px;font-size:8px;letter-spacing:.18em;color:rgba(23,23,27,.36);
+  text-transform:uppercase;
+}
+
+/* 主屏图片壁纸时，图标与文字的对比度补一层 */
+.home.wallimg .app-label{color:#2C2C32;text-shadow:0 1px 3px rgba(255,255,255,.75)}
+.home.wallimg .home-clock{color:#1C1C22}
+.home.wallimg .home-clock .hc-date{color:rgba(23,23,27,.55)}
+
+/* ---------- 5. 应用内：更轻的导航与卡片 ---------- */
+.page{background:linear-gradient(180deg,#F7F6F3 0%,#F1F0ED 100%)}
+.nav{
+  height:50px;background:rgba(247,246,243,.72);
+  backdrop-filter:blur(26px) saturate(1.5);-webkit-backdrop-filter:blur(26px) saturate(1.5);
+  border-bottom-color:transparent;
+}
+.nav.bordered{border-bottom-color:rgba(20,20,24,.05)}
+.nav-title{font-size:14.5px;font-weight:600;letter-spacing:.01em}
+.nav-back{border-radius:50%}
+.nav-back:active{background:rgba(23,23,27,.06)}
+
+.chat-head{padding:8px 18px 12px}
+.chat-head h1{font-size:26px;font-weight:600;letter-spacing:-.025em}
+.chat-head .sub{font-size:9px;letter-spacing:.2em;margin-top:7px}
+
+.group,.card{
+  background:rgba(255,255,255,.82);
+  border:1px solid rgba(255,255,255,.72);
+  box-shadow:var(--shadow-card);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.card{border-radius:24px}
+.group{border-radius:22px}
+.row{padding:14px 16px}
+.row + .row:before{background:rgba(20,20,24,.055)}
+
+.search-pill{
+  height:38px;border-radius:14px;background:rgba(255,255,255,.66);
+  border:1px solid rgba(255,255,255,.7);box-shadow:0 6px 18px -18px rgba(20,20,24,.5);
+}
+.search-pill input{font-size:12px}
+
+/* 底部胶囊：图标在上，字在下，选中加一点重量 */
+.app-tabs{
+  height:64px;padding-bottom:10px;
+  background:rgba(255,255,255,.66);
+  backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);
+  border-top:1px solid rgba(255,255,255,.7);
+  box-shadow:0 -10px 30px -26px rgba(20,20,24,.5);
+}
+.app-tabs button{font-size:9px;letter-spacing:.06em;color:#A2A2A8;gap:4px;width:64px}
+.app-tabs button.on{color:#1D1D23;font-weight:600}
+.app-tabs button.on .ico{transform:translateY(-1px);transition:transform .2s var(--ease)}
+.app-tabs .t-ico{position:relative}
+
+/* 输入条 */
+.composer{background:rgba(247,246,243,.9);border-top:1px solid rgba(255,255,255,.7);backdrop-filter:blur(26px)}
+.comp-input{background:rgba(255,255,255,.92);border-radius:18px;border-color:rgba(255,255,255,.8)}
+.comp-btn{background:rgba(255,255,255,.7);color:#5C5C63}
+
+/* 聊天气泡：更薄的一层 */
+.bubble{background:rgba(255,255,255,.88);border-radius:18px}
+.msg.them .bubble{border-bottom-left-radius:6px}
+.msg.me .bubble{background:#1F1F25;border-radius:18px;border-bottom-right-radius:6px}
+.room-nav{background:rgba(247,246,243,.72);border-bottom-color:rgba(255,255,255,.6)}
+
+/* ---------- 6. 大标题页（我们 / 时光 / 书架 等） ---------- */
+.app-head{padding:12px 18px 16px}
+.app-head h1{font-size:27px;font-weight:600;letter-spacing:-.03em}
+.app-head .desc{font-size:11px;margin-top:7px}
+.us-title,.page-hero{
+  font-weight:300;letter-spacing:-.03em;
+}
+
+/* ---------- 7. 小组件内容在更矮的格子里收紧一点 ---------- */
+.anniv-num{font-size:44px}
+.lv-big{font-size:33px}
+.cw-time{letter-spacing:-.04em}
+
+/* 小屏适配 */
+@media (max-height:760px){
+  .home-clock .hc-time{font-size:44px}
+  .home-clock{padding-bottom:10px}
+  .app-icon{width:50px;height:50px;border-radius:16px}
+  .dock{height:66px}
+  .home-foot{padding:8px 0 14px}
+}
+@media (max-width:360px){
+  .page-grid{grid-auto-rows:minmax(0,1fr);gap:8px}
+  .app-icon{width:50px;height:50px}
+}
+
+/* ---------- 8. 聊天室 / 朋友圈：把暖调拉回中性灰 ---------- */
+.room{background:#F4F3F0}
+.room:before{background:
+  radial-gradient(90% 55% at 14% 0%,rgba(255,255,255,.92),rgba(255,255,255,0) 62%),
+  radial-gradient(80% 50% at 92% 100%,rgba(208,208,204,.45),rgba(208,208,204,0) 66%)}
+.room-bg:after{background:rgba(244,243,240,.84)}
+.room-nav{background:rgba(247,246,243,.78)}
+.composer{background:rgba(247,246,243,.92)}
+
+.moments{background:#F5F4F1}
+.mo-cover{background:linear-gradient(150deg,#D6D5D1 0%,#9EA3A1 100%)}
+.mo-id .av{border-width:2px;border-color:#F5F4F1}
+.mo-card{border-radius:20px;border-color:rgba(255,255,255,.8);box-shadow:var(--shadow-card)}
+.mo-likes,.mo-cmt{background:#F5F4F1}
+.me-cover{background-image:radial-gradient(120% 100% at 12% 0%,#E4E3DE 0%,rgba(228,227,222,0) 62%),linear-gradient(150deg,#D2D1CC,#969B99)}

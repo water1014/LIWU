@@ -166,7 +166,7 @@ CHAT.Home = {
     },
     wallLabel() {
       if (S.cfg.ui.wallpaperKey) return '自定义图片';
-      const p = (window.WALLS && WALLS[S.cfg.ui.wallpaperPreset || 0]);
+      const p = (typeof WALLS !== 'undefined' && WALLS[S.cfg.ui.wallpaperPreset || 0]);
       return p ? p.name + ' · 预设' : '默认';
     },
     sizeLabel() {

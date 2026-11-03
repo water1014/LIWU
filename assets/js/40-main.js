@@ -216,6 +216,7 @@ CUSTOM.Page = {
 
 /* ---------------- status bar ---------------- */
 const StatusBar = {
+  props: { hideTime: Boolean },
   data() { return { time: '', S }; },
   mounted() {
     this.tick();
@@ -226,7 +227,7 @@ const StatusBar = {
     tick() { const d = new Date(); this.time = U.pad(d.getHours()) + ':' + U.pad(d.getMinutes()); }
   },
   template: `<div class="statusbar" :class="{dark:S.statusDark}">
-    <span>{{time}}</span>
+    <span :style="hideTime?{opacity:0}:{}">{{time}}</span>
     <div class="sb-r">
       <ico name="signal" :size="14"/>
       <ico name="wifi" :size="14"/>
@@ -295,7 +296,7 @@ const Root = {
     <div class="device">
       <div class="screen">
         <div class="island"></div>
-        <status-bar></status-bar>
+        <status-bar :hide-time="!top"></status-bar>
         <home-screen v-show="!top"></home-screen>
 
         <transition :name="NAV.dir==='push'?'pg':'pg-pop'">

@@ -15,17 +15,20 @@ HOME.Postcard = {
     async load(k) { this.url = k ? await A.resolveImg(k) : ''; },
     open() { if (!S.editing) this.$parent.editWidget('postcard'); }
   },
-  template: `<div class="widget pc" :style="{'--pc-base':h.base||'#EFEBE3'}" @click="open">
+  template: `<div class="widget pc" :style="{'--pc-base':h.base||'#F3F2EE'}" @click="open">
     <div class="pc-bg" :class="{empty:!url}" :style="url?{backgroundImage:'url('+url+')'}:{}"></div>
     <div class="pc-grain"></div>
     <div class="pc-fade"></div>
     <div class="pc-date">{{dateText}}</div>
     <div class="pc-mark">L I W U</div>
     <div class="pc-inner">
-      <div class="pc-av-wrap"><av :file-key="h.avatarKey" :name="h.name" :size="66"/></div>
-      <div class="pc-name">{{h.name}}</div>
-      <div class="pc-sign">{{h.sign}}</div>
+      <div class="pc-av-wrap"><av :file-key="h.avatarKey" :name="h.name" :size="56" radius="20px"/></div>
+      <div class="pc-text">
+        <div class="pc-name">{{h.name}}</div>
+        <div class="pc-sign">{{h.sign}}</div>
+      </div>
     </div>
+    <div class="pc-foot"><span>DAY {{A.dayNo()}}</span><span>{{A.mainAnniv() ? A.mainAnniv().label : '还没有纪念日'}}</span></div>
   </div>`
 };
 
@@ -288,7 +291,8 @@ HOME.Home = {
   data() {
     return {
       S, editing: false, press: null, drag: null, dragStyle: {},
-      sheet: '', postForm: null, tick: null, suppressClick: false, pageTimer: 0
+      sheet: '', postForm: null, tick: null, suppressClick: false, pageTimer: 0,
+      clock: '', dateText: '', _ct: 0
     };
   },
   computed: {
@@ -296,21 +300,32 @@ HOME.Home = {
     pages() { return this.layout.pages; },
     dock() { return this.layout.dock; },
     home() { return S.cfg.home; },
+    dayNo() { return A.dayNo(); },
+    annivLabel() { const m = A.mainAnniv(); return (m && m.label) || 'days'; },
     wallStyle() {
       const k = S.cfg.ui.wallpaperKey;
       if (k && S.imgCache[k]) return { backgroundImage: 'url(' + S.imgCache[k] + ')' };
-      const p = (window.WALLS && WALLS[S.cfg.ui.wallpaperPreset || 0]) || null;
+      const p = (typeof WALLS !== 'undefined' && WALLS[S.cfg.ui.wallpaperPreset || 0]) || null;
       return p ? { backgroundImage: p.css } : {};
     },
-    hasWall() { return !!(S.cfg.ui.wallpaperKey && S.imgCache[S.cfg.ui.wallpaperKey]); }
+    hasWall() {
+      if (S.cfg.ui.wallpaperKey && S.imgCache[S.cfg.ui.wallpaperKey]) return true;
+      const p = typeof WALLS !== 'undefined' && WALLS[S.cfg.ui.wallpaperPreset || 0];
+      return !!(p && p.img);
+    }
   },
   watch: {
     'S.cfg.ui.wallpaperKey': { immediate: true, handler(k) { if (k) A.resolveImg(k); } },
     editing(v) { S.editing = v; }
   },
-  mounted() {},
-  beforeUnmount() {},
+  mounted() { this.tickClock(); this._ct = setInterval(this.tickClock, 15000); },
+  beforeUnmount() { clearInterval(this._ct); },
   methods: {
+    tickClock() {
+      const d = new Date();
+      this.clock = U.pad(d.getHours()) + ':' + U.pad(d.getMinutes());
+      this.dateText = (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 · 周' + '日一二三四五六'[d.getDay()];
+    },
     meta(id) { return window.appMeta(id); },
     cellStyle(it) {
       return {
@@ -414,10 +429,11 @@ HOME.Home = {
       if (!grid) { this.resetDrag(); return; }
       const rect = grid.getBoundingClientRect();
       const pi = Number(grid.dataset.page);
-      const gap = 12, rowH = 98, padTop = 6;
+      const gap = rect.width * 0.0135, rowGap = rect.height * 0.0135;
       const cellW = (rect.width - gap * 3) / 4;
+      const cellH = (rect.height - rowGap * 5) / 6;
       let col = Math.floor((x - rect.left) / (cellW + gap));
-      let row = Math.floor((y - rect.top - padTop) / (rowH + gap));
+      let row = Math.floor((y - rect.top) / (cellH + rowGap));
       const target = d.it || (p && p.it);
       const w = target ? target.w : 1, h = target ? target.h : 1;
       col = Math.max(0, Math.min(4 - w, col));
@@ -543,6 +559,16 @@ HOME.Home = {
     </div>
 
     <div class="home-inner">
+      <div class="home-clock" v-if="!editing">
+        <div class="hc-l">
+          <div class="hc-time">{{clock}}</div>
+          <div class="hc-date">{{dateText}}</div>
+        </div>
+        <div class="hc-r">
+          <div class="hc-cap">{{annivLabel}}</div>
+          <div class="hc-n">{{dayNo}}</div>
+        </div>
+      </div>
       <div class="pages" ref="pages" @scroll="onScroll">
         <div class="page-grid" v-for="(page,pi) in pages" :key="pi" :data-page="pi">
           <div v-for="it in page" :key="it.id" :class="['cell', drag&&drag.id===it.id?'dragging':'', drag&&drag.id!==it.id?'dim':'' ]"
@@ -560,7 +586,7 @@ HOME.Home = {
             <template v-else-if="it.kind==='clock'"><clock-card :item="it"/></template>
             <template v-else>
               <button class="app" @click.stop="onAppClick(it)">
-                <span class="app-icon" :style="{background:meta(it.app).tint}"><ico :name="meta(it.app).icon" :size="25" :sw="1.5"/></span>
+                <span class="app-icon" :style="{'--tint':meta(it.app).tint}"><ico :name="meta(it.app).icon" :size="25" :sw="1.5"/></span>
                 <span class="app-label">{{meta(it.app).name}}</span>
               </button>
               <button v-if="editing" class="del-badge" @click.stop="delApp(it,pi)"><ico name="x" :size="10" :sw="2.6"/></button>
@@ -578,7 +604,7 @@ HOME.Home = {
           <div v-for="(appId,i) in dock" :key="appId" class="dock-slot" :style="dragStyleFor(null,appId)"
                @pointerdown="downDock($event,appId,i)">
             <button class="app" @click.stop="editing?null:A.openApp(appId)">
-              <span class="app-icon" :style="{background:meta(appId).tint}"><ico :name="meta(appId).icon" :size="24" :sw="1.5"/></span>
+              <span class="app-icon" :style="{'--tint':meta(appId).tint}"><ico :name="meta(appId).icon" :size="24" :sw="1.5"/></span>
               <span class="app-label">{{meta(appId).name}}</span>
             </button>
           </div>
