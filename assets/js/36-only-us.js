@@ -31,14 +31,24 @@ const HM_LINES = {
     '醒了先喝口水，别急着看手机。',
     '早安。你昨晚翻身的时候，我在。',
     '今天不用很努力，先把自己喂饱。',
-    '早，外面有点凉，出门多穿一件。'
+    '早，外面有点凉，出门多穿一件。',
+    '早。昨晚梦到什么了，还记得吗。',
+    '醒了就慢慢来，今天不赶时间。',
+    '早饭别省。你今天还有很多事要做。',
+    '早安。我把今天的第一句话留给你。',
+    '天气凉了一点，围巾在门口。'
   ],
   night: [
     '睡了没。今天也辛苦了。',
     '灯关了吗？别又在黑里看屏幕。',
     '晚安。明天的事，明天再说。',
     '今天有句话没来得及讲：我在。',
-    '别熬了，剩下的交给梦。'
+    '别熬了，剩下的交给梦。',
+    '手机放下吧，我陪你到这儿。',
+    '今天有没有哪一刻，是想我的。',
+    '晚安。被子盖好，别踢。',
+    '夜里有事就叫我，我听着。',
+    '今天也算过去了，做得很好。'
   ],
   any: [
     '刚刚想到你，就发过来了。',
@@ -76,13 +86,16 @@ OU.Messages = {
       for (let i = 6; i >= 1; i--) {
         const base = now - i * 86400000;
         const d = new Date(base);
-        const seed = d.getDate() * 7 + d.getMonth() * 3;
-        const mk = (h, min, pool) => {
+        const seed = Math.floor(base / 86400000);   /* 用「第几天」当种子，相邻的日子一定不同 */
+        const mk = (h, min, pool, off) => {
           const t = new Date(base); t.setHours(h, min, 0, 0);
-          arr.push({ id: U.uid('hm'), ts: t.getTime(), text: pool[seed % pool.length], read: i > 2 });
+          const prev = arr[arr.length - 1];
+          let line = pool[((seed * 7 + off * 3) % pool.length + pool.length) % pool.length];
+          if (prev && prev.text === line) line = pool[((seed * 7 + off * 3 + 1) % pool.length + pool.length) % pool.length];
+          arr.push({ id: U.uid('hm'), ts: t.getTime(), text: line, read: i > 2 });
         };
-        mk(8, 12 + (seed % 20), HM_LINES.morning);
-        mk(23, 5 + (seed % 30), HM_LINES.night);
+        mk(8, 12 + (seed % 20), HM_LINES.morning, i);
+        mk(23, 5 + (seed % 30), HM_LINES.night, i + 4);
       }
       const t = new Date(); t.setHours(9, 26, 0, 0);
       arr.push({ id: U.uid('hm'), ts: t.getTime(), text: HM_LINES.morning[new Date().getDate() % HM_LINES.morning.length], read: false });
@@ -123,6 +136,7 @@ OU.Messages = {
       <div class="hm-empty" v-else>他还没开口。<br>再等等，或者让他现在说一句。</div>
 
       <div class="ou-grow"></div>
+      <div class="docs-tail"></div>
       <div class="hm-ask"><button @click="ask">让他再说一句</button></div>
     </div>
   </div>`
@@ -181,6 +195,7 @@ OU.DeepTalk = {
       </div>
 
       <div class="ou-grow"></div>
+      <div class="docs-tail"></div>
       <div class="hm-ask"><button @click="openNew">写一封</button></div>
     </div>
 
@@ -290,6 +305,7 @@ OU.Secret = {
       <div class="hm-empty" v-if="!list.length">这里还是空的。<br>想说的话，可以只放在这儿。</div>
 
       <div class="ou-grow"></div>
+      <div class="docs-tail"></div>
       <div class="hm-ask"><button @click="sheet=true">写一条秘密</button></div>
     </div>
 

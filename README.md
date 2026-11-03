@@ -158,3 +158,15 @@ MIT
 | 我们（小房间 / 时间胶囊 / 词云 / 月度回顾） | 主屏「我们」→ 目录页 |
 | 额度 / 数据 / API / 提示词 / 美化 | 设置 |
 | 表情库 | 聊天 → 发现 |
+
+## Only us（v10 新增）
+
+「我们」页下的三条，都不联网、都存在本机：
+
+| 入口 | 内容 | 存哪 |
+| --- | --- | --- |
+| 他的消息 `messages` | 按日子长出来的早安晚安，可标记已读、可让他再说一句 | `S.cfg.extra.hisMessages` |
+| deeptalk | 像写信，一张一张；读完可一键收进永久记忆 | `S.cfg.extra.deepTalks` → `memories` |
+| 秘密 | 四位锁，锁着只给自己看的话 | `S.cfg.extra.secrets` / `secretPin` |
+
+样式单独放在 `assets/css/12-only.css`，与 `07-us.css` 同一套纸的语汇。

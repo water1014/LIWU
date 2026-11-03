@@ -142,3 +142,9 @@
 .body.ou-page { display: flex; flex-direction: column; }
 .body.ou-page .ou-grow { flex: 1 0 8px; min-height: 8px; }
 .body.ou-page .hm-ask { position: sticky; }
+
+/* 底部悬浮按钮不要压住最后一条 */
+.body.ou-page { padding-bottom: 6px; }
+.body.ou-page > .hm-row:last-of-type,
+.body.ou-page .sc-item:last-of-type { margin-bottom: 26px; }
+.body.ou-page .docs-tail { height: 70px; }
