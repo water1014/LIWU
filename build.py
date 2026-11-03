@@ -1,54 +1,63 @@
 #!/usr/bin/env python3
-"""把 src/ 下的 css / js 与 vue.js 打成单文件 liwu.html。
+"""可选步骤：把多文件工程压成一个可离线分享的 HTML。
 
-用法：  python3 build.py        # 产物：同目录 index.html（GitHub Pages 入口）与 liwu.html
+日常开发不需要跑这个脚本，直接用浏览器打开 index.html 即可。
+只有在需要发给别人一个文件、或贴到不支持多文件的平台时才打包。
 
-源码分层：
-  css  01-tokens.css 设计变量 → 02-shell.css 外壳与桌面 → 03-chat.css 聊天
-       → 04-apps.css 其它应用 → 05-fix.css 收尾补丁
-  js   10-icons / 11-db / 12-store / 13-ui / 20-home / 21-chat
-       / 30-wb-mem / 31-archive-store / 32-beauty-settings / 40-main
+用法：python3 build.py
+产物：dist/liwu.standalone.html
 """
 import pathlib
+import re
 
 ROOT = pathlib.Path(__file__).resolve().parent
-SRC = ROOT / 'src'
-OUT = ROOT / 'index.html'
-COPY = ROOT / 'liwu.html'
+OUT = ROOT / 'dist' / 'liwu.standalone.html'
 
-css_files = ['01-tokens.css', '02-shell.css', '03-chat.css', '04-apps.css', '04b-life.css', '05-fix.css']
-js_files = ['10-icons.js', '11-db.js', '12-store.js', '13-ui.js', '20-home.js',
-            '21-chat.js', '30-wb-mem.js', '31-archive-store.js', '32-beauty-settings.js',
-            '33-life.js', '40-main.js']
+CSS_DIR = ROOT / 'assets' / 'css'
+JS_DIR = ROOT / 'assets' / 'js'
 
-css = '\n'.join((SRC / f).read_text() for f in css_files if (SRC / f).exists())
-js = '\n'.join((SRC / f).read_text() for f in js_files if (SRC / f).exists())
+CSS_ORDER = [
+    '01-tokens.css', '02-shell.css', '03-chat.css',
+    '04-apps.css', '05-life.css', '06-parts.css', '09-fix.css',
+]
+JS_ORDER = [
+    '10-icons.js', '11-db.js', '12-core.js', '13-api.js', '14-ui.js',
+    '20-home.js', '21-chat.js', '30-wb-mem.js', '31-archive-store.js',
+    '32-beauty-settings.js', '33-life.js', '34-stickers.js', '40-main.js',
+]
 
-vue = (ROOT / 'vue.js').read_text().replace('</script', '<\\/script')
 
-html = f"""<!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
-<meta name="theme-color" content="#E7E4DE">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2317171B'/%3E%3Ctext x='16' y='22' font-size='15' font-family='Helvetica' fill='%23F2EFE9' text-anchor='middle'%3EL%3C/text%3E%3C/svg%3E">
-<title>LIWU · 小手机</title>
-<style>
-{css}
-</style>
-</head>
-<body>
-<div id="app"></div>
-<noscript>需要开启 JavaScript 才能打开小手机。</noscript>
-<script>{vue}</script>
-<script>
-{js}
-</script>
-</body>
-</html>
-"""
+def bundle(path, name):
+    p = path / name
+    if not p.exists():
+        raise SystemExit(f'缺少文件：{p.relative_to(ROOT)}')
+    return p.read_text(encoding='utf-8')
 
-OUT.write_text(html)
-COPY.write_text(html)
-print(f'built {OUT} · {len(html)/1024:.1f} KB · css {len(css)/1024:.1f}KB js {len(js)/1024:.1f}KB')
+
+def main():
+    html = (ROOT / 'index.html').read_text(encoding='utf-8')
+    css = '\n'.join(bundle(CSS_DIR, f) for f in CSS_ORDER)
+    js = '\n'.join(bundle(JS_DIR, f) for f in JS_ORDER)
+    vue = (ROOT / 'vendor' / 'vue.global.prod.js').read_text(encoding='utf-8')
+
+    # 去掉外链，换成内联
+    html = re.sub(r'\n<link rel="stylesheet"[^>]*>', '', html)
+    html = re.sub(r'\n<script src="[^"]*"></script>', '', html)
+
+    head_style = '<style>\n' + css + '\n</style>\n</head>'
+    html = html.replace('</head>', head_style, 1)
+
+    inline = (
+        '<script>' + vue.replace('</script', '<\\/script') + '</script>\n'
+        '<script>\n' + js + '\n</script>\n'
+    )
+    html = html.replace('<script>\nif (\'serviceWorker\'', '<script>\n/* standalone: 无 service worker */\nif (false && \'serviceWorker\'', 1)
+    html = html.replace('</body>', inline + '</body>', 1)
+
+    OUT.parent.mkdir(exist_ok=True)
+    OUT.write_text(html, encoding='utf-8')
+    print(f'打包完成：{OUT} · {len(html)/1024:.1f} KB')
+
+
+if __name__ == '__main__':
+    main()

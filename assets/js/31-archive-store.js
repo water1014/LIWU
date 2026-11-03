@@ -393,7 +393,7 @@ NOTICE.Page = {
           <div class="n-time">2026.11.04</div>
         </div>
         <div class="note-card">
-          <div class="n-ver">v0.1.0 · FRAMEWORK</div>
+          <div class="n-ver">v0.2.0 · MULTI-FILE</div>
           <div class="n-t">小手机，第一次开机</div>
           <div class="n-b" style="padding-left:0">
             <div v-for="(l,i) in log" :key="i" style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>{{l}}</span></div>

@@ -136,10 +136,10 @@ window.saveCfg = function (immediate) {
 
 /* ---------------- boot / accounts ---------------- */
 window.A = {
-  toast(msg, ms) {
-    state.toast = { msg, id: Date.now() };
+  toast(msg, ms, action) {
+    state.toast = { msg, id: Date.now(), action: action || null };
     clearTimeout(A._tt);
-    A._tt = setTimeout(() => { state.toast = null; }, ms || 2200);
+    A._tt = setTimeout(() => { state.toast = null; }, ms || (action ? 4000 : 2200));
   },
   async boot() {
     try {
@@ -183,6 +183,8 @@ window.A = {
     if (!state.cfg.home.name || state.cfg.home.name === '未命名') state.cfg.home.name = acc.name || '未命名';
     state.cfg.ui = Object.assign(defaultCfg().ui, state.cfg.ui || {});
     state.cfg.life = Object.assign(defaultCfg().life, state.cfg.life || {});
+    if (!Array.isArray(state.cfg.stickers)) state.cfg.stickers = [];
+    if (state.cfg.stickerOn == null) state.cfg.stickerOn = true;
     state.cfg.life.music = Object.assign(defaultCfg().life.music, state.cfg.life.music || {});
     ['books', 'annivs', 'diary'].forEach((k) => { if (!Array.isArray(state.cfg.life[k])) state.cfg.life[k] = []; });
     // 老账号：桌面上的那个纪念日，升级成时光里的第一条
@@ -260,6 +262,57 @@ window.A = {
     if (oldKey) delete state.imgCache[oldKey];
     await A.resolveImg(key);
     return key;
+  },
+
+  /* ---------------- stickers ---------------- */
+  stickerByName(name) {
+    return (state.cfg.stickers || []).find((s) => s.name === name) || null;
+  },
+  async addSticker(name, file) {
+    let blob = file;
+    // 只压大图；小图原样保留，避免透明底被转成黑
+    if (file.size > 300 * 1024) {
+      blob = await new Promise((res) => {
+        const img = new Image();
+        img.onload = () => {
+          const sc = Math.min(1, 480 / Math.max(img.width, img.height));
+          const c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round(img.width * sc));
+          c.height = Math.max(1, Math.round(img.height * sc));
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          URL.revokeObjectURL(img.src);
+          c.toBlob((b) => res(b || file), 'image/webp', 0.86);
+        };
+        img.onerror = () => res(file);
+        img.src = URL.createObjectURL(file);
+      });
+    }
+    const key = await DB.putFile(blob, { name: file.name });
+    const s = { id: U.uid('st'), name: String(name || '表情').slice(0, 10), fileKey: key, createdAt: Date.now() };
+    state.cfg.stickers.push(s);
+    await saveCfg(true);
+    return s;
+  },
+  async renameSticker(id, name) {
+    const s = (state.cfg.stickers || []).find((x) => x.id === id);
+    if (!s) return;
+    s.name = String(name).slice(0, 10);
+    await saveCfg(true);
+  },
+  async delSticker(id) {
+    state.cfg.stickers = (state.cfg.stickers || []).filter((s) => s.id !== id);
+    await saveCfg(true);
+  },
+  async restoreSticker(s) {
+    if ((state.cfg.stickers || []).some((x) => x.id === s.id)) return;
+    state.cfg.stickers.push(s);
+    await saveCfg(true);
+  },
+  stickerHint() {
+    const list = state.cfg.stickerOn === false ? [] : (state.cfg.stickers || []);
+    if (!list.length) return '当前没有可用表情，不要输出 [表情:名字] 这类标记。';
+    return '想发表情时，单独一行写 [表情:名字]，名字必须从下面清单里一字不差地选，' +
+      '清单里没有合适的就不要发，用文字表达，绝对不要自己编名字：\n' + list.map((s) => s.name).join(' / ');
   },
 
   /* ---------------- characters ---------------- */
@@ -427,6 +480,14 @@ window.A = {
     A.scheduleReply(chatId);
   },
 
+  async sendImage(chatId, file) {
+    if (!file) return;
+    const blob = await U.fileToBlob(file, 1400);
+    const key = await DB.putFile(blob, { name: file.name || 'image' });
+    await A.appendMessage(chatId, 'user', '[图片]', { imageKey: key });
+    A.scheduleReply(chatId);
+  },
+
   scheduleReply(chatId) {
     clearTimeout(timers[chatId]);
     state.typing[chatId] = true;
@@ -453,7 +514,7 @@ window.A = {
       await A.appendMessage(chatId, 'char', raw);
     } catch (e) {
       state.typing[chatId] = false;
-      A.toast('接口调用失败，已使用本地模拟：' + (e.message || ''), 2600);
+      A.toast('接口调用失败，已用本地模拟：' + API.friendly(e), 3600);
       const raw = A.mockReply(chat, char);
       await A.appendMessage(chatId, 'char', raw);
     }
@@ -480,42 +541,17 @@ window.A = {
     return (id && list.find((a) => a.id === id)) || list.find((a) => a.isDefault) || list[0];
   },
 
+  /* 具体请求细节在 13-api.js，这里只保留业务入口 */
   async callAPI(cfg, messages) {
-    const base = (cfg.baseUrl || '').replace(/\/+$/, '');
-    if (!base) throw new Error('未填写 Base URL');
-    let url, headers = { 'Content-Type': 'application/json' }, body;
-    if (cfg.protocol === 'anthropic') {
-      url = base + '/messages';
-      headers['x-api-key'] = cfg.key;
-      headers['anthropic-version'] = '2023-06-01';
-      headers['anthropic-dangerous-direct-browser-access'] = 'true';
-      body = { model: cfg.model, max_tokens: cfg.maxTokens || 1024, temperature: cfg.temp == null ? 0.9 : cfg.temp, system: messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n\n'), messages: messages.filter((m) => m.role !== 'system').map((m) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.content })) };
-    } else if (cfg.protocol === 'gemini') {
-      url = base + '/models/' + cfg.model + ':generateContent?key=' + encodeURIComponent(cfg.key);
-      body = { contents: messages.filter((m) => m.role !== 'system').map((m) => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] })), systemInstruction: { parts: [{ text: messages.filter((m) => m.role === 'system').map((m) => m.content).join('\n\n') }] } };
-    } else {
-      url = base + '/chat/completions';
-      headers['Authorization'] = 'Bearer ' + cfg.key;
-      body = { model: cfg.model, messages, temperature: cfg.temp == null ? 0.9 : cfg.temp, max_tokens: cfg.maxTokens || 1024 };
-    }
-    const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
-    const txt = await res.text();
-    if (!res.ok) throw new Error('HTTP ' + res.status + ' ' + txt.slice(0, 90));
-    let data;
-    try { data = JSON.parse(txt); } catch (e) { throw new Error('返回不是 JSON'); }
-    if (cfg.protocol === 'anthropic') return (data.content || []).map((c) => c.text || '').join('');
-    if (cfg.protocol === 'gemini') return ((data.candidates || [])[0] || {}).content?.parts?.map((p) => p.text).join('') || '';
-    return (data.choices || [])[0]?.message?.content || '';
+    return API.chat(cfg, messages);
   },
 
   async fetchModels(cfg) {
-    const base = (cfg.baseUrl || '').replace(/\/+$/, '');
-    if (!base) throw new Error('请先填写 Base URL');
-    if (cfg.protocol === 'anthropic') throw new Error('Anthropic 协议不支持模型列表，请手动填写');
-    const res = await fetch(base + '/models', { headers: cfg.key ? { Authorization: 'Bearer ' + cfg.key } : {} });
-    if (!res.ok) throw new Error('拉取失败 HTTP ' + res.status);
-    const data = await res.json();
-    return (data.data || data.models || []).map((m) => m.id || m.name).filter(Boolean);
+    try {
+      return await API.models(cfg);
+    } catch (e) {
+      throw new Error(API.friendly(e));
+    }
   },
 
   /* ---------------- prompt assembly ---------------- */
@@ -529,7 +565,8 @@ window.A = {
         '每次回复先输出 <think>内心想法</think>，再进行正文输出。',
         '旁白使用 <narratage>旁白</narratage> 包裹，居中呈现，每段不超过 50 字，旁白不超过全文一半。',
         '不同的聊天气泡之间用两个换行分隔。每次回复 1-6 句话语，可以没有旁白，但不能没有话语。',
-        '不要模仿历史消息的格式，不要替用户说话，不要输出时间戳，不要输出任何审美/排版指令。'
+        '不要模仿历史消息的格式，不要替用户说话，不要输出时间戳，不要输出任何审美/排版指令。',
+        A.stickerHint()
       ].join('\n');
     }
     if (blockId === 'persona') {
@@ -548,7 +585,8 @@ window.A = {
     }
     if (blockId.indexOf('world_') === 0) {
       const pos = blockId.replace('world_', '');
-      const books = state.worldbooks.filter((b) => (char.worldbookIds || []).includes(b.id));
+      // 全局世界书对所有角色生效，局部世界书看是否绑定
+      const books = state.worldbooks.filter((b) => b.scope === 'global' || (char.worldbookIds || []).includes(b.id));
       const recent = all.slice(-6).map((m) => m.raw).join(' ');
       const lines = [];
       books.forEach((b) => {
@@ -607,7 +645,8 @@ window.A = {
     const arr = [{ role: 'system', content: system.trim() }];
     const recent = (state.msgs[chat.id] || []).slice(-10);
     recent.forEach((m) => {
-      const clean = m.raw.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+      const clean = m.imageKey ? '（发了一张图片）' : m.raw.replace(/<think>[\s\S]*?<\/think>/gi, '')
+        .replace(/\[表情[:：]\s*([^\]]+)\]/g, '（发了一个表情：$1）').trim();
       if (clean) arr.push({ role: m.role === 'user' ? 'user' : 'assistant', content: clean });
     });
     arr.push({ role: 'user', content: '请以' + char.name + '的身份继续这段对话，直接输出格式化的回复。' });

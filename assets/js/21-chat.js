@@ -4,7 +4,7 @@
 window.parseRaw = function (raw) {
   const out = [];
   const src = String(raw || '');
-  const re = /<think>([\s\S]*?)<\/think>|<narratage>([\s\S]*?)<\/narratage>|<tool(?:\s+name="([^"]*)")?\s*>([\s\S]*?)<\/tool>/gi;
+  const re = /<think>([\s\S]*?)<\/think>|<narratage>([\s\S]*?)<\/narratage>|<tool(?:\s+name="([^"]*)")?\s*>([\s\S]*?)<\/tool>|\[表情[:：]\s*([^\]\n]{1,24})\]/gi;
   let last = 0, m;
   const pushSay = (text, base) => {
     const t = text.replace(/^\s+|\s+$/g, '');
@@ -25,6 +25,7 @@ window.parseRaw = function (raw) {
     if (m.index > last) pushSay(src.slice(last, m.index), last);
     if (m[1] !== undefined) out.push({ type: 'think', text: m[1].trim(), start: m.index, end: re.lastIndex });
     else if (m[2] !== undefined) out.push({ type: 'narr', text: m[2].trim(), start: m.index, end: re.lastIndex });
+    else if (m[5] !== undefined) out.push({ type: 'sticker', name: m[5].trim(), start: m.index, end: re.lastIndex });
     else out.push({ type: 'tool', name: m[3] || 'tool', text: m[4].trim(), start: m.index, end: re.lastIndex });
     last = re.lastIndex;
   }
@@ -344,6 +345,11 @@ CHAT.Home = {
                 <div class="row-main"><div class="row-title">时光</div><div class="row-sub">纪念日与只给自己看的日记</div></div>
                 <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
               </div>
+              <div class="row tap" @click="A.go('stickers')">
+                <div class="row-ico" style="background:#F2EEF3;color:#7C6C86"><ico name="smile" :size="15"/></div>
+                <div class="row-main"><div class="row-title">表情库</div><div class="row-sub">{{(S.cfg.stickers||[]).length}} 张 · AI 也能用</div></div>
+                <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+              </div>
             </div>
             <div style="height:20px"></div>
           </div>
@@ -390,7 +396,7 @@ CHAT.Home = {
                 </div>
                 <div class="row">
                   <div class="row-ico"><ico name="zap" :size="15"/></div>
-                  <div class="row-main"><div class="row-title">运行状态</div><div class="row-sub">单文件 · 离线可用</div></div>
+                  <div class="row-main"><div class="row-title">运行状态</div><div class="row-sub">多文件 · 可离线 · 可安装</div></div>
                   <div class="row-val"><span class="live-dot"></span>Running</div>
                 </div>
               </div>
@@ -525,7 +531,7 @@ CHAT.Room = {
     return {
       S, text: '', drawer: false, narration: '', limit: 40,
       menu: null, editMsg: null, editText: '', editSheet: false,
-      scrollEl: null, atBottom: true, cssTag: ''
+      scrollEl: null, atBottom: true, cssTag: '', stkOpen: false, stkUrls: {}, viewer: ''
     };
   },
   computed: {
@@ -541,12 +547,13 @@ CHAT.Room = {
     }
   },
   watch: {
-    'msgs.length'() { this.toBottom(); }
+    'msgs.length'() { this.toBottom(); this.syncStickers(); }
   },
   async mounted() {
     await A.loadMessages(this.chat.id);
     if (this.chat.bgKey) await A.resolveImg(this.chat.bgKey);
     this.applyCss();
+    this.syncStickers();
     this.$nextTick(this.toBottom);
     this.scrollEl = this.$refs.msgs;
     this.scrollEl.addEventListener('scroll', this.onScroll, { passive: true });
@@ -574,7 +581,47 @@ CHAT.Room = {
         if (el && this.atBottom !== false) el.scrollTop = el.scrollHeight;
       });
     },
-    blocks(m) { return parseRaw(m.raw); },
+    blocks(m) {
+      const all = parseRaw(m.raw);
+      return m.imageKey ? all.filter((b) => b.type !== 'say') : all;
+    },
+    stickerUrl(name) { return this.stkUrls[name] || ''; },
+    imgSrc(key) { return this.stkUrls['img:' + key] || ''; },
+    onImgLoad() { if (this.atBottom) this.toBottom(); },
+    openViewer(key) { this.viewer = this.imgSrc(key); },
+    pickImage() {
+      const input = document.createElement('input');
+      input.type = 'file'; input.accept = 'image/*';
+      input.onchange = async () => {
+        if (!input.files[0]) return;
+        this.drawer = false;
+        await A.sendImage(this.chat.id, input.files[0]);
+        this.$nextTick(this.toBottom);
+      };
+      input.click();
+    },
+    async syncStickers() {
+      const names = new Set();
+      for (const m of this.msgs) {
+        if (m.imageKey && !this.stkUrls['img:' + m.imageKey]) {
+          const u = S.imgCache[m.imageKey] || await A.resolveImg(m.imageKey);
+          if (u) this.stkUrls['img:' + m.imageKey] = u;
+        }
+        parseRaw(m.raw).forEach((b) => { if (b.type === 'sticker') names.add(b.name); });
+      }
+      for (const n of names) {
+        if (this.stkUrls[n]) continue;
+        const s = A.stickerByName(n);
+        if (!s) continue;
+        const u = S.imgCache[s.fileKey] || await A.resolveImg(s.fileKey);
+        if (u) this.stkUrls[n] = u;
+      }
+    },
+    async sendSticker(name) {
+      this.stkOpen = false;
+      this.atBottom = true;
+      await A.send(this.chat.id, '[表情:' + name + ']');
+    },
     isNarrOnly(m) { return m.narration && !parseRaw(m.raw).some((b) => b.type === 'say'); },
     sendText() {
       const t = this.text.trim();
@@ -703,6 +750,9 @@ CHAT.Room = {
               <span class="msg-time">{{fmtTime(m.ts)}}</span>
             </div>
             <div class="msg-body">
+              <div v-if="m.imageKey" class="img-msg" @click="openViewer(m.imageKey)">
+                <img :src="imgSrc(m.imageKey)" alt="图片" @load="onImgLoad">
+              </div>
               <template v-for="(b,bi) in blocks(m)" :key="bi">
                 <div v-if="b.type==='think'" class="think" :class="{open:b.open}">
                   <div class="think-head" @click="openTool(b)">
@@ -719,6 +769,10 @@ CHAT.Room = {
                   <div v-if="b.open" class="tool-body">{{b.text}}</div>
                 </div>
                 <div v-else-if="b.type==='narr'" class="narr">{{b.text}}</div>
+                <div v-else-if="b.type==='sticker'" class="stk-msg" @pointerdown="pressBubble($event,m,b)">
+                  <img v-if="stickerUrl(b.name)" :src="stickerUrl(b.name)" :alt="b.name">
+                  <span v-else class="stk-missing">{{b.name}}</span>
+                </div>
                 <div v-else class="bubble" :class="{multi:false}" @pointerdown="pressBubble($event,m,b)">{{b.text}}</div>
               </template>
             </div>
@@ -729,10 +783,20 @@ CHAT.Room = {
 
       <div class="composer">
         <button class="comp-btn" @click="drawer=true"><ico name="plus" :size="18"/></button>
+        <button class="comp-btn" @click="stkOpen=true"><ico name="smile" :size="18"/></button>
         <textarea ref="ta" class="comp-input" v-model="text" rows="1" placeholder="说点什么…" @input="grow" @keydown.enter.exact.prevent="sendText"></textarea>
         <button class="send-btn" :class="{off:!text.trim(),sending:typing}" @click="sendText"><ico name="send" :size="16" :sw="1.9"/></button>
       </div>
     </div>
+
+    <stk-picker v-model="stkOpen" @pick="sendSticker"/>
+
+    <teleport to=".screen">
+      <div v-if="viewer" class="img-view" @click="viewer=''">
+        <img :src="viewer" alt="图片">
+        <div class="iv-hint">点击任意处关闭</div>
+      </div>
+    </teleport>
 
     <!-- bubble menu -->
     <teleport to=".screen">
@@ -769,6 +833,7 @@ CHAT.Room = {
           <div class="d-head"><div class="d-title"><ico name="layers" :size="13"/>上下文</div></div>
           <div class="d-desc">当前已载入 {{(S.msgs[chat.id]||[]).length}} 条消息 · 阈值 {{S.cfg.memory.threshold}} 条自动总结</div>
           <div class="f g6" style="margin-top:9px">
+            <button class="btn sm" @click="pickImage">发送图片</button>
             <button class="btn sm" @click="A.summarize(chat)">立即总结</button>
             <button class="btn sm" @click="A.toast('上下文按提示词顺序实时拼装')">查看拼接</button>
           </div>

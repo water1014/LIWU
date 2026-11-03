@@ -5,7 +5,7 @@ const WB = {};
 
 WB.List = {
   props: { params: Object },
-  data() { return { S, sheet: false, name: '', desc: '', bind: this.params && this.params.charId ? this.params.charId : '' }; },
+  data() { return { S, sheet: false, name: '', desc: '', scope: 'local', bind: this.params && this.params.charId ? this.params.charId : '' }; },
   computed: {
     char() { return this.bind ? A.charById(this.bind) : null; }
   },
@@ -24,8 +24,8 @@ WB.List = {
     },
     async create() {
       if (!this.name.trim()) { A.toast('给这本世界书起个名字'); return; }
-      const b = await A.saveBook({ name: this.name.trim(), desc: this.desc.trim(), entries: [] });
-      this.sheet = false; this.name = ''; this.desc = '';
+      const b = await A.saveBook({ name: this.name.trim(), desc: this.desc.trim(), scope: this.scope, entries: [] });
+      this.sheet = false; this.name = ''; this.desc = ''; this.scope = 'local';
       A.go('worldbook.detail', { bookId: b.id });
     },
     counts(b) {
@@ -73,7 +73,8 @@ WB.List = {
               <span class="tag pre" v-if="counts(b).pre">前 {{counts(b).pre}}</span>
               <span class="tag mid" v-if="counts(b).mid">中 {{counts(b).mid}}</span>
               <span class="tag post" v-if="counts(b).post">后 {{counts(b).post}}</span>
-              <span v-if="bound(b)" class="tag on" style="margin-left:auto">已绑定</span>
+              <span v-if="b.scope==='global'" class="tag on" style="margin-left:auto">全局生效</span>
+              <span v-else-if="bound(b)" class="tag on" style="margin-left:auto">已绑定</span>
               <ico v-else name="chevronRight" :size="13" style="margin-left:auto;color:var(--muted-2)"/>
             </div>
           </div>
@@ -93,6 +94,10 @@ WB.List = {
       <div class="form-stack">
         <div class="field"><label>名称</label><input class="input" v-model="name" placeholder="如：雾港纪事"></div>
         <div class="field"><label>简介</label><textarea class="textarea" v-model="desc" placeholder="这个世界的气候、规则、正在发生的事。"></textarea></div>
+        <div class="field"><label>生效范围</label>
+          <seg :model-value="scope" @update:model-value="v=>scope=v" :options="[{value:'local',label:'手动绑定'},{value:'global',label:'全局生效'}]"/>
+          <div class="helper" style="margin-top:7px">全局书对所有角色自动生效，适合放时代背景；手动绑定的书只在该角色的设定里出现。</div>
+        </div>
       </div>
       <template #footer><button class="btn primary block" @click="create">创建</button></template>
     </sheet>
@@ -162,7 +167,12 @@ WB.Detail = {
       await A.deleteBook(this.book.id);
       A.back();
     },
-    modeLabel(e) { return e.mode === 'always' ? '始终注入' : e.mode === 'keyword' ? '关键词' : '概率 ' + (e.probability || 30) + '%'; }
+    modeLabel(e) { return e.mode === 'always' ? '始终注入' : e.mode === 'keyword' ? '关键词' : '概率 ' + (e.probability || 30) + '%'; },
+    async toggleScope() {
+      this.book.scope = this.book.scope === 'global' ? 'local' : 'global';
+      await DB.put('worldbooks', JSON.parse(JSON.stringify(this.book)));
+      A.toast(this.book.scope === 'global' ? '这本设定会对所有角色生效' : '改为手动绑定，只有绑定的角色会读到');
+    }
   },
   template: `<div class="page">
     <nav-bar title="">
@@ -181,6 +191,7 @@ WB.Detail = {
           </div>
         </div>
         <div class="f g6" style="margin-top:12px">
+          <span class="tag" :class="{on:book.scope==='global'}" style="cursor:pointer" @click="toggleScope">{{book.scope==='global'?'全局生效':'手动绑定'}}</span>
           <span class="tag">{{entries.length}} 个条目</span>
           <span class="tag pre">前置 {{entries.filter(e=>e.position==='pre').length}}</span>
           <span class="tag mid">中置 {{entries.filter(e=>e.position==='mid').length}}</span>

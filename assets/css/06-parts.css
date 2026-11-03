@@ -1,0 +1,92 @@
+/* ============================================================
+   组件补丁：果冻反馈 / 加载 / 表情
+   只动 transform 与自身视觉属性，不和布局抢规则
+   ============================================================ */
+
+/* ---------- 果冻：按下 0.08s 快压，松开 0.6s 过冲回弹 ---------- */
+.btn, .icon-btn, .comp-btn, .send-btn, .chip, .si-btn, .stk-cell, .dw-write, .mode-row .chip {
+  transition: transform .62s cubic-bezier(.34, 1.9, .4, 1),
+              background .22s ease,
+              box-shadow .62s cubic-bezier(.34, 1.9, .4, 1);
+}
+.btn:active, .icon-btn:active, .comp-btn:active, .send-btn:active,
+.chip:active, .si-btn:active, .stk-cell:active, .dw-write:active, .mode-row .chip:active {
+  transition: transform .08s ease-out, background .08s ease-out;
+}
+.btn:active { transform: scale(.94); }
+.icon-btn:active, .comp-btn:active, .send-btn:active { transform: scale(.86); }
+.chip:active, .si-btn:active, .mode-row .chip:active { transform: scale(.92); }
+.stk-cell:active { transform: scale(.9); }
+.dw-write:active { transform: scale(.86) rotate(-3deg); }
+
+/* ---------- 加载 ---------- */
+.spin-ring {
+  width: 15px; height: 15px; flex: none; border-radius: 50%;
+  border: 2px solid rgba(23,23,27,.14); border-top-color: var(--ink);
+  animation: spin .85s linear infinite;
+}
+.spin-ring.lg { width: 24px; height: 24px; border-width: 2.5px; }
+.spin-row { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 18px 0; font-size: 10px; color: var(--muted); letter-spacing: .04em; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- 轻提示上的操作 ---------- */
+.toast { pointer-events: auto; gap: 12px; }
+.toast-act {
+  border: 0; background: none; padding: 0; flex: none;
+  font-size: 11px; font-weight: 600; letter-spacing: .02em;
+  color: #D8C7A6; font-family: inherit;
+}
+.toast-act:active { opacity: .6; }
+
+/* ---------- 表情 ---------- */
+.stk-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; padding: 0 18px; }
+.stk-grid.pick { padding: 0; max-height: 46vh; overflow: auto; }
+.stk-cell {
+  position: relative; aspect-ratio: 1; border: 1px solid var(--line); border-radius: 13px;
+  background: var(--surface); display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 6px; overflow: hidden; gap: 3px; min-width: 0;
+}
+.stk-cell img { position: absolute; left: 5px; top: 5px; width: calc(100% - 10px); height: calc(100% - 18px); object-fit: contain; display: block; }
+.stk-cell .stk-ph { font-size: 15px; color: var(--muted-2); }
+.stk-name {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  font-size: 8px; line-height: 1.5; padding: 3px 2px;
+  color: var(--ink-2); background: linear-gradient(to top, rgba(255,255,255,.94), rgba(255,255,255,.5));
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stk-cell.add { border-style: dashed; color: var(--muted); background: transparent; }
+.stk-cell.add .stk-name { position: static; background: none; color: var(--muted); margin-top: 2px; }
+
+.stk-tip {
+  display: flex; gap: 8px; align-items: flex-start;
+  margin: 4px 18px 14px; padding: 11px 13px; border-radius: 13px;
+  background: rgba(138,154,124,.09); border: 1px solid rgba(138,154,124,.18);
+  font-size: 10px; line-height: 1.65; color: #5C6B57;
+}
+.stk-tip .ico { flex: none; margin-top: 1px; }
+.stk-count { text-align: center; font-size: 9px; color: var(--muted-2); margin-top: 18px; letter-spacing: .03em; }
+.stk-preview { display: flex; justify-content: center; }
+.stk-preview img { width: 108px; height: 108px; object-fit: contain; border-radius: 14px; background: var(--surface-2); }
+.stk-preview .stk-ph { width: 108px; height: 108px; display: grid; place-items: center; border-radius: 14px; background: var(--surface-2); font-size: 26px; color: var(--muted-2); }
+
+/* 聊天里的图片气泡：不套文字气泡背景 */
+.stk-msg { max-width: 132px; }
+.stk-msg img {
+  width: 108px; height: 108px; object-fit: contain; display: block;
+  border-radius: 14px; background: transparent;
+}
+.stk-missing {
+  display: inline-block; font-size: 10px; color: var(--muted);
+  border: 1px dashed var(--line); border-radius: 10px; padding: 7px 11px;
+}
+
+/* ---------- 聊天图片 ---------- */
+.img-msg { max-width: 168px; border-radius: 14px; overflow: hidden; cursor: zoom-in; }
+.img-msg img { width: 100%; display: block; border-radius: 14px; }
+.img-view {
+  position: absolute; inset: 0; z-index: 500;
+  background: rgba(16,16,19,.86); backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.img-view img { max-width: 100%; max-height: 100%; border-radius: 10px; object-fit: contain; }
+.iv-hint { position: absolute; left: 0; right: 0; bottom: 26px; text-align: center; font-size: 9.5px; color: rgba(255,255,255,.45); letter-spacing: .08em; }

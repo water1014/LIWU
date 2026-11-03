@@ -196,6 +196,7 @@ const VIEWS = {
   'worldbooks': WB.List,
   'worldbook.detail': WB.Detail,
   'memories': MEM.Page,
+  'stickers': STK.Library,
   'archive': ARCH.List,
   'archive.edit': ARCH.Edit,
   'music': MUSIC.Page,
@@ -215,6 +216,13 @@ const VIEWS = {
 
 const Root = {
   data() { return { S, NAV, ready: false }; },
+  methods: {
+    runToast() {
+      const a = S.toast && S.toast.action;
+      S.toast = null; clearTimeout(A._tt);
+      if (a && a.run) a.run();
+    }
+  },
   computed: {
     top() { return NAV.stack.length ? NAV.stack[NAV.stack.length - 1] : null; },
     view() { return this.top ? VIEWS[this.top.name] : null; }
@@ -238,7 +246,10 @@ const Root = {
           <component v-if="view" :is="view" :params="top.params" :key="top.key"></component>
         </transition>
 
-        <div class="toast-wrap"><div class="toast" v-if="S.toast">{{S.toast.msg}}</div></div>
+        <div class="toast-wrap"><div class="toast" v-if="S.toast">
+          <span>{{S.toast.msg}}</span>
+          <button v-if="S.toast.action" class="toast-act" @click="runToast">{{S.toast.action.label}}</button>
+        </div></div>
 
         <div v-if="!S.ready" style="position:absolute;inset:0;background:var(--paper);display:grid;place-items:center;z-index:500">
           <div style="text-align:center">
@@ -267,6 +278,7 @@ app.component('toggle', UI.Toggle);
 app.component('seg', UI.Seg);
 app.component('empty', UI.Empty);
 app.component('xrow', UI.Row);
+app.component('stk-picker', STK.Picker);
 app.component('home-screen', HOME.Home);
 app.component('chat-login', CHAT.Login);
 app.component('status-bar', StatusBar);

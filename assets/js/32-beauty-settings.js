@@ -208,7 +208,7 @@ SET.Page = {
         <div class="set-group">
           <div class="section-head" style="padding-left:2px"><span class="section-title">关于</span></div>
           <div class="set-list">
-            <div class="row"><div class="row-main"><div class="row-title">LIWU · 小手机</div><div class="row-sub">框架版 0.1.0 · 单文件 SPA</div></div><span class="tag">Vue 3</span></div>
+            <div class="row"><div class="row-main"><div class="row-title">LIWU · 小手机</div><div class="row-sub">框架版 0.2.0 · 多文件静态站</div></div><span class="tag">Vue 3</span></div>
             <div class="row"><div class="row-main"><div class="row-title">存储</div><div class="row-sub">IndexedDB · 图片以 Blob 保存</div></div><span class="tag">{{U.bytes(total)}}</span></div>
           </div>
         </div>
@@ -335,13 +335,19 @@ SET.ApiEdit = {
         <div class="field"><label>协议</label>
           <seg :model-value="form.protocol" @update:model-value="setProtocol" :options="[{value:'openai',label:'OpenAI'},{value:'anthropic',label:'Claude'},{value:'gemini',label:'Gemini'}]"/>
         </div>
-        <div class="field"><label>Base URL</label><input class="input" v-model="form.baseUrl" placeholder="https://..."></div>
+        <div class="field"><label>Base URL</label>
+          <input class="input" v-model="form.baseUrl" placeholder="https://...">
+          <div class="helper" style="margin-top:7px">填到哪一层都行。结尾带不带 /v1 会自动各试一次，不用手动改。</div>
+        </div>
         <div class="field"><label>API Key</label><input class="input" type="password" v-model="form.key" placeholder="sk-..."></div>
         <div class="field">
           <label>模型</label>
           <div class="f g8">
             <input class="input" v-model="form.model" placeholder="模型 ID" style="font-family:var(--mono);font-size:11.5px">
-            <button class="btn sm" :disabled="busy==='models'" @click="fetchModels">{{busy==='models'?'…':'拉取'}}</button>
+            <button class="btn sm" :disabled="busy==='models'" @click="fetchModels">
+              <span v-if="busy==='models'" class="spin-ring" style="width:11px;height:11px;border-width:1.5px"></span>
+              <template v-else>拉取</template>
+            </button>
           </div>
         </div>
         <div class="field"><label>温度 · {{form.temp}}</label><input type="range" min="0" max="2" step="0.1" v-model.number="form.temp" style="width:100%"></div>
@@ -355,7 +361,10 @@ SET.ApiEdit = {
       </div>
 
       <div class="f g8" style="margin-top:18px">
-        <button class="btn" style="flex:1" :disabled="busy==='test'" @click="test">{{busy==='test'?'测试中…':'测试连接'}}</button>
+        <button class="btn" style="flex:1" :disabled="busy==='test'" @click="test">
+          <span v-if="busy==='test'" class="spin-ring" style="width:12px;height:12px;border-width:1.5px"></span>
+          <template v-else>测试连接</template>
+        </button>
         <button class="btn primary" style="flex:1" @click="save">保存</button>
       </div>
       <div class="helper" style="margin-top:12px;line-height:1.7">浏览器直连需要接口允许跨域（CORS）。Claude 已附带 anthropic-dangerous-direct-browser-access 头。</div>
