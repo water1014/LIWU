@@ -2,15 +2,16 @@
    Beauty · Settings · API · Prompts · Data
    ============================================================ */
 const WALLS = [
-  { name: '窗', css: "url(assets/img/wall-window.jpg)", img: 1 },
+  { name: '雾粉', css: 'radial-gradient(120% 86% at 12% 0%,#FDFAF8 0%,rgba(253,250,248,0) 58%),radial-gradient(92% 68% at 94% 14%,#F0DFE2 0%,rgba(240,223,226,0) 62%),radial-gradient(110% 78% at 46% 106%,#D6CAC6 0%,rgba(214,202,198,0) 66%),linear-gradient(168deg,#FAF6F4 0%,#EFE4E2 46%,#DBD0CC 100%)' },
   { name: '帘', css: "url(assets/img/wall-curtain.jpg)", img: 1 },
   { name: '雾', css: "url(assets/img/wall-fog.jpg)", img: 1 },
   { name: '纸', css: 'radial-gradient(90% 60% at 16% 4%,#FDFBF5 0%,rgba(253,251,245,0) 58%),radial-gradient(70% 50% at 92% 16%,#E9E1D0 0%,rgba(233,225,208,0) 62%),radial-gradient(80% 60% at 46% 108%,#D3CBB8 0%,rgba(211,203,184,0) 66%),linear-gradient(168deg,#F6F3EB,#E4DDCD)' },
-  { name: '雾', css: 'radial-gradient(80% 50% at 18% 6%,#F6F7F4 0%,rgba(246,247,244,0) 56%),radial-gradient(70% 54% at 86% 28%,#C3CBC4 0%,rgba(195,203,196,0) 60%),radial-gradient(90% 60% at 40% 106%,#9FAAA0 0%,rgba(159,170,160,0) 62%),linear-gradient(170deg,#E7E9E4,#C4CCC3)' },
+  { name: '雾青', css: 'radial-gradient(80% 50% at 18% 6%,#F6F7F4 0%,rgba(246,247,244,0) 56%),radial-gradient(70% 54% at 86% 28%,#C3CBC4 0%,rgba(195,203,196,0) 60%),radial-gradient(90% 60% at 40% 106%,#9FAAA0 0%,rgba(159,170,160,0) 62%),linear-gradient(170deg,#E7E9E4,#C4CCC3)' },
   { name: '潮', css: 'radial-gradient(76% 48% at 82% 6%,#DCE4EA 0%,rgba(220,228,234,0) 58%),radial-gradient(66% 52% at 20% 34%,#F0EEE7 0%,rgba(240,238,231,0) 60%),radial-gradient(90% 60% at 56% 108%,#A9B6BE 0%,rgba(169,182,190,0) 64%),linear-gradient(160deg,#EAE9E2,#C2CDD2)' },
   { name: '暮', css: 'radial-gradient(80% 54% at 22% 6%,#F7EBDF 0%,rgba(247,235,223,0) 58%),radial-gradient(66% 50% at 86% 30%,#D9B9A2 0%,rgba(217,185,162,0) 62%),radial-gradient(90% 58% at 46% 108%,#B08D77 0%,rgba(176,141,119,0) 62%),linear-gradient(162deg,#F0E3D6,#C7AA95)' },
   { name: '苔', css: 'radial-gradient(80% 50% at 76% 4%,#EDF0E4 0%,rgba(237,240,228,0) 58%),radial-gradient(70% 52% at 16% 30%,#D5DCC9 0%,rgba(213,220,201,0) 60%),radial-gradient(90% 60% at 54% 108%,#95A28C 0%,rgba(149,162,140,0) 62%),linear-gradient(166deg,#E9E8DA,#B9C4AE)' },
-  { name: '樱', css: 'radial-gradient(84% 52% at 24% 4%,#FDF6F4 0%,rgba(253,246,244,0) 58%),radial-gradient(68% 50% at 88% 24%,#EAD2D2 0%,rgba(234,210,210,0) 60%),radial-gradient(92% 60% at 40% 106%,#CFB6BB 0%,rgba(207,182,187,0) 64%),linear-gradient(168deg,#F7EEEC,#DFC9CC)' }
+  { name: '樱', css: 'radial-gradient(84% 52% at 24% 4%,#FDF6F4 0%,rgba(253,246,244,0) 58%),radial-gradient(68% 50% at 88% 24%,#EAD2D2 0%,rgba(234,210,210,0) 60%),radial-gradient(92% 60% at 40% 106%,#CFB6BB 0%,rgba(207,182,187,0) 64%),linear-gradient(168deg,#F7EEEC,#DFC9CC)' },
+  { name: '窗', css: "url(assets/img/wall-window.jpg)", img: 1 }
 ];
 
 const BEAUTY = {};
@@ -53,6 +54,11 @@ BEAUTY.Page = {
       if (S.cfg.ui.wallpaperKey) { DB.delFile(S.cfg.ui.wallpaperKey); delete S.imgCache[S.cfg.ui.wallpaperKey]; }
       S.cfg.ui.wallpaperKey = '';
       saveCfg(true);
+    },
+    setLock(v) {
+      S.cfg.ui.lock = !!v;
+      saveCfg(true);
+      A.toast(v ? '下次打开会先看到锁屏' : '已关闭锁屏');
     },
     uploadFont() {
       const input = document.createElement('input');
@@ -119,6 +125,18 @@ BEAUTY.Page = {
             <span v-else style="color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.4)">点击更换</span>
           </div>
           <div class="helper" style="margin-top:8px">图片会压缩后以 Blob 存入 IndexedDB，替换时旧图自动删除。</div>
+
+          <div class="section-head" style="padding-left:2px;margin-top:24px"><span class="section-title">开屏</span></div>
+          <div class="group">
+            <div class="row">
+              <div class="row-main">
+                <div class="row-title">锁屏</div>
+                <div class="row-sub">每天第一次打开，先看到时间与你写的那句话</div>
+              </div>
+              <toggle :model-value="S.cfg.ui.lock!==false" @update:model-value="setLock"/>
+            </div>
+          </div>
+          <div class="helper" style="margin-top:8px">关闭后直接进入桌面；打开后向上轻扫解锁。</div>
         </template>
 
         <template v-else-if="tab==='font'">

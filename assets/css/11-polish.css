@@ -1,0 +1,223 @@
+/* ============================================================
+   POLISH · v8 质感层
+   只做视觉：排版（衬线 / 刊号 / 细线）、图标统一、卡片层次、
+   主屏呼吸感、点按反馈。不动结构、不动交互逻辑。
+   ============================================================ */
+
+:root{
+  --serif:"Songti SC","Noto Serif CJK SC","Source Han Serif SC",Georgia,"Times New Roman",serif;
+  --serif-en:Georgia,"Times New Roman","Songti SC",serif;
+  --hair:rgba(23,23,27,.085);
+  --ink-soft:rgba(23,23,27,.46);
+}
+
+/* ---------- 1. 主屏底色与上下呼吸 ---------- */
+.home{background:#EFEDE8}
+.home:before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(90% 40% at 50% -6%,rgba(255,255,255,.5),rgba(255,255,255,0) 70%),
+    radial-gradient(90% 34% at 50% 104%,rgba(20,20,24,.07),rgba(20,20,24,0) 72%);
+}
+.home-inner{z-index:2}
+
+/* ---------- 2. 时钟：衬线，安静 ---------- */
+.hc-time{
+  font-family:var(--serif-en);
+  font-size:54px;font-weight:400;line-height:.92;
+  letter-spacing:-.035em;color:#1A1A20;
+  text-shadow:none;
+}
+.hc-date{
+  font-family:var(--serif);font-size:10px;letter-spacing:.2em;
+  color:rgba(23,23,27,.42);margin-top:8px;
+}
+.hc-cap{
+  font-family:var(--serif-en);font-style:italic;font-weight:400;
+  font-size:9px;letter-spacing:.1em;text-transform:none;
+  color:rgba(23,23,27,.38);
+}
+.hc-n{
+  font-family:var(--serif-en);font-size:28px;font-weight:400;
+  letter-spacing:-.01em;color:#22222A;
+}
+.home-clock{padding:2px 4px 16px}
+
+/* ---------- 3. 图标：统一一层玻璃白 ---------- */
+.app-icon{
+  background:linear-gradient(158deg,#FFFFFF 0%,#FBFAF7 52%,#F3F2EE 100%);
+  border:1px solid rgba(255,255,255,.95);
+  color:#33333A;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 10px 20px -16px rgba(20,20,24,.55),
+    0 0 0 .5px rgba(20,20,24,.05);
+  transition:transform .16s var(--ease),box-shadow .2s var(--ease);
+}
+.app-icon:before{opacity:.1}
+.app-icon:after{
+  background:linear-gradient(158deg,rgba(255,255,255,.6),rgba(255,255,255,0) 58%);
+}
+.app-icon .ico{color:#35353C;opacity:.88}
+.app:active .app-icon{transform:scale(.9);box-shadow:0 4px 10px -8px rgba(20,20,24,.5)}
+.app-label{
+  font-size:9.5px;font-weight:450;letter-spacing:.03em;
+  color:rgba(23,23,27,.62);text-shadow:0 1px 0 rgba(255,255,255,.7);
+}
+
+/* ---------- 4. 卡片：统一圆角、内描边、刊号 ---------- */
+.glassw,.dlg,.music,.pc,.polaroid .pol-front{
+  border-radius:26px;
+  border-color:rgba(255,255,255,.86);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.5) inset,
+    0 1px 0 rgba(255,255,255,.85) inset,
+    0 26px 46px -38px rgba(18,18,22,.7);
+}
+.gw-cap,.dlg-cap{
+  font-family:var(--serif-en);font-style:italic;font-weight:400;
+  font-size:9px;letter-spacing:.16em;text-transform:none;
+  color:rgba(23,23,27,.42);
+}
+.pc-mark,.pc-foot,.pc-date{
+  font-family:var(--serif-en);font-style:italic;
+  letter-spacing:.2em;font-size:8px;
+}
+.pc-name{font-family:var(--serif);font-size:18px;font-weight:600;letter-spacing:.06em}
+.pc-sign{font-family:var(--serif);font-size:10.5px;letter-spacing:.04em;color:rgba(23,23,27,.48)}
+
+/* 卡片之间再拉开一点，别糊成一片 */
+.page-grid{gap:13px}
+/* 内容不满一页时垂直居中，让上下留白对称，而不是全堆在顶上 */
+.hp > .page-grid{align-content:center}
+/* 第一页顶着应用格排，别让一张卡片悬在中间 */
+.hp.top > .page-grid{align-content:start}
+
+/* ---------- 5. 全部应用 ---------- */
+.ha-head{padding:0 4px 11px}
+.ha-head .ha-t{
+  font-size:9px;letter-spacing:.24em;
+  color:rgba(23,23,27,.38);font-weight:500;
+}
+.ha-head .ha-n{
+  font-family:var(--serif-en);font-size:9.5px;
+  letter-spacing:.1em;color:rgba(23,23,27,.3);
+}
+.ha-grid{gap:13px 4px}
+.ha-grid .app-icon{
+  width:50px;height:50px;border-radius:16px;
+}
+
+/* ---------- 6. 底部：点与 dock ---------- */
+.dots-nav{gap:5px;padding:0 0 12px}
+.dots-nav i{width:4px;height:4px;background:rgba(23,23,27,.15)}
+.dots-nav i.on{width:16px;height:4px;border-radius:2px;background:rgba(23,23,27,.42)}
+
+.dock{
+  height:72px;border-radius:26px;
+  background:rgba(255,255,255,.5);
+  border:1px solid rgba(255,255,255,.72);
+  box-shadow:
+    0 0 0 .5px rgba(20,20,24,.04),
+    0 24px 44px -32px rgba(20,20,24,.6),
+    0 1px 0 rgba(255,255,255,.8) inset;
+  padding:0 10px;
+}
+.dock .app-icon{width:50px;height:50px;border-radius:16px}
+.home-foot{padding:10px 0 16px}
+
+/* ---------- 7. 应用页：标题也用衬线，统一刊号版式 ---------- */
+.app-head h1,.chat-head h1,.us-title,.page-hero{
+  font-family:var(--serif);
+  font-weight:600;letter-spacing:.02em;
+}
+.chat-head{padding:6px 18px 14px}
+.chat-head .sub{
+  font-size:8.5px;letter-spacing:.26em;
+  color:rgba(23,23,27,.36);text-transform:uppercase;
+}
+.app-head .desc{letter-spacing:.02em;line-height:1.6}
+
+/* 分组标题：一条细线收尾，做出刊物感 */
+.section-title{
+  font-size:9px;letter-spacing:.22em;font-weight:500;
+  color:rgba(23,23,27,.4);text-transform:uppercase;
+}
+.section-head{padding:0 2px 10px}
+.card{border-radius:24px}
+.group{border-radius:22px}
+
+/* 页面进入：轻轻抬起，不要弹跳 */
+.page{animation:pageIn .34s var(--ease-out) both}
+@keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- 8. 小屏收敛 ---------- */
+@media (max-height:760px){
+  .hc-time{font-size:48px}
+  .ha-grid .app-icon{width:46px;height:46px}
+  .dock{height:66px}
+  .dock .app-icon{width:46px;height:46px}
+  .page-grid{gap:11px}
+}
+
+/* ============================================================
+   9. 开屏锁屏：一天只出现一次
+   ============================================================ */
+.lock{
+  position:absolute;inset:0;z-index:290;
+  display:flex;flex-direction:column;justify-content:flex-start;
+  padding:calc(var(--status-h) + 30px) 30px calc(34px + env(safe-area-inset-bottom));
+  background-size:cover;background-position:center;
+  touch-action:none;cursor:grab;
+  transition:transform .54s var(--ease-out),opacity .54s var(--ease-out);
+  will-change:transform,opacity;
+}
+.lock:before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.34) 0%,rgba(255,255,255,0) 26%,rgba(23,23,27,.04) 72%,rgba(23,23,27,.12) 100%);
+}
+.lock.hide{transform:translateY(-16%) scale(1.015);opacity:0;pointer-events:none}
+.lk-top,.lk-bottom{position:relative;z-index:2}
+.lk-kicker{
+  font-family:var(--serif-en);font-style:italic;
+  font-size:9px;letter-spacing:.24em;color:rgba(23,23,27,.4);
+}
+.lk-time{
+  font-family:var(--serif-en);font-size:90px;line-height:.9;
+  letter-spacing:-.05em;color:#1B1B21;margin-top:22px;
+}
+.lk-date{
+  font-family:var(--serif);font-size:11.5px;letter-spacing:.18em;
+  color:rgba(23,23,27,.48);margin-top:14px;
+}
+.lk-mid{position:relative;z-index:2;flex:1;display:flex;align-items:center}
+.lk-card{
+  width:100%;padding:18px 20px;
+  background:rgba(255,255,255,.44);
+  border:1px solid rgba(255,255,255,.62);
+  border-radius:22px;
+  backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
+  box-shadow:0 22px 44px -34px rgba(20,20,24,.65),0 1px 0 rgba(255,255,255,.7) inset;
+}
+.lk-row{display:flex;align-items:baseline;justify-content:space-between}
+.lk-k{font-family:var(--serif-en);font-style:italic;font-size:9px;letter-spacing:.2em;color:rgba(23,23,27,.44)}
+.lk-v{font-family:var(--serif-en);font-size:11.5px;letter-spacing:.12em;color:rgba(23,23,27,.5)}
+.lk-name{
+  font-family:var(--serif);font-size:17px;font-weight:600;letter-spacing:.08em;
+  color:#26262C;margin-top:12px;
+}
+.lk-line{
+  font-family:var(--serif);font-size:11.5px;line-height:1.7;letter-spacing:.04em;
+  color:rgba(23,23,27,.46);margin-top:5px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.lk-bottom{display:flex;flex-direction:column;align-items:center;padding-bottom:8px}
+.lk-hint{display:flex;flex-direction:column;align-items:center;gap:8px}
+.lk-hint i{
+  width:1px;height:24px;
+  background:linear-gradient(180deg,rgba(23,23,27,.3),rgba(23,23,27,0));
+  animation:lkB 2.6s var(--ease) infinite;
+}
+.lk-hint span{font-size:8.5px;letter-spacing:.3em;color:rgba(23,23,27,.34)}
+@keyframes lkB{0%,100%{transform:translateY(-5px);opacity:.35}50%{transform:translateY(5px);opacity:.95}}
+@media (max-height:760px){.lk-time{font-size:76px;margin-top:16px}.lk-card{padding:15px 18px}}

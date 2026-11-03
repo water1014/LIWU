@@ -291,7 +291,7 @@ HOME.Home = {
   data() {
     return {
       S, editing: false, press: null, drag: null, dragStyle: {}, scrolled: false, scrolling: false,
-      sheet: '', postForm: null, tick: null, suppressClick: false, pageTimer: 0, areaH: 0, appsH: 0,
+      sheet: '', postForm: null, tick: null, suppressClick: false, pageTimer: 0, areaH: 0, appsH: 0, rh: {},
       clock: '', dateText: '', _ct: 0
     };
   },
@@ -321,12 +321,12 @@ HOME.Home = {
     homePages() {
       const H = Math.max(240, this.areaH || 560);
       const RH = { postcard: 176, polaroid: 214, dialog: 164, music: 184, anniv: 148, level: 148, reading: 157, calendar: 199, diary: 140, clock: 130 };
-      const GAP = 12;
+      const GAP = 13;
       const rows = [];
       let cur = null;
       this.widgets.forEach((it) => {
         const wide = this.fullWidth.indexOf(it.kind) >= 0 || it.w >= 3;
-        const h = RH[it.kind] || 150;
+        const h = this.rh[it.kind] || RH[it.kind] || 150;
         if (wide) { rows.push({ h, items: [it] }); cur = null; }
         else if (cur && cur.items.length === 1) { cur.items.push(it); cur.h = Math.max(cur.h, h); cur = null; }
         else { cur = { h, items: [it] }; rows.push(cur); }
@@ -336,7 +336,7 @@ HOME.Home = {
       let page = [], used = 0, first = true;
       const cap = () => Math.max(180, H - (first ? this.appsH : 0));
       const flush = () => {
-        pages.push({ apps: first, items: page.reduce((a, r) => a.concat(r.items), []) });
+        pages.push({ apps: first, rows: page.slice(), items: page.reduce((a, r) => a.concat(r.items), []) });
         page = []; used = 0; first = false;
       };
       rows.forEach((r) => {
@@ -346,7 +346,19 @@ HOME.Home = {
         page.push(r);
       });
       if (page.length) flush();
-      if (!pages.length) pages.push({ apps: true, items: [] });
+
+      /* 均衡：末页太空就往回搬几行，别让最后只剩两张卡孤零零漂着 */
+      const hOf = (rs) => rs.reduce((s, r, i) => s + r.h + (i ? GAP : 0), 0);
+      for (let g = 0; g < 4 && pages.length > 1; g++) {
+        const last = pages[pages.length - 1], prev = pages[pages.length - 2];
+        if (hOf(last.rows) >= H * 0.72 || prev.rows.length < 3) break;
+        const row = prev.rows.pop();
+        last.rows.unshift(row);
+        if (hOf(last.rows) > H) { prev.rows.push(row); last.rows.shift(); break; }
+        [prev, last].forEach((p) => { p.items = p.rows.reduce((a, r) => a.concat(r.items), []); });
+      }
+
+      if (!pages.length) pages.push({ apps: true, rows: [], items: [] });
       return pages;
     },
     allApps() {
@@ -354,7 +366,9 @@ HOME.Home = {
       const all = Object.keys(APPS || {});
       const order = ['chat', 'us', 'book', 'memory', 'archive', 'music', 'books', 'time', 'store', 'notices', 'beauty', 'settings'];
       const sorted = order.filter((a) => all.includes(a)).concat(all.filter((a) => !order.includes(a)));
-      return sorted.filter((a) => !rm.includes(a));
+      const dk = this.dock || [];
+      // 一个功能只留一个入口：已经停在 dock 上的，不再重复出现在应用格里
+      return sorted.filter((a) => !rm.includes(a) && !dk.includes(a));
     },
     dock() { return this.layout.dock; },
     home() { return S.cfg.home; },
@@ -424,6 +438,21 @@ HOME.Home = {
       if (a) {
         const h = a.offsetHeight;
         if (h > 20 && Math.abs(h - this.appsH) > 2) this.appsH = h;
+      }
+      /* 用真实渲染高度校准分页：估算是粗的，卡片自己的高度才准 */
+      if (Date.now() - (this._rhT || 0) > 2500) { this._rhPass = 0; this._rhT = Date.now(); }
+      if ((this._rhPass || 0) < 4) {
+        const next = {};
+        document.querySelectorAll('.hp .cell[data-kind]').forEach((c) => {
+          const k = c.dataset.kind, h = c.offsetHeight;
+          if (h > 40) next[k] = Math.max(next[k] || 0, h);
+        });
+        let changed = false;
+        Object.keys(next).forEach((k) => {
+          if (!this.rh[k] || Math.abs(this.rh[k] - next[k]) > 3) { this.rh[k] = next[k]; changed = true; }
+        });
+        if (changed) { this._rhPass = (this._rhPass || 0) + 1; this.$forceUpdate(); }
+        else this._rhPass = 0;
       }
     },
     delWidget(it) {
@@ -605,9 +634,9 @@ HOME.Home = {
         </div>
       </div>
       <div class="pages" ref="pages" @scroll.passive="onScroll">
-        <div class="hp" v-for="(pg,pi) in homePages" :key="'hp'+pi" :data-page="pi">
+        <div class="hp" v-for="(pg,pi) in homePages" :key="'hp'+pi" :data-page="pi" :class="{top:pg.apps}">
           <section class="home-apps" v-if="pg.apps">
-            <div class="ha-head"><span class="ha-t">全部应用</span><span class="ha-n">{{allApps.length}}</span></div>
+            <div class="ha-head"><span class="ha-t">应用</span><span class="ha-n">{{allApps.length}}</span></div>
             <div class="ha-grid">
               <button v-for="a in allApps" :key="a" class="app" @click.stop="openApp(a)">
                 <span class="app-icon" :style="{'--tint':meta(a).tint}"><ico :name="meta(a).icon" :size="25" :sw="1.5"/></span>
@@ -617,7 +646,7 @@ HOME.Home = {
           </section>
 
           <div class="page-grid">
-            <div v-for="it in pg.items" :key="it.id" :data-id="it.id" :class="['cell', fullWidth.indexOf(it.kind)>=0||it.w>=3?'wide':'', drag&&drag.id===it.id?'dragging':'', drag&&drag.id!==it.id?'dim':'' ]"
+            <div v-for="it in pg.items" :key="it.id" :data-id="it.id" :data-kind="it.kind" :class="['cell', fullWidth.indexOf(it.kind)>=0||it.w>=3?'wide':'', drag&&drag.id===it.id?'dragging':'', drag&&drag.id!==it.id?'dim':'' ]"
                  :style="[cellStyle(it), dragStyleFor(it.id)]"
                  @pointerdown="downGrid($event,it,pi)">
               <template v-if="it.kind==='postcard'"><pc-card :item="it"/></template>

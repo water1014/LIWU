@@ -272,8 +272,36 @@ const VIEWS = {
 };
 
 const Root = {
-  data() { return { S, NAV, ready: false }; },
+  data() { return { S, NAV, ready: false, lock: false, lockUp: false, lockTime: '', lockDate: '', lockFrom: 0 }; },
+  mounted() {
+    this.lockTick();
+    this._lt = setInterval(() => this.lockTick(), 10000);
+    setTimeout(() => this.maybeLock(), 820);
+  },
+  beforeUnmount() { clearInterval(this._lt); },
   methods: {
+    lockTick() {
+      const d = new Date();
+      this.lockTime = U.pad(d.getHours()) + ':' + U.pad(d.getMinutes());
+      this.lockDate = (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 · 周' + '日一二三四五六'[d.getDay()];
+    },
+    maybeLock() {
+      if (S.cfg.ui.lock === false) return;
+      if (S.cfg.ui.lastUnlockDay === new Date().toDateString()) return;
+      this.lock = true;
+    },
+    lockDown(e) { this.lockFrom = e.clientY || 0; },
+    lockUp2(e) {
+      const dy = (e.clientY || 0) - this.lockFrom;
+      if (dy < -30 || this.lockFrom === 0) this.unlock();
+    },
+    unlock() {
+      if (!this.lock || this.lockUp) return;
+      this.lockUp = true;
+      S.cfg.ui.lastUnlockDay = new Date().toDateString();
+      saveCfg();
+      setTimeout(() => { this.lock = false; this.lockUp = false; }, 540);
+    },
     runToast() {
       const a = S.toast && S.toast.action;
       S.toast = null; clearTimeout(A._tt);
@@ -282,7 +310,13 @@ const Root = {
   },
   computed: {
     top() { return NAV.stack.length ? NAV.stack[NAV.stack.length - 1] : null; },
-    view() { return this.top ? VIEWS[this.top.name] : null; }
+    view() { return this.top ? VIEWS[this.top.name] : null; },
+    lockWall() {
+      const k = S.cfg.ui.wallpaperKey;
+      if (k && S.imgCache[k]) return { backgroundImage: 'url(' + S.imgCache[k] + ')' };
+      const p = (typeof WALLS !== 'undefined' && WALLS[S.cfg.ui.wallpaperPreset || 0]) || null;
+      return p ? { backgroundImage: p.css } : {};
+    }
   },
   template: `<div class="stage">
     <div class="brand">
@@ -298,6 +332,28 @@ const Root = {
         <div class="island"></div>
         <status-bar :hide-time="!top"></status-bar>
         <home-screen v-show="!top"></home-screen>
+
+        <div class="lock" v-if="lock" :class="{hide:lockUp}" :style="lockWall"
+             @pointerdown="lockDown" @pointerup="lockUp2">
+          <div class="lk-top">
+            <div class="lk-kicker">LIWU · PRIVATE</div>
+            <div class="lk-time">{{lockTime}}</div>
+            <div class="lk-date">{{lockDate}}</div>
+          </div>
+          <div class="lk-mid">
+            <div class="lk-card">
+              <div class="lk-row">
+                <span class="lk-k">together</span>
+                <span class="lk-v">DAY {{A.dayNo()}}</span>
+              </div>
+              <div class="lk-name">{{S.cfg.home.name || '未命名'}}</div>
+              <div class="lk-line">{{S.cfg.home.sign || '在这里写下你的签名。'}}</div>
+            </div>
+          </div>
+          <div class="lk-bottom">
+            <div class="lk-hint"><i></i><span>向上轻扫</span></div>
+          </div>
+        </div>
 
         <transition :name="NAV.dir==='push'?'pg':'pg-pop'">
           <component v-if="view" :is="view" :params="top.params" :key="top.key"></component>
