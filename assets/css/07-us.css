@@ -365,3 +365,10 @@
   color:rgba(23,23,27,.48);letter-spacing:.01em;
 }
 .us-index + .us-tail{margin-top:34px}
+
+/* 目录分组小标题 */
+.us-group {
+  font-size: 8.5px; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--muted-2); padding: 18px 2px 6px;
+}
+.us-index > .ui-group:first-child { padding-top: 2px; }

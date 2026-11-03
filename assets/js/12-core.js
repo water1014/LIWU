@@ -1043,7 +1043,7 @@ window.A = {
   },
 
   async addMemory(m) {
-    const rec = Object.assign({ id: U.uid('mem'), accountId: state.account.id, ts: Date.now() }, m);
+    const rec = Object.assign({ id: U.uid('mem'), accountId: state.account ? state.account.id : '', ts: Date.now() }, m);
     await DB.put('memories', JSON.parse(JSON.stringify(rec)));
     state.memories.push(rec);
     A.refreshSizes();

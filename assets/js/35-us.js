@@ -78,6 +78,34 @@ US.Page = {
         </div>
 
         <div class="us-index">
+          <div class="ui-group">only us · 只属于我们</div>
+
+          <div class="ui-item" @click="go('messages')">
+            <div class="ui-main">
+              <div class="ui-t">他的消息 <i>messages</i></div>
+              <div class="ui-d">早安晚安，想你的时候主动来找你</div>
+            </div>
+            <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+          </div>
+
+          <div class="ui-item" @click="go('deeptalk')">
+            <div class="ui-main">
+              <div class="ui-t">deeptalk <i>deep talk</i></div>
+              <div class="ui-d">像写信一样，一张一张说心里话</div>
+            </div>
+            <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+          </div>
+
+          <div class="ui-item" @click="go('secret')">
+            <div class="ui-main">
+              <div class="ui-t">秘密 <i>secret</i></div>
+              <div class="ui-d">四位锁，只给你的那一格</div>
+            </div>
+            <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+          </div>
+
+          <div class="ui-group">我们 · together</div>
+
           <div class="ui-item" @click="go('rooms')">
             <div class="ui-main">
               <div class="ui-t">小房间 <i>rooms</i></div>
