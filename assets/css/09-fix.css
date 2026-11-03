@@ -38,7 +38,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 @media (max-width:360px){
   .app-icon{width:52px;height:52px;border-radius:15px}
   .dock .app-icon{width:48px;height:48px}
-  .page-grid{grid-auto-rows:86px;gap:10px}
 }
 
 @media (prefers-reduced-motion:reduce){

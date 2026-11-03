@@ -96,11 +96,15 @@
 .pb{padding-bottom:32px}
 
 /* page transitions */
-.pg-enter-active,.pg-leave-active{transition:transform .36s var(--ease-out),opacity .3s var(--ease),border-radius .36s var(--ease)}
-.pg-enter-from{transform:translateX(102%);border-radius:26px 0 0 26px}
-.pg-leave-to{transform:translateX(-26%);opacity:.55}
-.pg-pop-enter-from{transform:translateX(-26%);opacity:.55}
-.pg-pop-leave-to{transform:translateX(102%);border-radius:26px 0 0 26px}
+.pg-enter-active,.pg-leave-active{
+  transition:transform .26s var(--ease-out),opacity .18s var(--ease);
+  will-change:transform,opacity;
+  backface-visibility:hidden;
+}
+.pg-enter-from{transform:translateX(100%)}
+.pg-leave-to{transform:translateX(-22%);opacity:.6}
+.pg-pop-enter-from{transform:translateX(-22%);opacity:.6}
+.pg-pop-leave-to{transform:translateX(100%)}
 .pg-enter-active .nav,.pg-leave-active .nav{transition:opacity .2s}
 
 /* ============================================================

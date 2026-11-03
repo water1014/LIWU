@@ -290,7 +290,7 @@ HOME.Home = {
     'anniv-card': HOME.Anniv, 'lv-card': HOME.Level, 'cal-card': HOME.Calendar, 'read-card': HOME.Reading, 'diary-card': HOME.Diary, 'clock-card': HOME.Clock },
   data() {
     return {
-      S, editing: false, press: null, drag: null, dragStyle: {},
+      S, editing: false, press: null, drag: null, dragStyle: {}, scrolled: false, scrolling: false,
       sheet: '', postForm: null, tick: null, suppressClick: false, pageTimer: 0,
       clock: '', dateText: '', _ct: 0
     };
@@ -298,6 +298,32 @@ HOME.Home = {
   computed: {
     layout() { return S.cfg.layout; },
     pages() { return this.layout.pages; },
+    /* 所有组件合成一条流：按页序 + 页内坐标排，应用图标统一进「全部应用」 */
+    widgets() {
+      const out = [];
+      this.pages.forEach((page) => {
+        page.filter((i) => i.kind !== 'app')
+          .sort((a, b) => (a.y - b.y) || (a.x - b.x))
+          .forEach((i) => out.push(i));
+      });
+      // 用户拖过顺序就按保存的顺序；否则按「半宽成对、全宽独占」自动排
+      const saved = S.cfg.widgetOrder || [];
+      if (saved.length) {
+        const pos = (id) => { const i = saved.indexOf(id); return i < 0 ? 999 : i; };
+        return out.slice().sort((a, b) => pos(a.id) - pos(b.id));
+      }
+      const ORDER = ['postcard', 'polaroid', 'dialog', 'music', 'anniv', 'level', 'reading', 'calendar', 'diary', 'clock'];
+      const rank = (k) => { const i = ORDER.indexOf(k); return i < 0 ? 99 : i; };
+      return out.sort((a, b) => rank(a.kind) - rank(b.kind));
+    },
+    fullWidth() { return ['postcard', 'diary', 'clock', 'calendar']; },
+    allApps() {
+      const rm = S.cfg.removedApps || [];
+      const all = Object.keys(APPS || {});
+      const order = ['chat', 'us', 'book', 'memory', 'archive', 'music', 'books', 'time', 'store', 'notices', 'beauty', 'settings'];
+      const sorted = order.filter((a) => all.includes(a)).concat(all.filter((a) => !order.includes(a)));
+      return sorted.filter((a) => !rm.includes(a));
+    },
     dock() { return this.layout.dock; },
     home() { return S.cfg.home; },
     dayNo() { return A.dayNo(); },
@@ -328,10 +354,8 @@ HOME.Home = {
     },
     meta(id) { return window.appMeta(id); },
     cellStyle(it) {
-      return {
-        gridColumn: (it.x + 1) + ' / span ' + it.w,
-        gridRow: (it.y + 1) + ' / span ' + it.h
-      };
+      const full = this.fullWidth.indexOf(it.kind) >= 0 || it.w >= 3;
+      return { gridColumn: 'span ' + (full ? 2 : 1) };
     },
     dragStyleFor(id, appId) {
       if (!this.drag) return {};
@@ -340,7 +364,19 @@ HOME.Home = {
     },
     onScroll() {
       const el = this.$refs.pages;
-      S.homePage = Math.round(el.scrollLeft / Math.max(1, el.clientWidth));
+      if (!el) return;
+      const sc = el.scrollTop > 14;
+      if (sc !== this.scrolled) this.scrolled = sc;
+      // 滚动期间关掉毛玻璃，停下 130ms 后恢复
+      if (!this.scrolling) this.scrolling = true;
+      clearTimeout(this._st);
+      this._st = setTimeout(() => { this.scrolling = false; }, 130);
+      S.homePage = 0;
+    },
+    delWidget(it) {
+      this.pages.forEach((p) => { const i = p.findIndex((x) => x.id === it.id); if (i >= 0) p.splice(i, 1); });
+      S.layoutKey++;
+      saveCfg();
     },
     gotoPage(i) {
       const el = this.$refs.pages;
@@ -378,20 +414,12 @@ HOME.Home = {
         p.moved = true;
         clearTimeout(p.timer);
       }
-      if (!this.drag && p.moved && this.editing && dist > 7) {
+      if (!this.drag && p.moved && (this.editing || p.long) && dist > 7) {
         this.drag = Object.assign({ dx: 0, dy: 0 }, p.it ? { id: p.it.id } : { appId: p.appId });
       }
       if (this.drag) {
         this.drag.dx = dx; this.drag.dy = dy;
-        this.edgeFlip(e.clientX);
       }
-    },
-    edgeFlip(x) {
-      const scr = document.querySelector('.screen').getBoundingClientRect();
-      const now = Date.now();
-      if (now - this.pageTimer < 620) return;
-      if (x < scr.left + 34 && S.homePage > 0) { S.homePage--; this.gotoPage(S.homePage); this.pageTimer = now; this.drag.dx += scr.width * 0.5; }
-      else if (x > scr.right - 34 && S.homePage < this.pages.length - 1) { S.homePage++; this.gotoPage(S.homePage); this.pageTimer = now; this.drag.dx -= scr.width * 0.5; }
     },
     up(e) {
       window.removeEventListener('pointermove', this.move);
@@ -407,83 +435,30 @@ HOME.Home = {
     },
     drop(x, y) {
       const d = this.drag;
-      const el = document.elementFromPoint(x, y);
-      const grid = el && el.closest ? el.closest('.page-grid') : null;
-      const dockEl = el && el.closest ? el.closest('.dock') : null;
-      const p = this.press;
-
-      if (dockEl) {
-        if (d.appId) return; // already in dock
-        const page = this.pages[d.page];
-        const idx = page.findIndex((i) => i.id === d.id);
-        if (idx < 0) return;
-        const item = page[idx];
-        if (item.kind !== 'app') { this.resetDrag(); return; }
-        page.splice(idx, 1);
-        if (!S.cfg.layout.dock.includes(item.app)) S.cfg.layout.dock.push(item.app);
-        this.layoutKey = Date.now();
-        S.layoutKey++;
-        return;
-      }
-
-      if (!grid) { this.resetDrag(); return; }
-      const rect = grid.getBoundingClientRect();
-      const pi = Number(grid.dataset.page);
-      const gap = rect.width * 0.0135, rowGap = rect.height * 0.0135;
-      const cellW = (rect.width - gap * 3) / 4;
-      const cellH = (rect.height - rowGap * 5) / 6;
-      let col = Math.floor((x - rect.left) / (cellW + gap));
-      let row = Math.floor((y - rect.top) / (cellH + rowGap));
-      const target = d.it || (p && p.it);
-      const w = target ? target.w : 1, h = target ? target.h : 1;
-      col = Math.max(0, Math.min(4 - w, col));
-      row = Math.max(0, Math.min(6 - h, row));
-
-      if (d.appId) {
-        // dock -> grid
-        const appId = d.appId;
-        S.cfg.layout.dock = S.cfg.layout.dock.filter((a) => a !== appId);
-        const item = { id: U.uid('app'), x: col, y: row, w: 1, h: 1, kind: 'app', app: appId };
-        this.placeWithCollision(pi, item, null);
-        S.cfg.removedApps = (S.cfg.removedApps || []).filter((a) => a !== appId);
-        return;
-      }
-      if (!target) return;
-      if (d.page === pi) {
-        this.placeWithCollision(pi, target, target.x + ',' + target.y);
-      } else {
-        const oldPage = this.pages[d.page];
-        oldPage.splice(oldPage.indexOf(target), 1);
-        this.placeWithCollision(pi, target, null);
-      }
-    },
-    placeWithCollision(pi, item, oldPos) {
-      const page = this.pages[pi];
-      if (!page.includes(item)) page.push(item);
-      const rect = { x: item.x, y: item.y, w: item.w, h: item.h };
-      const hits = page.filter((o) => o.id !== item.id && o.x < rect.x + rect.w && o.x + o.w > rect.x && o.y < rect.y + rect.h && o.y + o.h > rect.y);
-      if (hits.length) {
-        if (hits.length === 1 && hits[0].w === item.w && hits[0].h === item.h && oldPos) {
-          const [ox, oy] = oldPos.split(',').map(Number);
-          hits[0].x = ox; hits[0].y = oy;
-        } else {
-          hits.forEach((h) => {
-            const f = this.findSpot(pi, h.w, h.h, item.id, hits);
-            h.x = f.x; h.y = f.y;
-          });
-        }
-      }
+      if (!d || !d.id) { this.resetDrag(); return; }
+      const cells = Array.from(document.querySelectorAll('.page-grid .cell'));
+      const list = this.widgets;
+      const from = list.findIndex((i) => i.id === d.id);
+      if (from < 0 || !cells.length) { this.resetDrag(); return; }
+      // 落点最近的格子
+      let to = from, best = 1e9;
+      cells.forEach((c, i) => {
+        const r = c.getBoundingClientRect();
+        const dist = Math.abs(y - (r.top + r.height / 2)) + Math.abs(x - (r.left + r.width / 2)) * 0.35;
+        if (dist < best) { best = dist; to = i; }
+      });
+      if (to === from) { this.resetDrag(); return; }
+      const ids = list.map((i) => i.id);
+      const [moved] = ids.splice(from, 1);
+      ids.splice(to, 0, moved);
+      S.cfg.widgetOrder = ids;
       S.layoutKey++;
-    },
-    findSpot(pi, w, h, skipId, alsoSkip) {
-      const page = this.pages[pi];
-      const conflict = (x, y) => page.some((o) => o.id !== skipId && !(alsoSkip || []).includes(o) &&
-        x < o.x + o.w && x + w > o.x && y < o.y + o.h && y + h > o.y);
-      for (let y = 0; y < 8; y++) for (let x = 0; x <= 4 - w; x++) if (!conflict(x, y)) return { x, y };
-      return { x: 0, y: 0 };
+      saveCfg();
+      this.resetDrag();
     },
     resetDrag() { this.drag = null; },
     /* ---------- app / widget actions ---------- */
+    openApp(id) { if (this.editing) return; A.openApp(id); },
     onAppClick(item) {
       if (this.suppressClick || this.editing) return;
       A.openApp(item.app);
@@ -542,11 +517,12 @@ HOME.Home = {
     resetPage() {
       if (!confirm('恢复默认桌面布局？自定义位置会丢失。')) return;
       S.cfg.layout = { pages: [JSON.parse(JSON.stringify(HOME.defaultPage())), []], dock: ['store', 'notices', 'beauty', 'settings'] };
+      S.cfg.widgetOrder = [];
       S.layoutKey++;
       saveCfg();
     }
   },
-  template: `<div class="home" :class="{editing, wallimg:hasWall}" id="home-stage">
+  template: `<div class="home" :class="{editing, wallimg:hasWall, scrolled, scrolling}" id="home-stage">
     <div class="wallpaper" :class="{tint:!hasWall,noise:!hasWall}" :style="wallStyle"></div>
     <div class="home-scrim"></div>
 
@@ -569,11 +545,23 @@ HOME.Home = {
           <div class="hc-n">{{dayNo}}</div>
         </div>
       </div>
-      <div class="pages" ref="pages" @scroll="onScroll">
-        <div class="page-grid" v-for="(page,pi) in pages" :key="pi" :data-page="pi">
-          <div v-for="it in page" :key="it.id" :class="['cell', drag&&drag.id===it.id?'dragging':'', drag&&drag.id!==it.id?'dim':'' ]"
+      <div class="pages" ref="pages" @scroll.passive="onScroll">
+
+        <section class="home-apps">
+          <div class="ha-head"><span class="ha-t">全部应用</span><span class="ha-n">{{allApps.length}}</span></div>
+          <div class="ha-grid">
+            <button v-for="a in allApps" :key="a" class="app" @click.stop="openApp(a)">
+              <span class="app-icon" :style="{'--tint':meta(a).tint}"><ico :name="meta(a).icon" :size="25" :sw="1.5"/></span>
+              <span class="app-label">{{meta(a).name}}</span>
+            </button>
+          </div>
+        </section>
+
+        <div class="ha-head ha-sub"><span class="ha-t">今天</span></div>
+        <div class="page-grid">
+          <div v-for="it in widgets" :key="it.id" :class="['cell', fullWidth.indexOf(it.kind)>=0||it.w>=3?'wide':'', drag&&drag.id===it.id?'dragging':'', drag&&drag.id!==it.id?'dim':'' ]"
                :style="[cellStyle(it), dragStyleFor(it.id)]"
-               @pointerdown="downGrid($event,it,pi)">
+               @pointerdown="downGrid($event,it,0)">
             <template v-if="it.kind==='postcard'"><pc-card :item="it"/></template>
             <template v-else-if="it.kind==='polaroid'"><pol-card :item="it"/></template>
             <template v-else-if="it.kind==='music'"><music-card :item="it"/></template>
@@ -584,16 +572,11 @@ HOME.Home = {
             <template v-else-if="it.kind==='reading'"><read-card :item="it"/></template>
             <template v-else-if="it.kind==='diary'"><diary-card :item="it"/></template>
             <template v-else-if="it.kind==='clock'"><clock-card :item="it"/></template>
-            <template v-else>
-              <button class="app" @click.stop="onAppClick(it)">
-                <span class="app-icon" :style="{'--tint':meta(it.app).tint}"><ico :name="meta(it.app).icon" :size="25" :sw="1.5"/></span>
-                <span class="app-label">{{meta(it.app).name}}</span>
-              </button>
-              <button v-if="editing" class="del-badge" @click.stop="delApp(it,pi)"><ico name="x" :size="10" :sw="2.6"/></button>
-            </template>
+            <button v-if="editing" class="del-badge" @click.stop="delWidget(it)"><ico name="x" :size="10" :sw="2.6"/></button>
             <div v-if="editing" class="widget-edit"></div>
           </div>
         </div>
+
       </div>
 
       <div class="home-foot">

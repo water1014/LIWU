@@ -232,8 +232,8 @@
   .home-foot{padding:8px 0 14px}
 }
 @media (max-width:360px){
-  .page-grid{grid-auto-rows:minmax(0,1fr);gap:8px}
-  .app-icon{width:50px;height:50px}
+  .page-grid{gap:10px}
+  .ha-grid .app-icon{width:48px;height:48px}
 }
 
 /* ---------- 8. 聊天室 / 朋友圈：把暖调拉回中性灰 ---------- */
@@ -251,3 +251,137 @@
 .mo-card{border-radius:20px;border-color:rgba(255,255,255,.8);box-shadow:var(--shadow-card)}
 .mo-likes,.mo-cmt{background:#F5F4F1}
 .me-cover{background-image:radial-gradient(120% 100% at 12% 0%,#E4E3DE 0%,rgba(228,227,222,0) 62%),linear-gradient(150deg,#D2D1CC,#969B99)}
+
+/* ============================================================
+   9. 主屏：纵向滚动（替代横向分页）
+   —— 解决"组件被压扁 / 页面被截断 / 新应用看不到"
+   ============================================================ */
+.home-inner{padding:calc(var(--status-h) + 2px) 18px 0}
+
+/* 头部时钟：滚动时收缩 */
+.home-clock{
+  flex:none;display:flex;align-items:flex-end;justify-content:space-between;
+  padding:0 2px 14px;pointer-events:none;transform-origin:50% 0;
+  transition:opacity .22s var(--ease),transform .26s var(--ease),height .26s var(--ease),padding .26s var(--ease);
+}
+.home.scrolled .home-clock{
+  opacity:.0;transform:translateY(-16px) scale(.94);
+  height:6px;padding-bottom:0;
+}
+
+/* 滚动容器 */
+.pages{
+  flex:1;min-height:0;display:block;
+  overflow-x:hidden;overflow-y:auto;
+  scroll-snap-type:none;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain;
+  scrollbar-width:none;
+  padding:2px 0 4px;
+  will-change:scroll-position;
+}
+/* 顶部渐隐用固定浮层，避免滚动时每帧重算 mask */
+.home-inner:before{
+  content:"";position:absolute;left:0;right:0;top:calc(var(--status-h) - 2px);height:18px;
+  background:linear-gradient(180deg,rgba(238,238,236,.55),rgba(238,238,236,0));
+  pointer-events:none;z-index:2;opacity:0;transition:opacity .2s var(--ease);
+}
+.home.scrolled .home-inner:before{opacity:1}
+.pages::-webkit-scrollbar{display:none}
+
+/* 每组：高度由内容撑开，行高固定 → 组件按行跨列，永不压扁 */
+.page-grid{
+  min-width:0;width:100%;height:auto;
+  display:grid;grid-template-columns:repeat(2,1fr);
+  grid-template-rows:none;grid-auto-rows:auto;
+  gap:12px;
+  align-items:start;padding:0;margin:0 0 20px;
+  scroll-snap-align:none;
+}
+.cell.wide{grid-column:span 2}
+.page-grid:empty{display:none;margin:0}
+.page-grid + .page-grid{margin-top:0}
+
+.cell{min-height:0;min-width:0}
+
+/* 组件内部：不再被 flex 压扁 */
+.cell > .widget{height:auto}
+.polaroid,.pc,.dlg,.music,.glassw{min-height:0}
+
+/* ---------- 全部应用 ---------- */
+.home-apps{margin:0 0 2px;padding-top:2px}
+.ha-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 4px 10px;
+}
+.ha-sub{margin-top:10px;padding:8px 4px 16px}
+.ha-head .ha-t{
+  font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(23,23,27,.42);font-weight:600;
+}
+.ha-head .ha-n{
+  font-size:10px;letter-spacing:.06em;color:rgba(23,23,27,.34);
+  font-variant-numeric:tabular-nums;
+}
+.ha-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:13px 4px;justify-items:center;
+}
+.ha-grid .app{height:auto;gap:6px}
+.ha-grid .app-icon{width:51px;height:51px;border-radius:16px}
+
+/* 底部：去掉小圆点，dock 前留一层渐隐 */
+.dots-nav{display:none}
+.home-foot{padding:10px 0 20px;gap:0}
+
+/* ---------- 性能：图标不再实时模糊 ---------- */
+.app-icon{
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  background:linear-gradient(156deg,rgba(255,255,255,.86),rgba(255,255,255,.6));
+  box-shadow:0 10px 22px -18px rgba(20,20,24,.7),inset 0 1px 0 rgba(255,255,255,.95);
+}
+.app-icon:before{opacity:.3}
+
+/* 滚动中暂停卡片毛玻璃（大块 blur 是掉帧主因） */
+.home.scrolling .glassw,
+.home.scrolling .dlg,
+.home.scrolling .music,
+.home.scrolling .pc,
+.home.scrolling .dock{
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+.home.scrolling .glassw{background:rgba(252,252,250,.94)}
+.home.scrolling .dlg,
+.home.scrolling .music{background:rgba(250,250,248,.95)}
+.home.scrolling .dock{background:rgba(250,250,248,.9)}
+
+
+/* 组件自然高度：内容说了算，不再被格行压扁 */
+.cell > .widget.pc{min-height:172px}
+.cell > .widget.polaroid{height:210px}
+.cell > .widget.dlg{min-height:160px}
+.cell > .widget.music{min-height:180px}
+.cell > .widget.glassw{min-height:144px}
+.cell > .widget.diaryw{min-height:136px}
+
+/* 编辑态：组件的移除按钮贴在右上角 */
+.cell .del-badge{top:8px;left:auto;right:8px}
+
+.ha-grid .app-label{font-size:9px}
+.home-apps{margin-bottom:0}
+
+/* 明信片底色拉回中性，和灰壁纸不打架 */
+.pc{--pc-base:#F0EFEC}
+.pc-fade{background:linear-gradient(180deg,rgba(241,240,237,0) 0%,var(--pc-base) 92%)}
+
+.pc-bg.empty{background:linear-gradient(150deg,#EDECE9,#DFDDD8)}
+
+/* 编辑态：顶部操作条不压标题 */
+.home.editing .pages{padding-top:46px}
+.edit-bar{top:calc(var(--status-h) - 6px);align-items:center}
+.edit-bar .chip,.edit-bar .btn{-webkit-backdrop-filter:none;backdrop-filter:none}
+.edit-bar .chip{background:rgba(255,255,255,.9)!important;border:1px solid rgba(255,255,255,.8)}
+
+/* 滚动中关模糊时用过渡，避免闪一下 */
+.glassw,.dlg,.music,.dock{transition:background-color .18s linear,backdrop-filter .18s linear}
+.home.scrolling .glassw,.home.scrolling .dlg,.home.scrolling .music,.home.scrolling .dock{transition:none}
