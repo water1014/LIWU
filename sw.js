@@ -1,5 +1,5 @@
 /* 离线壳：静态资源 stale-while-revalidate，页面导航失败时回退 index */
-const CACHE = 'liwu-v6';
+const CACHE = 'liwu-v7';
 const SHELL = [
   './', './index.html',
   './assets/css/01-tokens.css', './assets/css/02-shell.css', './assets/css/03-chat.css',

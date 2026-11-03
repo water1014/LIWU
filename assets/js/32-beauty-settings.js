@@ -200,6 +200,11 @@ SET.Page = {
               <div class="row-main"><div class="row-title">{{S.account?S.account.name:'未登录'}}</div><div class="row-sub">{{S.account?'@'+S.account.username:'打开聊天登录'}}</div></div>
               <span class="chip">{{S.account?S.account.gender:''}}</span>
             </div>
+            <div class="row tap" @click="A.go('quota')">
+              <div class="row-ico"><ico name="grid" :size="15"/></div>
+              <div class="row-main"><div class="row-title">额度</div><div class="row-sub">请求次数 · 七天用量 · 还能用几天</div></div>
+              <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+            </div>
             <div class="row tap" @click="A.go('beauty')">
               <div class="row-ico"><ico name="palette" :size="15"/></div>
               <div class="row-main"><div class="row-title">桌面美化</div><div class="row-sub">背景、字体、全局 CSS/JS</div></div>

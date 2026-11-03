@@ -156,6 +156,7 @@ CHAT.Home = {
       return [...S.chars].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'zh'));
     },
     me() { return S.account || {}; },
+    ms() { return A.monthStats(0); },
     stats() {
       return { friends: this.chats.length, chars: S.chars.length, mem: S.memories.length };
     },
@@ -327,33 +328,21 @@ CHAT.Home = {
                 <div class="row-main"><div class="row-title">世界书</div><div class="row-sub">{{S.worldbooks.length}} 本设定集</div></div>
                 <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
               </div>
-            </div>
-            <div class="section-head" style="padding:2px 22px 8px"><span class="section-title">我们 · 生活</span><span class="section-act" @click="A.go('us')">全部</span></div>
-            <div class="group" style="margin:0 18px 12px">
-              <div class="row tap" @click="A.go('us')">
-                <div class="row-ico" style="background:#F5EEF0;color:#8B7480"><ico name="heart" :size="15"/></div>
-                <div class="row-main"><div class="row-title">我们</div><div class="row-sub">第 {{A.dayNo()}} 天 · 胶囊、词云、小房间</div></div>
-                <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
-              </div>
-              <div class="row tap" @click="A.go('music')">
-                <div class="row-ico" style="background:#F1EEE9;color:#8A7E6C"><ico name="music" :size="15"/></div>
-                <div class="row-main"><div class="row-title">音乐</div><div class="row-sub">{{S.cfg.life.music.tracks.length}} 首 · 只在这个房间里响</div></div>
-                <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
-              </div>
-              <div class="row tap" @click="A.go('books')">
-                <div class="row-ico" style="background:#EEF1EA;color:#6D7A66"><ico name="bookmark" :size="15"/></div>
-                <div class="row-main"><div class="row-title">书架</div><div class="row-sub">一起读的书、进度与摘句</div></div>
-                <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
-              </div>
-              <div class="row tap" @click="A.go('time')">
-                <div class="row-ico" style="background:#F4EFE8;color:#8A7458"><ico name="clock" :size="15"/></div>
-                <div class="row-main"><div class="row-title">时光</div><div class="row-sub">纪念日与只给自己看的日记</div></div>
-                <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
-              </div>
               <div class="row tap" @click="A.go('stickers')">
                 <div class="row-ico" style="background:#F2EEF3;color:#7C6C86"><ico name="smile" :size="15"/></div>
                 <div class="row-main"><div class="row-title">表情库</div><div class="row-sub">{{(S.cfg.stickers||[]).length}} 张 · AI 也能用</div></div>
                 <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+              </div>
+            </div>
+            <div class="card" style="margin:14px 18px 0;padding:16px 16px 14px" @click="A.go('monthly')">
+              <div class="f" style="justify-content:space-between;align-items:baseline">
+                <span style="font-size:9.5px;letter-spacing:.2em;color:var(--muted-2);font-weight:600">THIS MONTH</span>
+                <span style="font-size:11px;color:var(--muted-2)">{{ms.label}}</span>
+              </div>
+              <div class="f" style="margin-top:14px;align-items:flex-end">
+                <div style="flex:1"><div style="font-size:24px;font-weight:300;letter-spacing:-.02em">{{ms.total}}</div><div style="font-size:10.5px;color:var(--muted-2);margin-top:3px">条消息</div></div>
+                <div style="flex:1"><div style="font-size:24px;font-weight:300;letter-spacing:-.02em">{{ms.active}}</div><div style="font-size:10.5px;color:var(--muted-2);margin-top:3px">天有聊</div></div>
+                <div style="flex:1"><div style="font-size:24px;font-weight:300;letter-spacing:-.02em">{{ms.diary}}</div><div style="font-size:10.5px;color:var(--muted-2);margin-top:3px">篇日记</div></div>
               </div>
             </div>
             <div style="height:20px"></div>

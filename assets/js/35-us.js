@@ -77,81 +77,37 @@ US.Page = {
           </div>
         </div>
 
-        <div class="us-sec">
-          <div class="us-sec-h"><b>我们</b><i>us</i></div>
-          <div class="group">
-            <div class="row tap" @click="go('time')">
-              <div class="row-ico" style="background:#F4EFE8;color:#8A7458"><ico name="clock" :size="15"/></div>
-              <div class="row-main"><div class="row-title">纪念日</div><div class="row-sub">每一个日子都有一颗心</div></div>
-              <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+        <div class="us-index">
+          <div class="ui-item" @click="go('rooms')">
+            <div class="ui-main">
+              <div class="ui-t">小房间 <i>rooms</i></div>
+              <div class="ui-d">{{openTodos ? '还有 ' + openTodos + ' 件没做完，他都知道' : '待办、备忘、心愿，还有每天的打卡'}}</div>
             </div>
-            <div class="row tap" @click="go('capsule')">
-              <div class="row-ico" style="background:#EFEDF3;color:#7A7186"><ico name="archive" :size="15"/></div>
-              <div class="row-main"><div class="row-title">时间胶囊</div><div class="row-sub">{{lockedCaps.length ? lockedCaps.length + ' 封还封着' : '写给以后的我们'}}</div></div>
-              <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
-            </div>
-            <div class="row tap" @click="go('words')">
-              <div class="row-ico" style="background:#EDF1EC;color:#71806B"><ico name="chat" :size="15"/></div>
-              <div class="row-main"><div class="row-title">词云</div><div class="row-sub">我们最常说的那些话</div></div>
-              <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
-            </div>
-            <div class="row tap" @click="go('monthly')">
-              <div class="row-ico" style="background:#F2EFF2;color:#7E7480"><ico name="calendar" :size="15"/></div>
-              <div class="row-main"><div class="row-title">月度回顾</div><div class="row-sub">这个月，和一封写给你的信</div></div>
-              <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
-            </div>
+            <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
           </div>
-        </div>
 
-        <div class="us-sec">
-          <div class="us-sec-h"><b>小房间</b><i>rooms</i></div>
-          <div class="group">
-            <div class="row tap" @click="go('rooms')">
-              <div class="row-ico" style="background:#F1EFE9;color:#7C7666"><ico name="check" :size="15"/></div>
-              <div class="row-main">
-                <div class="row-title">待办</div>
-                <div class="row-sub">{{openTodos ? '还有 ' + openTodos + ' 件没做完' : '今天的事都做完了'}}</div>
-              </div>
-              <span class="us-badge" v-if="openTodos">{{openTodos}}</span>
-              <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+          <div class="ui-item" @click="go('capsule')">
+            <div class="ui-main">
+              <div class="ui-t">时间胶囊 <i>capsule</i></div>
+              <div class="ui-d">{{lockedCaps.length ? lockedCaps.length + ' 封还封着，到日子才能拆' : '写给以后的我们，封起来'}}</div>
             </div>
-            <div class="row tap" @click="go('rooms',{tab:'wish'})">
-              <div class="row-ico" style="background:#F5EEF0;color:#8B7480"><ico name="heart" :size="15"/></div>
-              <div class="row-main">
-                <div class="row-title">心愿单</div>
-                <div class="row-sub">{{wishes.length ? '实现 ' + wishDone + ' / ' + wishes.length : '两个人的心愿，一件一件实现'}}</div>
-              </div>
-              <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
-            </div>
-            <div class="row tap" @click="check">
-              <div class="row-ico" style="background:#EEF1F3;color:#6E7A84"><ico name="feather" :size="15"/></div>
-              <div class="row-main">
-                <div class="row-title">今天的打卡</div>
-                <div class="row-sub">{{checked ? '已经打过 · 连续 ' + streak + ' 天' : '点一下，今天就算来过了'}}</div>
-              </div>
-              <span class="us-dot" :class="{on:checked}"></span>
-            </div>
+            <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
           </div>
-        </div>
 
-        <div class="us-sec">
-          <div class="us-sec-h"><b>我的</b><i>mine</i></div>
-          <div class="group">
-            <div class="row tap" @click="go('quota')">
-              <div class="row-ico" style="background:#F0F1EC;color:#767F6C"><ico name="grid" :size="15"/></div>
-              <div class="row-main"><div class="row-title">额度</div><div class="row-sub">{{usage.n || 0}} 次请求 · 七天用量</div></div>
-              <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+          <div class="ui-item" @click="go('words')">
+            <div class="ui-main">
+              <div class="ui-t">词云 <i>words</i></div>
+              <div class="ui-d">我们最常说的那些话</div>
             </div>
-            <div class="row tap" @click="go('stickers')">
-              <div class="row-ico" style="background:#F2EEF3;color:#7C6C86"><ico name="smile" :size="15"/></div>
-              <div class="row-main"><div class="row-title">表情库</div><div class="row-sub">{{(S.cfg.stickers||[]).length}} 张 · AI 也能用</div></div>
-              <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+            <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+          </div>
+
+          <div class="ui-item" @click="go('monthly')">
+            <div class="ui-main">
+              <div class="ui-t">月度回顾 <i>monthly</i></div>
+              <div class="ui-d">这个月说过多少话，还有一封他写的信</div>
             </div>
-            <div class="row tap" @click="go('memories')">
-              <div class="row-ico" style="background:#F4EFE8;color:#8A7A62"><ico name="memory" :size="15"/></div>
-              <div class="row-main"><div class="row-title">记忆</div><div class="row-sub">{{memCount}} 段，折好放着</div></div>
-              <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
-            </div>
+            <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
           </div>
         </div>
 

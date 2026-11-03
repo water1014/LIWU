@@ -269,38 +269,41 @@
   height:6px;padding-bottom:0;
 }
 
-/* 滚动容器 */
+/* 左右翻页容器 */
 .pages{
-  flex:1;min-height:0;display:block;
-  overflow-x:hidden;overflow-y:auto;
-  scroll-snap-type:none;
+  flex:1;min-height:0;display:flex;align-items:stretch;
+  overflow-x:auto;overflow-y:hidden;
+  scroll-snap-type:x mandatory;
   -webkit-overflow-scrolling:touch;
-  overscroll-behavior-y:contain;
+  overscroll-behavior-x:contain;
   scrollbar-width:none;
-  padding:2px 0 4px;
-  will-change:scroll-position;
+  padding:0;
 }
-/* 顶部渐隐用固定浮层，避免滚动时每帧重算 mask */
-.home-inner:before{
-  content:"";position:absolute;left:0;right:0;top:calc(var(--status-h) - 2px);height:18px;
-  background:linear-gradient(180deg,rgba(238,238,236,.55),rgba(238,238,236,0));
-  pointer-events:none;z-index:2;opacity:0;transition:opacity .2s var(--ease);
-}
-.home.scrolled .home-inner:before{opacity:1}
 .pages::-webkit-scrollbar{display:none}
 
-/* 每组：高度由内容撑开，行高固定 → 组件按行跨列，永不压扁 */
+/* 一页 = 一屏，内容按高度自动分页，绝不溢出 */
+.hp{
+  flex:0 0 100%;width:100%;height:100%;
+  scroll-snap-align:start;scroll-snap-stop:always;
+  display:flex;flex-direction:column;
+  padding:2px 0 6px;
+  box-sizing:border-box;
+}
+.hp > .page-grid{flex:1;min-height:0;margin-top:5px;overflow-y:auto;overscroll-behavior-y:contain;scrollbar-width:none}
+.hp > .page-grid::-webkit-scrollbar{display:none}
+
+/* 页内：两列，行高由内容决定 → 组件不会被压扁 */
 .page-grid{
   min-width:0;width:100%;height:auto;
   display:grid;grid-template-columns:repeat(2,1fr);
   grid-template-rows:none;grid-auto-rows:auto;
   gap:12px;
-  align-items:start;padding:0;margin:0 0 20px;
+  align-content:start;align-items:start;
+  padding:0;margin:0;
   scroll-snap-align:none;
 }
 .cell.wide{grid-column:span 2}
 .page-grid:empty{display:none;margin:0}
-.page-grid + .page-grid{margin-top:0}
 
 .cell{min-height:0;min-width:0}
 
@@ -312,7 +315,7 @@
 .home-apps{margin:0 0 2px;padding-top:2px}
 .ha-head{
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 4px 10px;
+  padding:0 4px 9px;
 }
 .ha-sub{margin-top:8px;padding:8px 4px 20px}
 .ha-head .ha-t{
@@ -325,14 +328,16 @@
 }
 .ha-grid{
   display:grid;grid-template-columns:repeat(4,1fr);
-  gap:13px 4px;justify-items:center;
+  gap:11px 4px;justify-items:center;
 }
 .ha-grid .app{height:auto;gap:6px}
-.ha-grid .app-icon{width:51px;height:51px;border-radius:16px}
+.ha-grid .app-icon{width:48px;height:48px;border-radius:15px}
 
-/* 底部：去掉小圆点，dock 前留一层渐隐 */
-.dots-nav{display:none}
-.home-foot{padding:10px 0 20px;gap:0}
+/* 底部页点 */
+.dots-nav{display:flex;justify-content:center;gap:6px;padding:0 0 10px}
+.dots-nav i{width:5px;height:5px;border-radius:50%;background:rgba(23,23,27,.16);transition:all .22s var(--ease)}
+.dots-nav i.on{width:14px;border-radius:3px;background:rgba(23,23,27,.5)}
+.home-foot{padding:8px 0 18px;gap:0}
 
 /* ---------- 性能：图标不再实时模糊 ---------- */
 .app-icon{
@@ -376,9 +381,8 @@
 
 .pc-bg.empty{background:linear-gradient(150deg,#E7E6E2,#D5D3CE)}
 
-/* 编辑态：顶部操作条不压标题 */
-.home.editing .pages{padding-top:46px}
-.edit-bar{top:calc(var(--status-h) - 6px);align-items:center}
+/* 编辑态：操作条放到底部，别抢第一页的标题和翻页高度 */
+.edit-bar{top:auto;bottom:104px;padding:0 22px;justify-content:flex-end;align-items:center}
 .edit-bar .chip,.edit-bar .btn{-webkit-backdrop-filter:none;backdrop-filter:none}
 .edit-bar .chip{background:rgba(255,255,255,.9)!important;border:1px solid rgba(255,255,255,.8)}
 
@@ -392,3 +396,6 @@
 /* 分组标题加一条延伸细线，和卡片分层 */
 .ha-sub{justify-content:flex-start;gap:10px}
 .ha-sub:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(23,23,27,.14),rgba(23,23,27,.03));border-radius:1px}
+
+/* 编辑态：时钟只隐身，不腾位置（否则分页会重算，拖拽会错位） */
+.home-clock.ghost{opacity:0}

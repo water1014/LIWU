@@ -291,7 +291,7 @@ HOME.Home = {
   data() {
     return {
       S, editing: false, press: null, drag: null, dragStyle: {}, scrolled: false, scrolling: false,
-      sheet: '', postForm: null, tick: null, suppressClick: false, pageTimer: 0,
+      sheet: '', postForm: null, tick: null, suppressClick: false, pageTimer: 0, areaH: 0, appsH: 0,
       clock: '', dateText: '', _ct: 0
     };
   },
@@ -312,11 +312,43 @@ HOME.Home = {
         const pos = (id) => { const i = saved.indexOf(id); return i < 0 ? 999 : i; };
         return out.slice().sort((a, b) => pos(a.id) - pos(b.id));
       }
-      const ORDER = ['postcard', 'polaroid', 'dialog', 'music', 'anniv', 'level', 'reading', 'calendar', 'diary', 'clock'];
+      const ORDER = ['postcard', 'dialog', 'anniv', 'level', 'polaroid', 'music', 'reading', 'calendar', 'diary', 'clock'];
       const rank = (k) => { const i = ORDER.indexOf(k); return i < 0 ? 99 : i; };
       return out.sort((a, b) => rank(a.kind) - rank(b.kind));
     },
     fullWidth() { return ['postcard', 'diary', 'clock', 'calendar']; },
+    /* 按「行」装箱再按页高切分：左右翻页，但每页都不会溢出 */
+    homePages() {
+      const H = Math.max(240, this.areaH || 560);
+      const RH = { postcard: 176, polaroid: 214, dialog: 164, music: 184, anniv: 148, level: 148, reading: 157, calendar: 199, diary: 140, clock: 130 };
+      const GAP = 12;
+      const rows = [];
+      let cur = null;
+      this.widgets.forEach((it) => {
+        const wide = this.fullWidth.indexOf(it.kind) >= 0 || it.w >= 3;
+        const h = RH[it.kind] || 150;
+        if (wide) { rows.push({ h, items: [it] }); cur = null; }
+        else if (cur && cur.items.length === 1) { cur.items.push(it); cur.h = Math.max(cur.h, h); cur = null; }
+        else { cur = { h, items: [it] }; rows.push(cur); }
+      });
+
+      const pages = [];
+      let page = [], used = 0, first = true;
+      const cap = () => Math.max(180, H - (first ? this.appsH : 0));
+      const flush = () => {
+        pages.push({ apps: first, items: page.reduce((a, r) => a.concat(r.items), []) });
+        page = []; used = 0; first = false;
+      };
+      rows.forEach((r) => {
+        const need = page.length ? used + GAP + r.h : r.h;
+        if (need > cap() && (page.length || first)) flush();
+        used = page.length ? used + GAP + r.h : r.h;
+        page.push(r);
+      });
+      if (page.length) flush();
+      if (!pages.length) pages.push({ apps: true, items: [] });
+      return pages;
+    },
     allApps() {
       const rm = S.cfg.removedApps || [];
       const all = Object.keys(APPS || {});
@@ -342,10 +374,20 @@ HOME.Home = {
   },
   watch: {
     'S.cfg.ui.wallpaperKey': { immediate: true, handler(k) { if (k) A.resolveImg(k); } },
-    editing(v) { S.editing = v; }
+    editing(v) { S.editing = v; if (!v) this.$nextTick(this.measure); }
   },
-  mounted() { this.tickClock(); this._ct = setInterval(this.tickClock, 15000); },
-  beforeUnmount() { clearInterval(this._ct); },
+  mounted() {
+    this.tickClock();
+    this._ct = setInterval(this.tickClock, 15000);
+    this.$nextTick(this.measure);
+    this._mt = setTimeout(this.measure, 260);
+    window.addEventListener('resize', this.measure);
+  },
+  updated() { if (!this._mu) { this._mu = 1; this.$nextTick(this.measure); setTimeout(() => { this._mu = 0; }, 300); } },
+  beforeUnmount() {
+    clearInterval(this._ct); clearTimeout(this._mt);
+    window.removeEventListener('resize', this.measure);
+  },
   methods: {
     tickClock() {
       const d = new Date();
@@ -365,13 +407,24 @@ HOME.Home = {
     onScroll() {
       const el = this.$refs.pages;
       if (!el) return;
-      const sc = el.scrollTop > 14;
-      if (sc !== this.scrolled) this.scrolled = sc;
-      // 滚动期间关掉毛玻璃，停下 130ms 后恢复
+      const i = Math.round(el.scrollLeft / Math.max(1, el.clientWidth));
+      if (i !== S.homePage) S.homePage = i;
       if (!this.scrolling) this.scrolling = true;
       clearTimeout(this._st);
       this._st = setTimeout(() => { this.scrolling = false; }, 130);
-      S.homePage = 0;
+    },
+    measure() {
+      if (this.editing) return;
+      const el = this.$refs.pages;
+      if (el) {
+        const h = el.clientHeight;
+        if (h > 60 && Math.abs(h - this.areaH) > 2) this.areaH = h;
+      }
+      const a = document.querySelector('.home-apps');
+      if (a) {
+        const h = a.offsetHeight;
+        if (h > 20 && Math.abs(h - this.appsH) > 2) this.appsH = h;
+      }
     },
     delWidget(it) {
       this.pages.forEach((p) => { const i = p.findIndex((x) => x.id === it.id); if (i >= 0) p.splice(i, 1); });
@@ -436,16 +489,22 @@ HOME.Home = {
     drop(x, y) {
       const d = this.drag;
       if (!d || !d.id) { this.resetDrag(); return; }
-      const cells = Array.from(document.querySelectorAll('.page-grid .cell'));
       const list = this.widgets;
       const from = list.findIndex((i) => i.id === d.id);
+      const pages = document.querySelectorAll('.hp');
+      const pageEl = pages[Math.min(S.homePage || 0, pages.length - 1)];
+      const cells = pageEl ? Array.from(pageEl.querySelectorAll('.cell')) : [];
       if (from < 0 || !cells.length) { this.resetDrag(); return; }
-      // 落点最近的格子
+      // 只在本页内比较落点，避免跳到别的页
       let to = from, best = 1e9;
-      cells.forEach((c, i) => {
+      cells.forEach((c) => {
         const r = c.getBoundingClientRect();
-        const dist = Math.abs(y - (r.top + r.height / 2)) + Math.abs(x - (r.left + r.width / 2)) * 0.35;
-        if (dist < best) { best = dist; to = i; }
+        const dist = Math.abs(y - (r.top + r.height / 2)) + Math.abs(x - (r.left + r.width / 2)) * 0.3;
+        if (dist < best) {
+          best = dist;
+          const idx = list.findIndex((it) => it.id === c.dataset.id);
+          if (idx >= 0) to = idx;
+        }
       });
       if (to === from) { this.resetDrag(); return; }
       const ids = list.map((i) => i.id);
@@ -535,7 +594,7 @@ HOME.Home = {
     </div>
 
     <div class="home-inner">
-      <div class="home-clock" v-if="!editing">
+      <div class="home-clock" :class="{ghost:editing}">
         <div class="hc-l">
           <div class="hc-time">{{clock}}</div>
           <div class="hc-date">{{dateText}}</div>
@@ -546,42 +605,41 @@ HOME.Home = {
         </div>
       </div>
       <div class="pages" ref="pages" @scroll.passive="onScroll">
+        <div class="hp" v-for="(pg,pi) in homePages" :key="'hp'+pi" :data-page="pi">
+          <section class="home-apps" v-if="pg.apps">
+            <div class="ha-head"><span class="ha-t">全部应用</span><span class="ha-n">{{allApps.length}}</span></div>
+            <div class="ha-grid">
+              <button v-for="a in allApps" :key="a" class="app" @click.stop="openApp(a)">
+                <span class="app-icon" :style="{'--tint':meta(a).tint}"><ico :name="meta(a).icon" :size="25" :sw="1.5"/></span>
+                <span class="app-label">{{meta(a).name}}</span>
+              </button>
+            </div>
+          </section>
 
-        <section class="home-apps">
-          <div class="ha-head"><span class="ha-t">全部应用</span><span class="ha-n">{{allApps.length}}</span></div>
-          <div class="ha-grid">
-            <button v-for="a in allApps" :key="a" class="app" @click.stop="openApp(a)">
-              <span class="app-icon" :style="{'--tint':meta(a).tint}"><ico :name="meta(a).icon" :size="25" :sw="1.5"/></span>
-              <span class="app-label">{{meta(a).name}}</span>
-            </button>
-          </div>
-        </section>
-
-        <div class="ha-head ha-sub"><span class="ha-t">今天</span></div>
-        <div class="page-grid">
-          <div v-for="it in widgets" :key="it.id" :class="['cell', fullWidth.indexOf(it.kind)>=0||it.w>=3?'wide':'', drag&&drag.id===it.id?'dragging':'', drag&&drag.id!==it.id?'dim':'' ]"
-               :style="[cellStyle(it), dragStyleFor(it.id)]"
-               @pointerdown="downGrid($event,it,0)">
-            <template v-if="it.kind==='postcard'"><pc-card :item="it"/></template>
-            <template v-else-if="it.kind==='polaroid'"><pol-card :item="it"/></template>
-            <template v-else-if="it.kind==='music'"><music-card :item="it"/></template>
-            <template v-else-if="it.kind==='dialog'"><dlg-card :item="it"/></template>
-            <template v-else-if="it.kind==='anniv'"><anniv-card :item="it"/></template>
-            <template v-else-if="it.kind==='level'"><lv-card :item="it"/></template>
-            <template v-else-if="it.kind==='calendar'"><cal-card :item="it"/></template>
-            <template v-else-if="it.kind==='reading'"><read-card :item="it"/></template>
-            <template v-else-if="it.kind==='diary'"><diary-card :item="it"/></template>
-            <template v-else-if="it.kind==='clock'"><clock-card :item="it"/></template>
-            <button v-if="editing" class="del-badge" @click.stop="delWidget(it)"><ico name="x" :size="10" :sw="2.6"/></button>
-            <div v-if="editing" class="widget-edit"></div>
+          <div class="page-grid">
+            <div v-for="it in pg.items" :key="it.id" :data-id="it.id" :class="['cell', fullWidth.indexOf(it.kind)>=0||it.w>=3?'wide':'', drag&&drag.id===it.id?'dragging':'', drag&&drag.id!==it.id?'dim':'' ]"
+                 :style="[cellStyle(it), dragStyleFor(it.id)]"
+                 @pointerdown="downGrid($event,it,pi)">
+              <template v-if="it.kind==='postcard'"><pc-card :item="it"/></template>
+              <template v-else-if="it.kind==='polaroid'"><pol-card :item="it"/></template>
+              <template v-else-if="it.kind==='music'"><music-card :item="it"/></template>
+              <template v-else-if="it.kind==='dialog'"><dlg-card :item="it"/></template>
+              <template v-else-if="it.kind==='anniv'"><anniv-card :item="it"/></template>
+              <template v-else-if="it.kind==='level'"><lv-card :item="it"/></template>
+              <template v-else-if="it.kind==='calendar'"><cal-card :item="it"/></template>
+              <template v-else-if="it.kind==='reading'"><read-card :item="it"/></template>
+              <template v-else-if="it.kind==='diary'"><diary-card :item="it"/></template>
+              <template v-else-if="it.kind==='clock'"><clock-card :item="it"/></template>
+              <button v-if="editing" class="del-badge" @click.stop="delWidget(it)"><ico name="x" :size="10" :sw="2.6"/></button>
+              <div v-if="editing" class="widget-edit"></div>
+            </div>
           </div>
         </div>
-
       </div>
 
       <div class="home-foot">
         <div class="dots-nav">
-          <i v-for="(p,i) in pages" :key="i" :class="{on:S.homePage===i}"></i>
+          <i v-for="(p,i) in homePages" :key="i" :class="{on:S.homePage===i}" @click="gotoPage(i)"></i>
         </div>
         <div class="dock" ref="dock">
           <div v-for="(appId,i) in dock" :key="appId" class="dock-slot" :style="dragStyleFor(null,appId)"
