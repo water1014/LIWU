@@ -381,6 +381,18 @@ NOTICE.Page = {
 
       <template v-if="tab==='log'">
         <div class="note-card">
+          <div class="n-ver">v0.3.0 · US</div>
+          <div class="n-t">把「我们」单独放进一格</div>
+          <div class="n-b" style="padding-left:0">
+            <div style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>我们：在一起的天数、今天的提醒与五个入口</span></div>
+            <div style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>小房间：待办、便签、心愿、打卡，四件事放一起</span></div>
+            <div style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>时间胶囊：封起来，到期那天才能拆</span></div>
+            <div style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>词云与月度回顾：从本机聊天里数出来，不上传</span></div>
+            <div style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>额度：请求次数、token 与七天用量</span></div>
+          </div>
+          <div class="n-time">2026.11.03</div>
+        </div>
+        <div class="note-card">
           <div class="n-ver">v0.2.0 · LIFE</div>
           <div class="n-t">把日子也装进手机里</div>
           <div class="n-b" style="padding-left:0">

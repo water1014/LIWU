@@ -61,6 +61,25 @@ window.API = (function () {
     throw last;
   }
 
+  /* 用量记账：有官方 usage 就用官方的，没有就按字数估 */
+  function estTok(str) {
+    let cjk = 0;
+    const t = String(str || '');
+    for (const ch of t) if (/[\u4e00-\u9fa5]/.test(ch)) cjk++;
+    return Math.round(cjk / 1.6 + (t.length - cjk) / 3.6);
+  }
+  function rec(data, messages, out, ok) {
+    let inTok = 0, outTok = 0;
+    const u = data && (data.usage || data.usageMetadata);
+    if (u) {
+      inTok = u.prompt_tokens || u.input_tokens || u.promptTokenCount || 0;
+      outTok = u.completion_tokens || u.output_tokens || u.candidatesTokenCount || 0;
+    }
+    if (!inTok) inTok = (messages || []).reduce((a, m) => a + estTok(m.content), 0);
+    if (!outTok && ok) outTok = estTok(out);
+    try { if (window.A && A.addUsage) A.addUsage(inTok, outTok, ok); } catch (e) {}
+  }
+
   async function models(cfg) {
     return attempt(cfg, async (base) => {
       const headers = {};
@@ -126,9 +145,10 @@ window.API = (function () {
       else out = ((data.choices || [])[0] || {}).message?.content || '';
 
       if (!String(out).trim()) throw new Error('返回结果为空');
+      rec(data, messages, out, true);
       return out;
-    });
+    }).catch((e) => { rec(null, messages, '', false); throw e; });
   }
 
-  return { norm, bases, models, chat, friendly };
+  return { norm, bases, models, chat, friendly, estTok };
 })();

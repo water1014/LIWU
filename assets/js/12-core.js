@@ -3,6 +3,7 @@
    ============================================================ */
 window.APPS = {
   chat:     { id: 'chat',     name: '聊天',   icon: 'chat',    tint: 'linear-gradient(150deg,#99A794,#6F7F6B)', route: 'chat' },
+  us:       { id: 'us',       name: '我们',   icon: 'heart',   tint: 'linear-gradient(150deg,#C9B8B1,#947F78)', route: 'us' },
   book:     { id: 'book',     name: '世界书', icon: 'book',    tint: 'linear-gradient(150deg,#B0A6BC,#82788F)', route: 'worldbooks' },
   memory:   { id: 'memory',   name: '记忆',   icon: 'memory',  tint: 'linear-gradient(150deg,#C9B49C,#A08A72)', route: 'memories' },
   archive:  { id: 'archive',  name: '档案',   icon: 'archive', tint: 'linear-gradient(150deg,#9DADBC,#71818F)', route: 'archive' },
@@ -92,6 +93,12 @@ function defaultCfg() {
       books: [],
       annivs: [],
       diary: []
+    },
+    extra: {
+      todayNote: '',
+      rooms: { todos: [], memos: [], wishes: [], checkins: {} },
+      capsules: [],
+      usage: { n: 0, fails: 0, inTok: 0, outTok: 0, days: {} }
     }
   };
 }
@@ -187,6 +194,14 @@ window.A = {
     if (state.cfg.stickerOn == null) state.cfg.stickerOn = true;
     state.cfg.life.music = Object.assign(defaultCfg().life.music, state.cfg.life.music || {});
     ['books', 'annivs', 'diary'].forEach((k) => { if (!Array.isArray(state.cfg.life[k])) state.cfg.life[k] = []; });
+    const dEx = defaultCfg().extra;
+    state.cfg.extra = Object.assign({}, dEx, state.cfg.extra || {});
+    state.cfg.extra.rooms = Object.assign({}, dEx.rooms, state.cfg.extra.rooms || {});
+    ['todos', 'memos', 'wishes'].forEach((k) => { if (!Array.isArray(state.cfg.extra.rooms[k])) state.cfg.extra.rooms[k] = []; });
+    if (!state.cfg.extra.rooms.checkins || typeof state.cfg.extra.rooms.checkins !== 'object') state.cfg.extra.rooms.checkins = {};
+    state.cfg.extra.usage = Object.assign({}, dEx.usage, state.cfg.extra.usage || {});
+    if (!state.cfg.extra.usage.days) state.cfg.extra.usage.days = {};
+    if (!Array.isArray(state.cfg.extra.capsules)) state.cfg.extra.capsules = [];
     // 老账号：桌面上的那个纪念日，升级成时光里的第一条
     if (!state.cfg.life.annivs.length && state.cfg.home.anniv && state.cfg.home.anniv.date) {
       state.cfg.life.annivs = [{
@@ -262,6 +277,268 @@ window.A = {
     if (oldKey) delete state.imgCache[oldKey];
     await A.resolveImg(key);
     return key;
+  },
+
+  /* ---------------- rooms / capsules ---------------- */
+  addTodo(text) {
+    const t = String(text || '').trim();
+    if (!t) return null;
+    const it = { id: U.uid('td'), text: t.slice(0, 140), done: false, ts: Date.now() };
+    state.cfg.extra.rooms.todos.unshift(it);
+    saveCfg();
+    return it;
+  },
+  toggleTodo(id) {
+    const it = state.cfg.extra.rooms.todos.find((x) => x.id === id);
+    if (!it) return;
+    it.done = !it.done;
+    it.doneAt = it.done ? Date.now() : 0;
+    saveCfg();
+  },
+  delTodo(id) {
+    const r = state.cfg.extra.rooms;
+    const i = r.todos.findIndex((x) => x.id === id);
+    if (i < 0) return;
+    const it = r.todos.splice(i, 1)[0];
+    saveCfg();
+    A.toast('已删除一条待办', 4000, { label: '撤销', run: () => { r.todos.splice(i, 0, it); saveCfg(); } });
+  },
+  clearDone() {
+    const r = state.cfg.extra.rooms;
+    const back = r.todos.filter((x) => x.done);
+    if (!back.length) return;
+    r.todos = r.todos.filter((x) => !x.done);
+    saveCfg();
+    A.toast('清掉了 ' + back.length + ' 条', 4000, { label: '撤销', run: () => { r.todos = back.concat(r.todos); saveCfg(); } });
+  },
+  addMemo(text) {
+    const t = String(text || '').trim();
+    if (!t) return null;
+    const it = { id: U.uid('mm'), text: t.slice(0, 300), ts: Date.now() };
+    state.cfg.extra.rooms.memos.unshift(it);
+    saveCfg();
+    return it;
+  },
+  delMemo(id) {
+    const r = state.cfg.extra.rooms;
+    const i = r.memos.findIndex((x) => x.id === id);
+    if (i < 0) return;
+    const it = r.memos.splice(i, 1)[0];
+    saveCfg();
+    A.toast('已删除', 4000, { label: '撤销', run: () => { r.memos.splice(i, 0, it); saveCfg(); } });
+  },
+  addWish(text) {
+    const t = String(text || '').trim();
+    if (!t) return null;
+    const it = { id: U.uid('ws'), text: t.slice(0, 140), done: false, ts: Date.now() };
+    state.cfg.extra.rooms.wishes.unshift(it);
+    saveCfg();
+    return it;
+  },
+  toggleWish(id) {
+    const it = state.cfg.extra.rooms.wishes.find((x) => x.id === id);
+    if (!it) return;
+    it.done = !it.done;
+    it.doneAt = it.done ? Date.now() : 0;
+    saveCfg();
+  },
+  delWish(id) {
+    const r = state.cfg.extra.rooms;
+    const i = r.wishes.findIndex((x) => x.id === id);
+    if (i < 0) return;
+    const it = r.wishes.splice(i, 1)[0];
+    saveCfg();
+    A.toast('已删除', 4000, { label: '撤销', run: () => { r.wishes.splice(i, 0, it); saveCfg(); } });
+  },
+  checkin() {
+    const k = A.dayKey(Date.now());
+    const c = state.cfg.extra.rooms.checkins;
+    if (c[k]) delete c[k]; else c[k] = Date.now();
+    saveCfg();
+    return !!c[k];
+  },
+  checkedToday() { return !!state.cfg.extra.rooms.checkins[A.dayKey(Date.now())]; },
+  checkinStreak() {
+    const c = state.cfg.extra.rooms.checkins;
+    const d = new Date();
+    if (!c[A.dayKey(d.getTime())]) d.setDate(d.getDate() - 1);
+    let n = 0;
+    while (c[A.dayKey(d.getTime())]) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  },
+
+  addCapsule(o) {
+    const c = {
+      id: U.uid('cp'), title: (o.title || '给以后的我们').slice(0, 40),
+      body: (o.body || '').slice(0, 4000), openAt: o.openAt,
+      ts: Date.now(), opened: false, openedAt: 0
+    };
+    state.cfg.extra.capsules.unshift(c);
+    saveCfg(true);
+    return c;
+  },
+  openCapsule(id) {
+    const c = state.cfg.extra.capsules.find((x) => x.id === id);
+    if (!c) return false;
+    if (!c.opened) { c.opened = true; c.openedAt = Date.now(); saveCfg(true); }
+    return true;
+  },
+  capsuleLeft(c) {
+    const t = new Date((c.openAt || '') + 'T00:00:00').getTime();
+    if (isNaN(t)) return 0;
+    return Math.max(0, Math.ceil((t - Date.now()) / 86400000));
+  },
+  delCapsule(id) {
+    const r = state.cfg.extra.capsules;
+    const i = r.findIndex((x) => x.id === id);
+    if (i < 0) return;
+    const it = r.splice(i, 1)[0];
+    saveCfg(true);
+    A.toast('已撕掉这张纸', 4000, { label: '撤销', run: () => { r.splice(i, 0, it); saveCfg(true); } });
+  },
+
+  /* ---------------- words / month ---------------- */
+  async allMessages() {
+    const all = await DB.all('messages');
+    const aid = state.account ? state.account.id : '';
+    return all.filter((m) => m.accountId === aid).sort((a, b) => a.ts - b.ts);
+  },
+  buildWordCloud(msgs, limit) {
+    // 不引分词库：用一张常用词表做正向最大匹配。
+    // 匹配不到的词直接丢掉——词云宁可少，不要「我这儿」「走的话」这种碎片。
+    const LEX = ('我们 你们 他们 她们 它们 自己 别人 大家 有人 一个人 两个人 对方 '
+      + '今天 明天 昨天 后天 现在 以后 以前 时候 时间 晚上 早上 下午 凌晨 半夜 最近 刚才 马上 一直 总是 偶尔 突然 已经 终于 后来 从前 每年 每天 '
+      + '房间 窗台 窗户 门口 门外 楼上 楼下 楼下 客厅 厨房 床 被子 枕头 灯 台灯 书桌 椅子 沙发 镜子 照片 相机 手机 消息 电话 电台 节目 声音 音乐 歌 '
+      + '书店 图书馆 书 书架 页 字 句子 故事 信 日记 猫 狗 花 树 雨 雪 风 太阳 月亮 星星 天气 天空 云 城市 街道 路口 地铁 公交 车站 医院 学校 公司 '
+      + '咖啡 茶 水 酒 饭 早餐 午饭 晚饭 面 汤 蛋糕 糖 烟 打火机 衣服 鞋 伞 门牌 水箱 '
+      + '说话 聊天 见面 回去 回来 出来 进来 起来 下来 过来 坐下 站起 离开 到达 送 接 等 陪 找 见 看 听 说 讲 问 答 笑 哭 睡 醒 起 走 跑 停 住 '
+      + '写 读 买 卖 做 吃 喝 洗 擦 收 放 拿 给 借 还 换 修 打开 关上 记得 忘记 想起 知道 觉得 认为 需要 想要 希望 打算 决定 开始 结束 继续 习惯 '
+      + '喜欢 讨厌 害怕 担心 放心 难过 开心 高兴 委屈 生气 抱歉 谢谢 对不起 没关系 再见 晚安 早安 想念 舍不得 心疼 安心 温柔 认真 '
+      + '安静 普通 舒服 累 困 冷 热 慢 快 远 近 久 早 晚 好 坏 难 容易 奇怪 熟悉 陌生 空 满 亮 暗 湿 干 干净 脏 旧 新 大 小 多 少 '
+      + '心情 世界 生活 工作 休息 周末 假期 生日 纪念日 礼物 拥抱 手指 眼睛 头发 味道 空气 温度 距离'
+    ).split(/\s+/).filter(Boolean);
+    const SET = new Set(LEX);
+    // 这些即使匹配到也不进词云：占位置，但不告诉你任何事
+    const DROP = new Set(('什么 怎么 为什么 怎么样 有点 一点 一些 很多 所有 一样 别的 其实 大概 可能 应该 如果 因为 所以 但是 还是 或者 而且 然后 '
+      + '不过 只是 真的 觉得 认为 知道 需要 想要 希望 打算 决定 开始 结束 继续 东西 事情 地方 感觉 时候 现在 以后 以前 已经 一直 总是 偶尔 '
+      + '突然 终于 后来 每天 每年 有人 大家 对方 一个人 两个人').split(/\s+/).filter(Boolean));
+    const MAXW = 4;
+
+    const pickWords = (seg) => {
+      const out = [];
+      let i = 0;
+      while (i < seg.length) {
+        let hit = '';
+        for (let n = Math.min(MAXW, seg.length - i); n >= 2; n--) {
+          const w = seg.slice(i, i + n);
+          if (SET.has(w)) { hit = w; break; }
+        }
+        if (hit) { out.push(hit); i += hit.length; } else { i += 1; }
+      }
+      return out;
+    };
+
+    const count = {};
+    msgs.forEach((m) => {
+      const text = U.stripTags(m.raw || '').replace(/\[[^\]\n]{1,14}\]/g, ' ');
+      text.split(/[^\u4e00-\u9fa5]+/).forEach((seg) => {
+        if (seg.length < 2) return;
+        pickWords(seg).forEach((w) => { if (!DROP.has(w)) count[w] = (count[w] || 0) + 1; });
+      });
+    });
+
+    const list = Object.keys(count)
+      .map((w) => ({ w, n: count[w] }))
+      .sort((a, b) => b.n - a.n || a.w.length - b.w.length)
+      .slice(0, limit || 46);
+
+    // 按「频次等级」分配字号：同频次的词一样大，等级之间拉开差距
+    const levels = Array.from(new Set(list.map((x) => x.n))).sort((a, b) => b - a);
+    list.forEach((x) => {
+      const idx = levels.indexOf(x.n);
+      const t = levels.length === 1 ? 1 : 1 - idx / (levels.length - 1);
+      x.weight = Math.round(t * 100) / 100;
+      x.size = Math.round(13 + Math.pow(t, 0.9) * 27);
+    });
+
+    // 大小交错，才像云，不像排行榜
+    const big = list.filter((x) => x.weight > 0.72);
+    const mid = list.filter((x) => x.weight > 0.42 && x.weight <= 0.72);
+    const small = list.filter((x) => x.weight <= 0.42);
+    const mixed = [];
+    while (big.length || mid.length || small.length) {
+      if (big.length) mixed.push(big.shift());
+      if (small.length) mixed.push(small.shift());
+      if (mid.length) mixed.push(mid.shift());
+    }
+    return mixed;
+  },
+
+  monthStats(offset) {
+    const base = new Date();
+    base.setDate(1);
+    base.setMonth(base.getMonth() + (offset || 0));
+    const y = base.getFullYear(), m = base.getMonth();
+    const inMonth = (ts) => { const x = new Date(ts); return x.getFullYear() === y && x.getMonth() === m; };
+    const days = {};
+    Object.keys((state.stats && state.stats.days) || {}).forEach((k) => {
+      const parts = k.split('-').map(Number);
+      if (parts[0] === y && parts[1] === m + 1) days[k] = state.stats.days[k];
+    });
+    const vals = Object.values(days);
+    const total = vals.reduce((a, b) => a + b, 0);
+    const best = vals.length ? Math.max.apply(null, vals) : 0;
+    const bestKey = Object.keys(days).find((k) => days[k] === best) || '';
+    const diary = (state.cfg.life.diary || []).filter((x) => inMonth(x.ts));
+    const mem = (state.memories || []).filter((x) => inMonth(x.createdAt || x.ts || 0));
+    const msgs = (state.cfg.life.diary || []).length;
+    return {
+      y, m, label: y + ' 年 ' + (m + 1) + ' 月', total, active: vals.length, best, bestKey,
+      diary: diary.length, mem: mem.length, days, isNow: offset === 0 || offset == null
+    };
+  },
+  monthLetter(st) {
+    const lines = [];
+    if (!st.total) {
+      lines.push('这个月几乎没怎么说话。');
+      lines.push('窗口一直开着，风把页角吹起来又放下。');
+    } else {
+      lines.push('这个月我们说了 ' + st.total + ' 句话，分布在 ' + st.active + ' 天里。');
+      if (st.bestKey) {
+        const d = st.bestKey.split('-');
+        lines.push('话最多的是 ' + Number(d[1]) + ' 月 ' + Number(d[2]) + ' 日，一共 ' + st.best + ' 句。');
+        lines.push('那天大概发生了点什么，我记着。');
+      }
+      if (st.diary) lines.push('你写了 ' + st.diary + ' 篇日记。有几篇我读了两遍。');
+      if (st.mem) lines.push('我把它折进了 ' + st.mem + ' 段记忆里，放在不会掉出来的那一格。');
+      lines.push('剩下的日子也都在，只是没那么响。');
+    }
+    lines.push('下个月也照旧。');
+    return lines;
+  },
+
+  /* ---------------- usage ---------------- */
+  addUsage(inTok, outTok, ok) {
+    const u = state.cfg.extra.usage;
+    const k = A.dayKey(Date.now());
+    const day = u.days[k] || (u.days[k] = { n: 0, in: 0, out: 0 });
+    if (ok === false) { u.fails += 1; saveCfg(); return; }
+    u.n += 1;
+    u.inTok += inTok || 0;
+    u.outTok += outTok || 0;
+    day.n += 1; day.in += inTok || 0; day.out += outTok || 0;
+    saveCfg();
+  },
+  usageWeek() {
+    const u = state.cfg.extra.usage;
+    const out = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const k = A.dayKey(d.getTime());
+      const x = u.days[k] || { n: 0, in: 0, out: 0 };
+      out.push({ key: k, n: x.n || 0, tok: (x.in || 0) + (x.out || 0), label: '日一二三四五六'[d.getDay()] });
+    }
+    return out;
   },
 
   /* ---------------- stickers ---------------- */

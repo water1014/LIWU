@@ -18,12 +18,12 @@ JS_DIR = ROOT / 'assets' / 'js'
 
 CSS_ORDER = [
     '01-tokens.css', '02-shell.css', '03-chat.css',
-    '04-apps.css', '05-life.css', '06-parts.css', '09-fix.css',
+    '04-apps.css', '05-life.css', '06-parts.css', '07-us.css', '09-fix.css',
 ]
 JS_ORDER = [
     '10-icons.js', '11-db.js', '12-core.js', '13-api.js', '14-ui.js',
     '20-home.js', '21-chat.js', '30-wb-mem.js', '31-archive-store.js',
-    '32-beauty-settings.js', '33-life.js', '34-stickers.js', '40-main.js',
+    '32-beauty-settings.js', '33-life.js', '34-stickers.js', '35-us.js', '40-main.js',
 ]
 
 

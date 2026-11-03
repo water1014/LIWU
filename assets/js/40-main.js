@@ -71,7 +71,17 @@ window.loadDemoData = async function () {
     ['user', '今天走了很久，鞋都湿了。'],
     ['char', '<think>（不需要问为什么走。先让她坐下来。）</think>\n\n那就先别走了。\n\n<narratage>窗外的雨敲在遮阳棚上，声音很密。</narratage>\n\n书店没什么人，你可以待到打烊。'],
     ['user', '你不问我去哪了吗？'],
-    ['char', '<think>（问了就要解释，解释很累。）</think>\n\n你想说的时候会说。\n\n我这儿别的不多，时间很多。']
+    ['char', '<think>（问了就要解释，解释很累。）</think>\n\n你想说的时候会说。\n\n我这儿别的不多，时间很多。'],
+    ['user', '书店一直开到这个点吗？'],
+    ['char', '<narratage>他把台灯往边上挪了一点。</narratage>\n\n开到没人来为止。\n\n雨天的客人走得早，一般十点就剩我一个。'],
+    ['user', '那我是不是待太久了。'],
+    ['char', '<think>（她总是先替别人算时间。）</think>\n\n没有。\n\n我这儿的时间本来就不值钱，你坐着，它才有点像时间。'],
+    ['user', '你说话总是这样。'],
+    ['char', '哪样。\n\n<narratage>他低头笑了一下，把茶壶重新添满。</narratage>\n\n你听不下去就说，我改。'],
+    ['user', '没有，挺好的。就是有点不习惯。'],
+    ['char', '<think>（不习惯被人好好说话，这不算好事。）</think>\n\n那就多听几次。\n\n习惯这种东西，是慢慢养出来的。'],
+    ['user', '雨好像小了。'],
+    ['char', '嗯，小了。\n\n<narratage>他走到门口，把半掩的门推开一些。</narratage>\n\n要走的话，我送你到路口。\n\n不走的话，茶还有。']
   ]);
 
   await mk({
@@ -110,6 +120,46 @@ window.loadDemoData = async function () {
   });
   const shen = S.chars.find((c) => c.name === '沈砚');
   if (shen) { shen.worldbookIds = [book.id]; await DB.put('characters', JSON.parse(JSON.stringify(shen))); }
+
+  // 小房间 / 胶囊：给演示账号留一点生活痕迹
+  const hrs = (n) => Date.now() - n * 3600e3;
+  const backD = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); };
+  S.cfg.extra.todayNote = '今天要早一点睡。';
+  S.cfg.extra.rooms.todos = [
+    { id: U.uid('td'), text: '把窗台的灰擦一下', done: false, ts: hrs(2) },
+    { id: U.uid('td'), text: '还图书馆那本《雾港纪事》', done: false, ts: hrs(26) },
+    { id: U.uid('td'), text: '买一包新的咖啡豆', done: true, ts: hrs(50), doneAt: hrs(30) }
+  ];
+  S.cfg.extra.rooms.memos = [
+    { id: U.uid('mm'), text: '他说过喜欢下雨天。\n下次下雨记得叫他。', ts: hrs(20) },
+    { id: U.uid('mm'), text: '洗衣液快用完了，是那种没什么味道的。', ts: hrs(70) }
+  ];
+  S.cfg.extra.rooms.wishes = [
+    { id: U.uid('ws'), text: '一起去看一次海', done: false, ts: hrs(200) },
+    { id: U.uid('ws'), text: '把那本没读完的书读完', done: true, ts: hrs(400), doneAt: hrs(90) },
+    { id: U.uid('ws'), text: '学会做一道他爱吃的菜', done: false, ts: hrs(120) }
+  ];
+  S.cfg.extra.rooms.checkins = {};
+  for (const d of [1, 2, 3, 5, 6, 8, 9, 12, 13]) {
+    const x = new Date(); x.setDate(x.getDate() - d);
+    S.cfg.extra.rooms.checkins[U.dayKey(x.getTime())] = x.getTime();
+  }
+  const soon = new Date(); soon.setDate(soon.getDate() + 214);
+  const due = new Date(); due.setDate(due.getDate() - 3);
+  S.cfg.extra.capsules = [
+    {
+      id: U.uid('cp'), title: '给一年后的我们', openAt: soon.toISOString().slice(0, 10), ts: hrs(300), opened: false,
+      body: '写这封的时候是十一月，窗子关不严，风会从缝里进来。\n\n不知道你现在在哪，是不是还住在这间朝北的房子。如果搬了，希望新家的窗是朝南的。\n\n如果那时候我们已经不联系了，也希望你看到这封信的时候，记得今年冬天其实没有那么冷。'
+    },
+    {
+      id: U.uid('cp'), title: '三个月后要问他的问题', openAt: due.toISOString().slice(0, 10), ts: hrs(2000), opened: false,
+      body: '你那天说的「时间很多」，是真的吗？\n\n如果是真的，我想再坐久一点。'
+    },
+    {
+      id: U.uid('cp'), title: '搬进来第一天', openAt: backD(30), ts: hrs(2400), opened: true, openedAt: hrs(700),
+      body: '房间朝北，下午三点以后就没有太阳了。\n\n但窗很大，能看到对面楼顶的水箱。夜里滴水的声音很明显，一开始睡不着，现在习惯了。\n\n从今天起，这里是我住的地方。'
+    }
+  ];
 
   S.cfg.moments.unshift({
     id: U.uid('mo'), text: '今天的雨下得很慢。\n在窗边坐了一下午，什么也没做成，但觉得这样就很好。',
@@ -199,6 +249,12 @@ const VIEWS = {
   'stickers': STK.Library,
   'archive': ARCH.List,
   'archive.edit': ARCH.Edit,
+  'us': US.Page,
+  'rooms': US.Rooms,
+  'capsule': US.Capsule,
+  'words': US.Words,
+  'monthly': US.Monthly,
+  'quota': US.Quota,
   'music': MUSIC.Page,
   'books': BOOKS.Page,
   'book.detail': BOOKS.Detail,

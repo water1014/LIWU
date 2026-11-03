@@ -328,8 +328,13 @@ CHAT.Home = {
                 <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
               </div>
             </div>
-            <div class="section-head" style="padding:2px 22px 8px"><span class="section-title">生活</span><span class="section-act">life</span></div>
+            <div class="section-head" style="padding:2px 22px 8px"><span class="section-title">我们 · 生活</span><span class="section-act" @click="A.go('us')">全部</span></div>
             <div class="group" style="margin:0 18px 12px">
+              <div class="row tap" @click="A.go('us')">
+                <div class="row-ico" style="background:#F5EEF0;color:#8B7480"><ico name="heart" :size="15"/></div>
+                <div class="row-main"><div class="row-title">我们</div><div class="row-sub">第 {{A.dayNo()}} 天 · 胶囊、词云、小房间</div></div>
+                <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+              </div>
               <div class="row tap" @click="A.go('music')">
                 <div class="row-ico" style="background:#F1EEE9;color:#8A7E6C"><ico name="music" :size="15"/></div>
                 <div class="row-main"><div class="row-title">音乐</div><div class="row-sub">{{S.cfg.life.music.tracks.length}} 首 · 只在这个房间里响</div></div>
