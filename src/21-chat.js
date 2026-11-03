@@ -157,6 +157,40 @@ CHAT.Home = {
     me() { return S.account || {}; },
     stats() {
       return { friends: this.chats.length, chars: S.chars.length, mem: S.memories.length };
+    },
+    api() { return A.pickApi(null); },
+    apiLabel() {
+      if (!this.api) return '未配置';
+      return this.api.model || this.api.name || '已配置';
+    },
+    wallLabel() {
+      if (S.cfg.ui.wallpaperKey) return '自定义图片';
+      const p = (window.WALLS && WALLS[S.cfg.ui.wallpaperPreset || 0]);
+      return p ? p.name + ' · 预设' : '默认';
+    },
+    sizeLabel() {
+      const n = S.storageTotal || (S.sizes || []).reduce((a, b) => a + (b.bytes || 0), 0);
+      if (!n) return '—';
+      return n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+    },
+    week() {
+      const days = (S.stats && S.stats.days) || {};
+      const out = []; let max = 1;
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const k = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+        const c = days[k] || 0;
+        if (c > max) max = c;
+        out.push({ k, c, w: '日一二三四五六'[d.getDay()], today: i === 0 });
+      }
+      out.max = max;
+      return out;
+    },
+    weekTotal() { return this.week.reduce((a, b) => a + b.c, 0); },
+    coverStyle() {
+      const k = S.cfg.ui.wallpaperKey;
+      if (k && S.imgCache[k]) return { backgroundImage: 'url(' + S.imgCache[k] + ')' };
+      return {};
     }
   },
   methods: {
@@ -198,6 +232,18 @@ CHAT.Home = {
 
         <!-- friends -->
         <template v-if="tab==='friends'">
+          <div class="week-strip" v-if="chats.length">
+            <div class="ws-top">
+              <span class="ws-cap">this week</span>
+              <span class="ws-sum">{{weekTotal}} 条消息</span>
+            </div>
+            <div class="ws-days">
+              <div class="ws-d" v-for="d in week" :key="d.k" :class="{today:d.today}">
+                <i :style="{height:(4 + 24 * (d.c / week.max)) + 'px',opacity:d.c ? .3 + .7 * (d.c / week.max) : .12}"></i>
+                <span>{{d.w}}</span>
+              </div>
+            </div>
+          </div>
           <div class="search-pill">
             <ico name="search" :size="14"/>
             <input v-model="search" placeholder="搜索聊天">
@@ -281,6 +327,24 @@ CHAT.Home = {
                 <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
               </div>
             </div>
+            <div class="section-head" style="padding:2px 22px 8px"><span class="section-title">生活</span><span class="section-act">life</span></div>
+            <div class="group" style="margin:0 18px 12px">
+              <div class="row tap" @click="A.go('music')">
+                <div class="row-ico" style="background:#F1EEE9;color:#8A7E6C"><ico name="music" :size="15"/></div>
+                <div class="row-main"><div class="row-title">音乐</div><div class="row-sub">{{S.cfg.life.music.tracks.length}} 首 · 只在这个房间里响</div></div>
+                <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+              </div>
+              <div class="row tap" @click="A.go('books')">
+                <div class="row-ico" style="background:#EEF1EA;color:#6D7A66"><ico name="bookmark" :size="15"/></div>
+                <div class="row-main"><div class="row-title">书架</div><div class="row-sub">一起读的书、进度与摘句</div></div>
+                <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+              </div>
+              <div class="row tap" @click="A.go('time')">
+                <div class="row-ico" style="background:#F4EFE8;color:#8A7458"><ico name="clock" :size="15"/></div>
+                <div class="row-main"><div class="row-title">时光</div><div class="row-sub">纪念日与只给自己看的日记</div></div>
+                <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+              </div>
+            </div>
             <div style="height:20px"></div>
           </div>
         </template>
@@ -288,12 +352,15 @@ CHAT.Home = {
         <!-- me -->
         <template v-else>
           <div class="app-scroll">
-            <div class="profile-card">
-              <av :file-key="me.avatarKey" :name="me.name" :size="62" radius="22px"/>
-              <div class="grow">
-                <div class="profile-name">{{me.name}}</div>
-                <div class="profile-sig">@{{me.username}} · {{me.gender}}<span v-if="me.mbti"> · {{me.mbti}}</span></div>
-                <div class="profile-sig clamp2" style="margin-top:6px">{{me.persona}}</div>
+            <div class="me-hero">
+              <div class="me-cover" :style="coverStyle">
+                <div class="me-cover-lab">M Y &nbsp; P R O F I L E</div>
+              </div>
+              <div class="me-body">
+                <div class="me-av"><av :file-key="me.avatarKey" :name="me.name" :size="60" radius="20px"/></div>
+                <div class="me-name">{{me.name}}</div>
+                <div class="me-sig">@{{me.username}} · {{me.gender}}<span v-if="me.mbti"> · {{me.mbti}}</span></div>
+                <div class="me-bio clamp2">{{me.persona || '还没有写人设。'}}</div>
               </div>
             </div>
             <div class="stat-row">
@@ -302,6 +369,33 @@ CHAT.Home = {
               <div class="stat"><div class="n">{{stats.mem}}</div><div class="l">记忆</div></div>
             </div>
             <div class="section" style="margin-top:18px">
+              <div class="group">
+                <div class="row tap" @click="A.go('beauty')">
+                  <div class="row-ico"><ico name="image" :size="15"/></div>
+                  <div class="row-main"><div class="row-title">外观</div><div class="row-sub">壁纸 · 字体 · 桌面 CSS</div></div>
+                  <div class="row-val">{{wallLabel}}</div>
+                  <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+                </div>
+                <div class="row tap" @click="A.go('settings.api')">
+                  <div class="row-ico"><ico name="link" :size="15"/></div>
+                  <div class="row-main"><div class="row-title">API 通道</div><div class="row-sub">模型与协议</div></div>
+                  <div class="row-val">{{apiLabel}}</div>
+                  <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+                </div>
+                <div class="row tap" @click="A.go('settings.data')">
+                  <div class="row-ico"><ico name="database" :size="15"/></div>
+                  <div class="row-main"><div class="row-title">数据存储</div><div class="row-sub">IndexedDB · 本机</div></div>
+                  <div class="row-val">{{sizeLabel}}</div>
+                  <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+                </div>
+                <div class="row">
+                  <div class="row-ico"><ico name="zap" :size="15"/></div>
+                  <div class="row-main"><div class="row-title">运行状态</div><div class="row-sub">单文件 · 离线可用</div></div>
+                  <div class="row-val"><span class="live-dot"></span>Running</div>
+                </div>
+              </div>
+            </div>
+            <div class="section">
               <div class="group">
                 <div class="row tap" @click="A.go('settings')">
                   <div class="row-ico"><ico name="settings" :size="15"/></div>

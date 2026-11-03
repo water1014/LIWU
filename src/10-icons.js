@@ -23,6 +23,8 @@ window.ICONS = {
   send: '<path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/>',
   play: '<path d="M8 5.5v13l11-6.5-11-6.5Z" fill="currentColor" stroke-linejoin="round"/>',
   pause: '<path d="M9 5.5v13M15 5.5v13" stroke-width="2.4"/>',
+  prev: '<path d="M18.5 5.5v13L8 12l10.5-6.5Z" fill="currentColor" stroke-linejoin="round"/><path d="M5.5 5.5v13"/>',
+  next: '<path d="M5.5 5.5v13L16 12 5.5 5.5Z" fill="currentColor" stroke-linejoin="round"/><path d="M18.5 5.5v13"/>',
   edit: '<path d="M4 20h4l10.3-10.3a2.2 2.2 0 0 0-3.1-3.1L5 17v3Z"/><path d="m13.8 7.4 3 3"/>',
   trash: '<path d="M4.5 7h15M9.5 7V5.2A1.2 1.2 0 0 1 10.7 4h2.6a1.2 1.2 0 0 1 1.2 1.2V7M6.5 7l.9 12.1a1.5 1.5 0 0 0 1.5 1.4h6.2a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/>',
   refresh: '<path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v4.5h-4.5"/>',

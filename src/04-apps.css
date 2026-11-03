@@ -92,8 +92,8 @@
 .wp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .wp-cell{aspect-ratio:.62;border-radius:12px;border:1.5px solid transparent;position:relative;overflow:hidden;background-size:cover;background-position:center}
 .wp-cell.on{border-color:var(--ink)}
-.wp-cell.on:after{content:"";position:absolute;right:3px;bottom:3px;width:13px;height:13px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 2px rgba(255,255,255,.85)}
-.wp-cell span{position:absolute;left:4px;top:4px;font-size:7px;color:rgba(255,255,255,.85);letter-spacing:.08em;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.wp-cell.on:after{content:"";position:absolute;right:4px;bottom:4px;width:14px;height:14px;border-radius:50%;background:var(--ink) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.5l5 5L20 6.5'/%3E%3C/svg%3E") center/8px 8px no-repeat;box-shadow:0 0 0 2px rgba(255,255,255,.9)}
+.wp-cell span{position:absolute;left:5px;top:5px;font-size:7px;color:rgba(23,23,27,.55);letter-spacing:.08em;padding:1.5px 4px;border-radius:5px;background:rgba(255,255,255,.62);backdrop-filter:blur(4px)}
 .editor-area{width:100%;min-height:130px;border-radius:14px;border:1px solid var(--line);background:#FBFBF9;padding:11px 12px;font-family:var(--mono);font-size:10.5px;line-height:1.7;color:#3E3E45}
 .editor-area:focus{outline:none;border-color:rgba(23,23,27,.22)}
 

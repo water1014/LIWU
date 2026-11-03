@@ -118,7 +118,7 @@
 .wallpaper.noise:after{
   content:"";position:absolute;inset:0;
   background-image:radial-gradient(rgba(23,23,27,.16) .6px,transparent .6px);
-  background-size:4px 4px;opacity:.16;mix-blend-mode:multiply;
+  background-size:3.5px 3.5px;opacity:.26;mix-blend-mode:multiply;
 }
 .home-scrim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.22),transparent 22%,transparent 78%,rgba(255,255,255,.16))}
 .home-inner{position:absolute;inset:0;display:flex;flex-direction:column;padding:var(--status-h) 18px 0}
@@ -126,7 +126,7 @@
 .pages::-webkit-scrollbar{display:none}
 .page-grid{
   min-width:100%;width:100%;scroll-snap-align:start;scroll-snap-stop:always;
-  display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:94px;gap:12px;
+  display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:98px;gap:12px;
   align-content:start;padding:6px 0 0;position:relative;
 }
 .home-foot{flex:none;display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px 0 22px}
@@ -223,7 +223,7 @@
 .pol-tape{position:absolute;top:-4px;left:50%;transform:translateX(-50%) rotate(-4deg);width:34px;height:11px;background:rgba(226,220,205,.72);z-index:4}
 
 /* music */
-.music{background:linear-gradient(155deg,#FDFCFA,#F2EFE8);border:1px solid rgba(255,255,255,.8);box-shadow:0 12px 30px -22px rgba(23,23,27,.5);padding:13px;display:flex;flex-direction:column;justify-content:space-between}
+.music{background:rgba(255,255,255,.5);background-image:linear-gradient(155deg,rgba(255,255,255,.6),rgba(255,255,255,.16) 60%);backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);border:1px solid rgba(255,255,255,.68);box-shadow:0 16px 34px -26px rgba(23,23,27,.55),inset 0 1px 0 rgba(255,255,255,.6);padding:13px;display:flex;flex-direction:column;justify-content:space-between}
 .music-top{display:flex;gap:10px;align-items:flex-start}
 .music-art{width:54px;height:54px;border-radius:13px;flex:none;background:conic-gradient(from 210deg,#2E2E33,#54544F,#2A2A2F,#6B6B62,#2E2E33);position:relative;overflow:hidden;display:grid;place-items:center}
 .music-art:after{content:"";width:15px;height:15px;border-radius:50%;background:#F4F2EE;box-shadow:0 0 0 5px rgba(255,255,255,.1)}
@@ -242,7 +242,7 @@
 .music-time{display:flex;justify-content:space-between;font-size:7.5px;color:var(--muted-2);font-variant-numeric:tabular-nums}
 
 /* dialogue */
-.dlg{display:flex;flex-direction:column;justify-content:center;gap:11px;padding:16px 12px;background:rgba(255,255,255,.34);border:1px solid rgba(255,255,255,.6);backdrop-filter:blur(10px);border-radius:24px}
+.dlg{display:flex;flex-direction:column;justify-content:center;gap:11px;padding:16px 12px;background:rgba(255,255,255,.44);background-image:linear-gradient(160deg,rgba(255,255,255,.5),rgba(255,255,255,.12) 64%);border:1px solid rgba(255,255,255,.66);backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);box-shadow:0 16px 34px -26px rgba(23,23,27,.5),inset 0 1px 0 rgba(255,255,255,.6);border-radius:24px}
 .dlg-row{display:flex;align-items:flex-end;gap:6px;min-width:0}
 .dlg-row.me{flex-direction:row-reverse}
 .dlg-av{width:18px;height:18px;border-radius:50%;overflow:hidden;flex:none;background:#D8D4CB;display:grid;place-items:center;color:#fff;font-size:7px}
@@ -251,3 +251,66 @@
 
 /* store / misc tiles */
 .tile{display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 4px;border-radius:18px;background:var(--surface);border:1px solid var(--line)}
+
+/* ============================================================
+   GLASS WIDGETS (anniversary / level / calendar)
+   ============================================================ */
+.glassw{
+  background:rgba(255,255,255,.46);
+  background-image:linear-gradient(158deg,rgba(255,255,255,.5),rgba(255,255,255,.12) 62%);
+  -webkit-backdrop-filter:blur(26px) saturate(1.55);
+  backdrop-filter:blur(26px) saturate(1.55);
+  border:1px solid rgba(255,255,255,.62);
+  box-shadow:0 16px 34px -26px rgba(23,23,27,.55),inset 0 1px 0 rgba(255,255,255,.6);
+  padding:14px;
+  display:flex;flex-direction:column;
+}
+.glassw:after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(160deg,rgba(255,255,255,.34),rgba(255,255,255,0) 42%);
+}
+.glassw > *{position:relative;z-index:1}
+.gw-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.gw-cap{font-size:7.5px;letter-spacing:.2em;color:rgba(23,23,27,.42);text-transform:uppercase;font-weight:600}
+.gw-ico{color:rgba(23,23,27,.34)}
+
+/* anniversary */
+.anniv-num{
+  font-size:46px;font-weight:300;line-height:.94;letter-spacing:-.035em;margin-top:auto;
+  font-variant-numeric:tabular-nums;color:#22222A;
+}
+.anniv-lab{font-size:10px;color:rgba(23,23,27,.58);margin-top:2px;letter-spacing:.04em}
+.anniv-date{margin-top:auto;font-size:8px;letter-spacing:.14em;color:rgba(23,23,27,.38);font-variant-numeric:tabular-nums}
+.anniv-num.sm{font-size:34px}
+
+/* level */
+.lv-row{display:flex;align-items:baseline;gap:6px;margin-top:auto}
+.lv-big{font-size:34px;font-weight:300;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.lv-badge{font-size:8px;letter-spacing:.12em;padding:2px 5px;border-radius:5px;background:rgba(23,23,27,.72);color:#fff}
+.lv-pct{margin-left:auto;font-size:9px;color:rgba(23,23,27,.45);font-variant-numeric:tabular-nums}
+.lv-bar{height:3px;border-radius:3px;background:rgba(23,23,27,.1);margin-top:9px;overflow:hidden}
+.lv-bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,rgba(23,23,27,.75),rgba(23,23,27,.45));transition:width .5s var(--ease)}
+.lv-sub{display:flex;justify-content:space-between;margin-top:7px;font-size:8px;color:rgba(23,23,27,.42)}
+
+/* calendar */
+.cal{padding:12px 12px 10px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cal-m{font-size:10.5px;font-weight:600;letter-spacing:.04em}
+.cal-m span{color:rgba(23,23,27,.4);font-weight:500;margin-left:4px;font-size:9px;letter-spacing:.1em}
+.cal-nav{display:flex;gap:2px}
+.cal-nav button{width:20px;height:20px;border-radius:7px;display:grid;place-items:center;color:rgba(23,23,27,.45)}
+.cal-nav button:active{background:rgba(23,23,27,.06)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:19px;gap:3px;flex:1;align-content:center}
+.cal-w{font-size:7px;text-align:center;color:rgba(23,23,27,.32);letter-spacing:.04em;padding-bottom:1px}
+.cal-d{
+  display:grid;place-items:center;border-radius:6px;font-size:8.5px;
+  color:rgba(23,23,27,.66);font-variant-numeric:tabular-nums;position:relative;transition:background .2s;
+}
+.cal-d.dim{color:rgba(23,23,27,.16)}
+.cal-d.today{box-shadow:inset 0 0 0 1px rgba(23,23,27,.45);font-weight:600;color:var(--ink)}
+.cal-foot{margin-top:5px;font-size:7.5px;color:rgba(23,23,27,.34);letter-spacing:.04em;text-align:center}
+
+/* 纯渐变壁纸时模糊不可见，省掉 backdrop-filter 换取滚动帧率 */
+.home:not(.wallimg) .glassw,
+.home:not(.wallimg) .dlg,
+.home:not(.wallimg) .music{-webkit-backdrop-filter:none;backdrop-filter:none}

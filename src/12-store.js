@@ -6,6 +6,9 @@ window.APPS = {
   book:     { id: 'book',     name: '世界书', icon: 'book',    tint: 'linear-gradient(150deg,#B0A6BC,#82788F)', route: 'worldbooks' },
   memory:   { id: 'memory',   name: '记忆',   icon: 'memory',  tint: 'linear-gradient(150deg,#C9B49C,#A08A72)', route: 'memories' },
   archive:  { id: 'archive',  name: '档案',   icon: 'archive', tint: 'linear-gradient(150deg,#9DADBC,#71818F)', route: 'archive' },
+  music:    { id: 'music',    name: '音乐',   icon: 'music',   tint: 'linear-gradient(150deg,#B4ABA0,#7E766C)', route: 'music' },
+  books:    { id: 'books',    name: '书架',   icon: 'bookmark',tint: 'linear-gradient(150deg,#B5BDAE,#7D8778)', route: 'books' },
+  time:     { id: 'time',     name: '时光',   icon: 'clock',   tint: 'linear-gradient(150deg,#C5B7A5,#94836F)', route: 'time' },
   store:    { id: 'store',    name: '商店',   icon: 'store',   tint: 'linear-gradient(150deg,#CDBD97,#A79367)', route: 'store' },
   notices:  { id: 'notices',  name: '通知',   icon: 'bell',    tint: 'linear-gradient(150deg,#B6B6BA,#8B8B91)', route: 'notices' },
   beauty:   { id: 'beauty',   name: '美化',   icon: 'palette', tint: 'linear-gradient(150deg,#C6A9B4,#9C7E8A)', route: 'beauty' },
@@ -50,7 +53,13 @@ function defaultCfg() {
           { id: 'w_dialog', x: 0, y: 4, w: 2, h: 2, kind: 'dialog' },
           { id: 'w_music', x: 2, y: 4, w: 2, h: 2, kind: 'music' }
         ],
-        []
+        [
+          { id: 'w_anniv', x: 0, y: 0, w: 2, h: 2, kind: 'anniv' },
+          { id: 'w_level', x: 2, y: 0, w: 2, h: 2, kind: 'level' },
+          { id: 'w_cal', x: 0, y: 2, w: 4, h: 2, kind: 'calendar' },
+          { id: 'w_read', x: 0, y: 4, w: 2, h: 2, kind: 'reading' },
+          { id: 'w_diary', x: 2, y: 4, w: 2, h: 2, kind: 'diary' }
+        ]
       ],
       dock: ['store', 'notices', 'beauty', 'settings']
     },
@@ -59,6 +68,7 @@ function defaultCfg() {
       bgKey: '', base: '#EFEBE3',
       polaroidKey: '', polaroidCap: 'slow morning',
       music: { title: 'Soft Static', artist: 'LIWU RADIO', dur: 214, played: 62 },
+      anniv: { date: '', label: '在一起' },
       dialog: [
         { text: '今天也会是很普通的一天吗？', who: 'them' },
         { text: '普通就很好。', who: 'me' }
@@ -68,7 +78,21 @@ function defaultCfg() {
     removedApps: [],
     moments: [],
     momentsCoverKey: '',
-    momentsSig: '把日子过成一张慢慢显影的照片。'
+    momentsSig: '把日子过成一张慢慢显影的照片。',
+    life: {
+      music: {
+        tracks: [
+          { id: 'tr_soft', title: 'Soft Static', artist: 'LIWU RADIO', dur: 214 },
+          { id: 'tr_late', title: 'Late Bus', artist: 'LIWU RADIO', dur: 187 },
+          { id: 'tr_window', title: 'Window Seat', artist: 'LIWU RADIO', dur: 243 }
+        ],
+        cur: 'tr_soft',
+        mode: 'loop'
+      },
+      books: [],
+      annivs: [],
+      diary: []
+    }
   };
 }
 
@@ -89,6 +113,7 @@ window.S = Vue.reactive({
   homePage: 0,
   musicPlaying: false,
   sizes: [],
+  stats: { total: 0, days: {} },
   busy: '',
   statusDark: false
 });
@@ -157,6 +182,16 @@ window.A = {
     // 新账号第一次进来时，明信片跟着昵称走，避免一直显示「未命名」
     if (!state.cfg.home.name || state.cfg.home.name === '未命名') state.cfg.home.name = acc.name || '未命名';
     state.cfg.ui = Object.assign(defaultCfg().ui, state.cfg.ui || {});
+    state.cfg.life = Object.assign(defaultCfg().life, state.cfg.life || {});
+    state.cfg.life.music = Object.assign(defaultCfg().life.music, state.cfg.life.music || {});
+    ['books', 'annivs', 'diary'].forEach((k) => { if (!Array.isArray(state.cfg.life[k])) state.cfg.life[k] = []; });
+    // 老账号：桌面上的那个纪念日，升级成时光里的第一条
+    if (!state.cfg.life.annivs.length && state.cfg.home.anniv && state.cfg.home.anniv.date) {
+      state.cfg.life.annivs = [{
+        id: U.uid('an'), date: state.cfg.home.anniv.date,
+        label: state.cfg.home.anniv.label || '在一起', note: '', main: true, ts: Date.now()
+      }];
+    }
     state.msgs = {};
     state.typing = {};
     state.editing = false;
@@ -168,6 +203,7 @@ window.A = {
       acc.avatarKey, state.cfg.ui.wallpaperKey
     ].filter(Boolean).map((k) => A.resolveImg(k)));
     A.applyGlobalBeauty();
+    A.ensureStats();
   },
 
   async register(form) {
@@ -301,6 +337,45 @@ window.A = {
     return state.msgs[chatId];
   },
 
+  /* ---------------- lightweight stats (level / calendar) ---------------- */
+  dayKey(ts) { const d = new Date(ts); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); },
+  statsKey() { return 'stats_' + (state.account ? state.account.id : 'anon'); },
+  async ensureStats(force) {
+    if (!state.account) return;
+    if (!force && state.stats && state.stats.total) return;
+    if (!force) {
+      const rec = await DB.get('meta', A.statsKey());
+      if (rec && rec.value) { state.stats = rec.value; return; }
+    }
+    const all = await DB.all('messages');
+    const days = {};
+    let total = 0;
+    for (const m of all) {
+      if (m.accountId !== state.account.id) continue;
+      total++;
+      const k = A.dayKey(m.ts);
+      days[k] = (days[k] || 0) + 1;
+    }
+    state.stats = { total, days };
+    A.saveStats();
+  },
+  saveStats() {
+    clearTimeout(A._stT);
+    A._stT = setTimeout(() => {
+      if (!state.account) return;
+      DB.put('meta', { key: A.statsKey(), value: JSON.parse(JSON.stringify(state.stats)) });
+    }, 600);
+  },
+  bumpStats(ts, delta) {
+    if (!state.stats) state.stats = { total: 0, days: {} };
+    const d = delta == null ? 1 : delta;
+    state.stats.total = Math.max(0, state.stats.total + d);
+    const k = A.dayKey(ts == null ? Date.now() : ts);
+    const n = (state.stats.days[k] || 0) + d;
+    if (n > 0) state.stats.days[k] = n; else delete state.stats.days[k];
+    A.saveStats();
+  },
+
   async appendMessage(chatId, role, raw, meta) {
     const chat = A.chatById(chatId);
     const seq = (chat ? chat.seq : 0) + 1;
@@ -317,6 +392,7 @@ window.A = {
       if (role === 'char') chat.unread = (chat.unread || 0) + 1;
       await DB.put('chats', JSON.parse(JSON.stringify(chat)));
     }
+    A.bumpStats(msg.ts, 1);
     // threshold check
     if (role === 'char' && chat) A.maybeSummarize(chat);
     return msg;
@@ -686,6 +762,193 @@ window.A = {
     });
   },
 
+  /* ---------------- life: music / books / anniversaries / diary ---------------- */
+  musicTrack(id) {
+    const m = state.cfg.life.music;
+    return (m.tracks || []).find((t) => t.id === id) || null;
+  },
+  playTrack(id, autoplay) {
+    const t = A.musicTrack(id);
+    if (!t) return;
+    state.cfg.life.music.cur = t.id;
+    state.cfg.home.music = Object.assign({}, state.cfg.home.music, {
+      title: t.title, artist: t.artist, dur: t.dur, played: 0
+    });
+    state.musicPlaying = autoplay !== false;
+    saveCfg();
+  },
+  toggleMusic() {
+    state.musicPlaying = !state.musicPlaying;
+    saveCfg();
+  },
+  setMusicMode(mode) {
+    state.cfg.life.music.mode = mode;
+    saveCfg();
+  },
+  nextTrack(dir, ended) {
+    const m = state.cfg.life.music;
+    const list = m.tracks || [];
+    if (!list.length) { state.musicPlaying = false; return; }
+    let i = list.findIndex((t) => t.id === m.cur);
+    if (i < 0) i = 0;
+    const mode = m.mode || 'loop';
+    if (ended && mode === 'one') { A.playTrack(list[i].id, true); return; }
+    if (mode === 'shuffle' && list.length > 1) {
+      let j = i;
+      while (j === i) j = Math.floor(Math.random() * list.length);
+      i = j;
+    } else {
+      i = (i + (dir || 1) + list.length) % list.length;
+    }
+    A.playTrack(list[i].id, state.musicPlaying !== false);
+  },
+  tickMusic() {
+    if (!state.musicPlaying || !state.account) return;
+    const m = state.cfg.home.music;
+    m.played = (m.played || 0) + 1;
+    if (m.played >= (m.dur || 1)) { A.nextTrack(1, true); return; }
+    if (m.played % 15 === 0) saveCfg();
+  },
+  addTrack(t) {
+    const list = state.cfg.life.music.tracks;
+    const rec = Object.assign({ id: U.uid('tr'), title: '未命名', artist: 'LIWU RADIO', dur: 200 }, t);
+    list.push(rec);
+    saveCfg();
+    return rec;
+  },
+  delTrack(id) {
+    const m = state.cfg.life.music;
+    m.tracks = m.tracks.filter((t) => t.id !== id);
+    if (m.cur === id) {
+      if (m.tracks.length) A.playTrack(m.tracks[0].id, state.musicPlaying);
+      else { m.cur = ''; state.musicPlaying = false; }
+    }
+    saveCfg();
+  },
+
+  bookById(id) { return (state.cfg.life.books || []).find((b) => b.id === id) || null; },
+  bookTint(title) {
+    const sets = [
+      'linear-gradient(155deg,#8E8577,#4F4A42)', 'linear-gradient(155deg,#8A9581,#49533F)',
+      'linear-gradient(155deg,#9A857C,#584741)', 'linear-gradient(155deg,#8894A3,#49525F)',
+      'linear-gradient(155deg,#A3937A,#5C5140)'
+    ];
+    return sets[Math.abs(U.hash(title || 'x').split('').reduce((a, c) => a + c.charCodeAt(0), 0)) % sets.length];
+  },
+  addBook(b) {
+    const rec = Object.assign({
+      id: U.uid('bk'), title: '未命名', author: '', total: 320, cur: 0,
+      status: 'reading', quotes: [], createdAt: Date.now()
+    }, b || {});
+    rec.tint = rec.tint || A.bookTint(rec.title);
+    state.cfg.life.books.unshift(rec);
+    saveCfg();
+    return rec;
+  },
+  updateBook(id, patch) {
+    const b = A.bookById(id);
+    if (!b) return null;
+    Object.assign(b, patch);
+    if (b.cur >= b.total) b.status = 'done';
+    saveCfg();
+    return b;
+  },
+  delBook(id) {
+    state.cfg.life.books = state.cfg.life.books.filter((b) => b.id !== id);
+    saveCfg();
+  },
+  addQuote(bookId, q) {
+    const b = A.bookById(bookId);
+    if (!b) return;
+    b.quotes = b.quotes || [];
+    b.quotes.unshift(Object.assign({ id: U.uid('q'), ts: Date.now() }, q));
+    saveCfg();
+  },
+  delQuote(bookId, qid) {
+    const b = A.bookById(bookId);
+    if (!b) return;
+    b.quotes = (b.quotes || []).filter((q) => q.id !== qid);
+    saveCfg();
+  },
+
+  mainAnniv() {
+    const list = state.cfg.life.annivs || [];
+    return list.find((a) => a.main) || list[0] || null;
+  },
+  syncAnniv() {
+    const m = A.mainAnniv();
+    if (!m) return;
+    state.cfg.home.anniv = { date: m.date, label: m.label };
+    saveCfg();
+  },
+  syncAnnivFromHome() {
+    const m = A.mainAnniv();
+    if (!m) {
+      if (state.cfg.home.anniv && state.cfg.home.anniv.date) {
+        state.cfg.life.annivs.push({
+          id: U.uid('an'), date: state.cfg.home.anniv.date,
+          label: state.cfg.home.anniv.label || '在一起', note: '', main: true, ts: Date.now()
+        });
+        saveCfg();
+      }
+      return;
+    }
+    m.date = state.cfg.home.anniv.date;
+    m.label = state.cfg.home.anniv.label;
+    saveCfg();
+  },
+  addAnniv(a) {
+    const list = state.cfg.life.annivs;
+    const rec = Object.assign({ id: U.uid('an'), date: '', label: '值得记住', note: '', ts: Date.now() }, a);
+    rec.main = !list.length;
+    list.push(rec);
+    if (rec.main) A.syncAnniv(); else saveCfg();
+    return rec;
+  },
+  updateAnniv(id, patch) {
+    const a = state.cfg.life.annivs.find((x) => x.id === id);
+    if (!a) return;
+    Object.assign(a, patch);
+    if (a.main) A.syncAnniv(); else saveCfg();
+  },
+  setMainAnniv(id) {
+    state.cfg.life.annivs.forEach((a) => { a.main = a.id === id; });
+    A.syncAnniv();
+  },
+  delAnniv(id) {
+    const list = state.cfg.life.annivs;
+    const was = list.find((a) => a.id === id);
+    state.cfg.life.annivs = list.filter((a) => a.id !== id);
+    if (was && was.main) {
+      if (state.cfg.life.annivs.length) { state.cfg.life.annivs[0].main = true; A.syncAnniv(); }
+      else { state.cfg.home.anniv = { date: '', label: '在一起' }; saveCfg(); }
+    } else saveCfg();
+  },
+  dayNo() {
+    const m = A.mainAnniv();
+    const base = m && m.date ? new Date(m.date + 'T00:00:00')
+      : new Date(state.account ? (state.account.createdAt || Date.now()) : Date.now());
+    if (isNaN(base)) return 1;
+    const now = new Date(); now.setHours(0, 0, 0, 0); base.setHours(0, 0, 0, 0);
+    return Math.max(1, Math.round((now - base) / 86400000) + 1);
+  },
+  addDiary(d) {
+    const rec = Object.assign({ id: U.uid('dy'), ts: Date.now(), text: '', mood: '平静' }, d || {});
+    state.cfg.life.diary.unshift(rec);
+    saveCfg();
+    return rec;
+  },
+  updateDiary(id, patch) {
+    const d = state.cfg.life.diary.find((x) => x.id === id);
+    if (!d) return;
+    Object.assign(d, patch);
+    saveCfg();
+  },
+  delDiary(id) {
+    state.cfg.life.diary = state.cfg.life.diary.filter((d) => d.id !== id);
+    saveCfg();
+  },
+
   /* ---------------- layout ---------------- */
   layout() { return state.cfg.layout; },
   appInLayout(app) {
@@ -713,6 +976,38 @@ window.A = {
     state.layoutKey++;
     saveCfg();
   },
+  /* ---------------- desktop widgets ---------------- */
+  widgetSize(kind) {
+    return ({ postcard: [4, 2], polaroid: [2, 2], music: [2, 2], dialog: [2, 2], anniv: [2, 2], level: [2, 2], calendar: [4, 2], reading: [2, 2], diary: [2, 2], clock: [4, 2] })[kind] || [2, 2];
+  },
+  hasWidget(kind) {
+    return state.cfg.layout.pages.some((p) => p.some((it) => it.kind === kind));
+  },
+  addWidget(kind) {
+    if (A.hasWidget(kind)) return A.toast('这个组件已经在桌面上了');
+    const [w, h] = A.widgetSize(kind);
+    const pages = state.cfg.layout.pages;
+    const freeIn = (items) => {
+      const occ = (x, y, it) => x < it.x + it.w && x + w > it.x && y < it.y + it.h && y + h > it.y;
+      for (let y = 0; y < 6; y++) for (let x = 0; x <= 4 - w; x++) if (!items.some((it) => occ(x, y, it))) return { x, y };
+      return null;
+    };
+    let target = null, slot = null;
+    for (const p of pages) { const f = freeIn(p); if (f) { target = p; slot = f; break; } }
+    if (!slot) { target = []; pages.push(target); slot = { x: 0, y: 0 }; }
+    target.push({ id: 'w_' + kind + '_' + U.uid('x'), x: slot.x, y: slot.y, w, h, kind });
+    state.layoutKey++;
+    saveCfg();
+    A.toast('已添加到桌面');
+  },
+  removeWidget(kind) {
+    state.cfg.layout.pages.forEach((p) => {
+      for (let i = p.length - 1; i >= 0; i--) if (p[i].kind === kind) p.splice(i, 1);
+    });
+    state.layoutKey++;
+    saveCfg();
+  },
+
   restoreApp(appId) {
     const page = state.cfg.layout.pages[0];
     const free = A.findFree(page, 1, 1);

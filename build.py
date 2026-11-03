@@ -16,9 +16,10 @@ SRC = ROOT / 'src'
 OUT = ROOT / 'index.html'
 COPY = ROOT / 'liwu.html'
 
-css_files = ['01-tokens.css', '02-shell.css', '03-chat.css', '04-apps.css', '05-fix.css']
+css_files = ['01-tokens.css', '02-shell.css', '03-chat.css', '04-apps.css', '04b-life.css', '05-fix.css']
 js_files = ['10-icons.js', '11-db.js', '12-store.js', '13-ui.js', '20-home.js',
-            '21-chat.js', '30-wb-mem.js', '31-archive-store.js', '32-beauty-settings.js', '40-main.js']
+            '21-chat.js', '30-wb-mem.js', '31-archive-store.js', '32-beauty-settings.js',
+            '33-life.js', '40-main.js']
 
 css = '\n'.join((SRC / f).read_text() for f in css_files if (SRC / f).exists())
 js = '\n'.join((SRC / f).read_text() for f in js_files if (SRC / f).exists())

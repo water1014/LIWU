@@ -41,11 +41,15 @@ window.loadDemoData = async function () {
     });
   }
   if (S.chars.some((c) => c.demo)) { A.toast('演示数据已经载入过了'); return; }
+  let spread = 0;
   const mk = async (data, lines) => {
     const c = await A.saveCharacter(Object.assign({ demo: true, avatarKey: '' }, data));
     const chat = await A.ensureChat(c.id);
-    for (const l of lines) {
-      await A.appendMessage(chat.id, l[0], l[1], l[2] || {});
+    for (let li = 0; li < lines.length; li++) {
+      const l = lines[li];
+      // 把演示对话摊到最近几天，日历热力图才有东西看
+      const ts = Date.now() - (lines.length - li) * 5 * 3600e3 - (spread++) * 26 * 3600e3;
+      await A.appendMessage(chat.id, l[0], l[1], Object.assign({ ts }, l[2] || {}));
     }
     const m = { id: U.uid('mem'), accountId: S.account.id, charId: c.id };
     await A.addMemory({ charId: c.id, type: 'permanent', title: '底色 · ' + c.name, content: data.perm, keywords: ['底色'] });
@@ -112,6 +116,32 @@ window.loadDemoData = async function () {
     imgs: [], ts: Date.now() - 3600e3, likes: [], comments: [], shares: 0
   });
   S.cfg.momentsSig = '把日子过成一张慢慢显影的照片。';
+  const ago = new Date(); ago.setDate(ago.getDate() - 61);
+  S.cfg.home.anniv = { date: ago.toISOString().slice(0, 10), label: '在一起' };
+  S.cfg.home.sign = '把日子过成一张慢慢显影的照片。';
+
+  // 时光：纪念日与日记
+  const back = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); };
+  S.cfg.life.annivs = [
+    { id: U.uid('an'), date: back(88), label: '第一次说话', note: '在书店门口躲雨，问了句「这里还开着吗」。', main: false, ts: Date.now() },
+    { id: U.uid('an'), date: back(61), label: '在一起', note: '', main: true, ts: Date.now() },
+    { id: U.uid('an'), date: back(9), label: '第一次一起看完一部电影', note: '片尾字幕走完才起身。', main: false, ts: Date.now() }
+  ];
+  S.cfg.life.diary = [
+    { id: U.uid('dy'), ts: Date.now() - 5 * 3600e3, mood: '平静', text: '今天没做什么。窗外的雨下到下午就停了，地上还留着一点湿。\n给他拍了一张水的照片，他回得很快，说像一面没擦干净的镜子。' },
+    { id: U.uid('dy'), ts: Date.now() - 30 * 3600e3, mood: '想你', text: '忽然意识到，已经习惯了睡前把今天的事讲一遍。\n讲给谁听其实不重要，重要的是有人会在。' }
+  ];
+  // 书架：一起读的书
+  S.cfg.life.books = [
+    { id: U.uid('bk'), title: '你当像鸟飞往你的山', author: '塔拉·韦斯特弗', total: 388, cur: 214, status: 'reading', tint: A.bookTint('你当像鸟飞往你的山'), createdAt: Date.now() - 20 * 86400e3, quotes: [
+      { id: U.uid('q'), text: '你可以爱一个人，但仍然选择和他说再见。', page: 186, ts: Date.now() - 4 * 86400e3 }
+    ] },
+    { id: U.uid('bk'), title: '我与地坛', author: '史铁生', total: 246, cur: 246, status: 'done', tint: A.bookTint('我与地坛'), createdAt: Date.now() - 50 * 86400e3, quotes: [
+      { id: U.uid('q'), text: '就命运而言，休论公道。', page: 97, ts: Date.now() - 18 * 86400e3 }
+    ] },
+    { id: U.uid('bk'), title: '夏天、烟火和我的尸体', author: '乙一', total: 212, cur: 46, status: 'reading', tint: A.bookTint('夏天、烟火和我的尸体'), createdAt: Date.now() - 3 * 86400e3, quotes: [] }
+  ];
+  if (!S.cfg.home.name || S.cfg.home.name === '未命名') S.cfg.home.name = S.account.name;
   await saveCfg(true);
   await A.refreshSizes();
   A.toast('演示数据已载入');
@@ -168,6 +198,10 @@ const VIEWS = {
   'memories': MEM.Page,
   'archive': ARCH.List,
   'archive.edit': ARCH.Edit,
+  'music': MUSIC.Page,
+  'books': BOOKS.Page,
+  'book.detail': BOOKS.Detail,
+  'time': TIME.Page,
   'store': STORE.Page,
   'notices': NOTICE.Page,
   'beauty': BEAUTY.Page,
@@ -251,6 +285,7 @@ app.mount('#app');
 A.boot().then(async () => {
   if (S.cfg.ui.fontKey) await A.applyFont();
   A.applyGlobalBeauty();
+  setInterval(() => A.tickMusic(), 1000);
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && NAV.stack.length) A.back();
   });

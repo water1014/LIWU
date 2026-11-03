@@ -103,8 +103,188 @@ HOME.Dialog = {
   </div>`
 };
 
+HOME.Anniv = {
+  computed: {
+    cfg() { return S.cfg.home.anniv || {}; },
+    days() {
+      if (!this.cfg.date) return null;
+      const t = new Date(this.cfg.date + 'T00:00:00');
+      if (isNaN(t)) return null;
+      const now = new Date(); now.setHours(0, 0, 0, 0);
+      return Math.round((now - t) / 86400000) + 1;
+    },
+    future() { return this.days != null && this.days < 1; },
+    big() { return this.days == null ? '＋' : Math.abs(this.days); },
+    dateText() { return this.cfg.date ? this.cfg.date.replace(/-/g, '.') : '点一下设置日期'; }
+  },
+  methods: { open() { if (!S.editing) this.$parent.editWidget('anniv'); } },
+  template: `<div class="widget glassw anniv" @click="open">
+    <div class="gw-top">
+      <span class="gw-cap">{{future ? 'still counting' : 'days together'}}</span>
+      <ico class="gw-ico" name="heart" :size="12" :sw="1.4"/>
+    </div>
+    <div class="anniv-num" :class="{sm:big>999}">{{big}}</div>
+    <div class="anniv-lab" v-if="days!=null">{{future ? '天后 · ' + (cfg.label || '见面') : '天 · ' + (cfg.label || '在一起')}}</div>
+    <div class="anniv-lab" v-else>设置一个纪念日</div>
+    <div class="anniv-date">{{dateText}}</div>
+  </div>`
+};
+
+HOME.Level = {
+  computed: {
+    total() { return (S.stats && S.stats.total) || 0; },
+    lv() { return 1 + Math.floor(this.total / 40); },
+    pct() { return Math.round(((this.total % 40) / 40) * 100); },
+    human() { return this.total >= 1000 ? (this.total / 1000).toFixed(1) + 'k' : this.total; },
+    tail() { return this.total < 10 ? '才刚刚开始' : this.total < 200 ? '慢慢熟起来' : '已经聊了很久'; }
+  },
+  methods: { open() { if (!S.editing) A.toast('熟悉度由聊天条数自动累积'); } },
+  template: `<div class="widget glassw lv" @click="open">
+    <div class="gw-top">
+      <span class="gw-cap">familiarity</span>
+      <span class="lv-badge">Lv.{{lv}}</span>
+    </div>
+    <div class="lv-row">
+      <span class="lv-big">{{pct}}<span style="font-size:13px;color:rgba(23,23,27,.4)">%</span></span>
+      <span class="lv-pct">{{40 - (total % 40)}} 条后升级</span>
+    </div>
+    <div class="lv-bar"><i :style="{width:Math.max(3,pct)+'%'}"></i></div>
+    <div class="lv-sub"><span>共 {{human}} 条对话</span><span>{{tail}}</span></div>
+  </div>`
+};
+
+HOME.Calendar = {
+  data() { return { off: 0 }; },
+  computed: {
+    month() { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() + this.off); return d; },
+    title() { return this.month.getFullYear() + ' 年 · ' + (this.month.getMonth() + 1) + ' 月'; },
+    heat() {
+      const src = (S.stats && S.stats.days) || {};
+      let max = 1;
+      for (const k in src) if (src[k] > max) max = src[k];
+      return { map: src, max };
+    },
+    cells() {
+      const y = this.month.getFullYear(), mo = this.month.getMonth();
+      const first = new Date(y, mo, 1).getDay();
+      const days = new Date(y, mo + 1, 0).getDate();
+      const today = new Date();
+      const isNow = today.getFullYear() === y && today.getMonth() === mo;
+      const out = [];
+      for (let i = 0; i < first; i++) out.push({ n: 0 });
+      for (let i = 1; i <= days; i++) {
+        const c = this.heat.map[y + '-' + (mo + 1) + '-' + i] || 0;
+        out.push({ n: i, c, today: isNow && today.getDate() === i });
+      }
+      return out;
+    }
+  },
+  methods: {
+    shade(c) {
+      if (!c) return {};
+      const max = this.heat.max || 1;
+      const a = 0.1 + 0.55 * Math.min(1, c / max);
+      return { background: 'rgba(92,107,87,' + a.toFixed(2) + ')', color: a > 0.4 ? '#fff' : 'inherit' };
+    },
+    open() { if (!S.editing) A.toast('颜色越深，那天聊得越多'); }
+  },
+  template: `<div class="widget glassw cal" @click="open">
+    <div class="cal-head">
+      <div class="cal-m">{{title}}<span>· {{cells.filter(c=>c.c).length}} 天有对话</span></div>
+      <div class="cal-nav">
+        <button @click.stop="off--"><ico name="chevronLeft" :size="11" :sw="2"/></button>
+        <button @click.stop="off++"><ico name="chevronRight" :size="11" :sw="2"/></button>
+      </div>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-w" v-for="w in ['日','一','二','三','四','五','六']" :key="w">{{w}}</div>
+      <div class="cal-d" v-for="(d,i) in cells" :key="i" :class="{dim:!d.n,today:d.today}" :style="shade(d.c)">{{d.n||''}}</div>
+    </div>
+    <div class="cal-foot">颜色越深，那天聊得越多</div>
+  </div>`
+};
+
+HOME.Clock = {
+  data() { return { time: '', date: '', tick: null }; },
+  computed: {
+    day() { return A.dayNo(); },
+    label() { const m = A.mainAnniv(); return m ? m.label : '还没有纪念日'; }
+  },
+  mounted() { this.paint(); this.tick = setInterval(this.paint, 15000); },
+  beforeUnmount() { clearInterval(this.tick); },
+  methods: {
+    paint() {
+      const d = new Date();
+      this.time = U.pad(d.getHours()) + ':' + U.pad(d.getMinutes());
+      this.date = (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 · 周' + '日一二三四五六'[d.getDay()];
+    },
+    open() { if (!S.editing) A.go('time'); }
+  },
+  template: `<div class="widget glassw clockw" @click="open">
+    <div class="gw-top">
+      <span class="gw-cap">local time</span>
+      <ico class="gw-ico" name="clock" :size="12" :sw="1.4"/>
+    </div>
+    <div class="cw-time">{{time}}</div>
+    <div class="cw-date">{{date}}</div>
+    <div class="cw-foot"><span>DAY {{day}}</span><span>{{label}}</span></div>
+  </div>`
+};
+
+HOME.Reading = {
+  computed: {
+    book() {
+      const bs = S.cfg.life.books || [];
+      return bs.find((b) => b.status === 'reading') || bs[0] || null;
+    },
+    pct() { return this.book ? Math.min(100, Math.round((this.book.cur || 0) / Math.max(1, this.book.total || 1) * 100)) : 0; },
+    quote() { return this.book && this.book.quotes && this.book.quotes.length ? this.book.quotes[0].text : ''; }
+  },
+  methods: {
+    open() { if (!S.editing) A.go('books'); }
+  },
+  template: `<div class="widget glassw readw" @click="open">
+    <div class="gw-top">
+      <span class="gw-cap">reading</span>
+      <ico class="gw-ico" name="book" :size="12" :sw="1.4"/>
+    </div>
+    <template v-if="book">
+      <div class="rw-title">{{book.title}}</div>
+      <div class="rw-author">{{book.author || '未署名'}}</div>
+      <div class="rw-quote" v-if="quote">「{{quote}}」</div>
+      <div class="rw-bar"><i :style="{width:Math.max(3,pct)+'%'}"></i></div>
+      <div class="rw-foot"><span>第 {{book.cur||0}} / {{book.total}} 页</span><span>{{pct}}%</span></div>
+    </template>
+    <template v-else>
+      <div class="rw-empty"><span>＋</span>放一本书进来</div>
+      <div class="rw-foot"><span>书架还是空的</span></div>
+    </template>
+  </div>`
+};
+
+HOME.Diary = {
+  computed: {
+    last() { return (S.cfg.life.diary || [])[0] || null; },
+    day() { return A.dayNo(); },
+    dateText() {
+      const d = new Date();
+      return (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+    }
+  },
+  methods: { open() { if (!S.editing) A.go('time', { tab: 'diary' }); } },
+  template: `<div class="widget glassw diaryw" @click="open">
+    <div class="gw-top">
+      <span class="gw-cap">my diary</span>
+      <span class="dw-day">DAY {{day}}</span>
+    </div>
+    <div class="dw-text" :class="{empty:!last}">{{last ? last.text : '写点什么，留给以后。'}}</div>
+    <div class="dw-foot"><span>{{dateText}}</span><span v-if="last">{{last.mood}}</span></div>
+  </div>`
+};
+
 HOME.Home = {
-  components: { 'pc-card': HOME.Postcard, 'pol-card': HOME.Polaroid, 'music-card': HOME.Music, 'dlg-card': HOME.Dialog },
+  components: { 'pc-card': HOME.Postcard, 'pol-card': HOME.Polaroid, 'music-card': HOME.Music, 'dlg-card': HOME.Dialog,
+    'anniv-card': HOME.Anniv, 'lv-card': HOME.Level, 'cal-card': HOME.Calendar, 'read-card': HOME.Reading, 'diary-card': HOME.Diary, 'clock-card': HOME.Clock },
   data() {
     return {
       S, editing: false, press: null, drag: null, dragStyle: {},
@@ -128,15 +308,8 @@ HOME.Home = {
     'S.cfg.ui.wallpaperKey': { immediate: true, handler(k) { if (k) A.resolveImg(k); } },
     editing(v) { S.editing = v; }
   },
-  mounted() {
-    this.tick = setInterval(() => {
-      if (!S.musicPlaying) return;
-      const m = S.cfg.home.music;
-      m.played += 1;
-      if (m.played >= m.dur) { m.played = 0; S.musicPlaying = false; }
-    }, 1000);
-  },
-  beforeUnmount() { clearInterval(this.tick); },
+  mounted() {},
+  beforeUnmount() {},
   methods: {
     meta(id) { return window.appMeta(id); },
     cellStyle(it) {
@@ -241,7 +414,7 @@ HOME.Home = {
       if (!grid) { this.resetDrag(); return; }
       const rect = grid.getBoundingClientRect();
       const pi = Number(grid.dataset.page);
-      const gap = 12, rowH = 94, padTop = 6;
+      const gap = 12, rowH = 98, padTop = 6;
       const cellW = (rect.width - gap * 3) / 4;
       let col = Math.floor((x - rect.left) / (cellW + gap));
       let row = Math.floor((y - rect.top - padTop) / (rowH + gap));
@@ -345,6 +518,11 @@ HOME.Home = {
       saveCfg();
     },
     save() { saveCfg(); },
+    saveSheet() {
+      saveCfg(true);
+      if (this.sheet === 'anniv') A.syncAnnivFromHome();
+      this.sheet = '';
+    },
     resetPage() {
       if (!confirm('恢复默认桌面布局？自定义位置会丢失。')) return;
       S.cfg.layout = { pages: [JSON.parse(JSON.stringify(HOME.defaultPage())), []], dock: ['store', 'notices', 'beauty', 'settings'] };
@@ -352,7 +530,7 @@ HOME.Home = {
       saveCfg();
     }
   },
-  template: `<div class="home" :class="{editing}" id="home-stage">
+  template: `<div class="home" :class="{editing, wallimg:hasWall}" id="home-stage">
     <div class="wallpaper" :class="{tint:!hasWall,noise:!hasWall}" :style="wallStyle"></div>
     <div class="home-scrim"></div>
 
@@ -374,6 +552,12 @@ HOME.Home = {
             <template v-else-if="it.kind==='polaroid'"><pol-card :item="it"/></template>
             <template v-else-if="it.kind==='music'"><music-card :item="it"/></template>
             <template v-else-if="it.kind==='dialog'"><dlg-card :item="it"/></template>
+            <template v-else-if="it.kind==='anniv'"><anniv-card :item="it"/></template>
+            <template v-else-if="it.kind==='level'"><lv-card :item="it"/></template>
+            <template v-else-if="it.kind==='calendar'"><cal-card :item="it"/></template>
+            <template v-else-if="it.kind==='reading'"><read-card :item="it"/></template>
+            <template v-else-if="it.kind==='diary'"><diary-card :item="it"/></template>
+            <template v-else-if="it.kind==='clock'"><clock-card :item="it"/></template>
             <template v-else>
               <button class="app" @click.stop="onAppClick(it)">
                 <span class="app-icon" :style="{background:meta(it.app).tint}"><ico :name="meta(it.app).icon" :size="25" :sw="1.5"/></span>
@@ -405,7 +589,7 @@ HOME.Home = {
     <div class="home-hint" v-if="false">长按图标编辑桌面</div>
 
     <!-- widget editors -->
-    <sheet v-if="sheet" v-model="sheet" :title="sheet==='postcard'?'明信片':sheet==='music'?'音乐盒':sheet==='dialog'?'小对话':'拍立得'" :sub="sheet==='postcard'?'这一张卡片只属于你。':'组件的细节都可以慢慢改。'">
+    <sheet v-if="sheet" v-model="sheet" :title="sheet==='postcard'?'明信片':sheet==='music'?'音乐盒':sheet==='dialog'?'小对话':sheet==='anniv'?'纪念日':'拍立得'" :sub="sheet==='postcard'?'这一张卡片只属于你。':sheet==='anniv'?'写下一个日期，剩下的交给它。':'组件的细节都可以慢慢改。'">
       <div v-if="sheet==='postcard'" class="form-stack">
         <div class="avatar-upload">
           <div class="au-ring"><av :file-key="home.avatarKey" :name="home.name" :size="56"/></div>
@@ -439,6 +623,11 @@ HOME.Home = {
         <div class="field"><label>照片落款</label><input class="input" v-model="home.polaroidCap" maxlength="20" placeholder="slow morning"></div>
       </div>
 
+      <div v-else-if="sheet==='anniv'" class="form-stack">
+        <div class="field"><label>那一天</label><input class="input" type="date" v-model="home.anniv.date"></div>
+        <div class="field"><label>这件事叫什么</label><input class="input" v-model="home.anniv.label" maxlength="10" placeholder="在一起 / 第一次见面"></div>
+        <div class="helper">纪念日会显示在桌面卡片上，跨过零点自动加一天。</div>
+      </div>
       <div v-else-if="sheet==='music'" class="form-stack">
         <div class="field"><label>歌曲名</label><input class="input" v-model="home.music.title" maxlength="24"></div>
         <div class="field"><label>歌手 / 来源</label><input class="input" v-model="home.music.artist" maxlength="24" placeholder="LIWU RADIO"></div>
@@ -453,9 +642,22 @@ HOME.Home = {
         </div>
       </div>
 
-      <template #footer><button class="btn primary block" @click="saveCfg(true);sheet=''">保存</button></template>
+      <template #footer>
+        <button v-if="sheet==='music'" class="btn grow" @click="sheet='';A.go('music')"><ico name="music" :size="15"/>播放器</button>
+        <button class="btn primary grow" @click="saveSheet">保存</button>
+      </template>
     </sheet>
   </div>`
+};
+
+HOME.defaultPage2 = function () {
+  return [
+    { id: 'w_anniv', x: 0, y: 0, w: 2, h: 2, kind: 'anniv' },
+    { id: 'w_level', x: 2, y: 0, w: 2, h: 2, kind: 'level' },
+    { id: 'w_cal', x: 0, y: 2, w: 4, h: 2, kind: 'calendar' },
+    { id: 'w_read', x: 0, y: 4, w: 2, h: 2, kind: 'reading' },
+    { id: 'w_diary', x: 2, y: 4, w: 2, h: 2, kind: 'diary' }
+  ];
 };
 
 HOME.defaultPage = function () {

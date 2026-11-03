@@ -229,7 +229,23 @@ ARCH.Edit = {
 const STORE = {};
 
 STORE.Page = {
-  data() { return { S, uploadSheet: false, name: '', html: '' }; },
+  data() {
+    return {
+      S, uploadSheet: false, name: '', html: '',
+      widgets: [
+        { kind: 'postcard', name: '明信片', desc: '4×2 · 头像、昵称、签名与背景', icon: 'image' },
+        { kind: 'polaroid', name: '拍立得', desc: '2×2 · 一张可以随时换的照片', icon: 'camera' },
+        { kind: 'music', name: '音乐盒', desc: '2×2 · 播放键、进度与曲名', icon: 'music' },
+        { kind: 'dialog', name: '小对话', desc: '2×2 · 一对可编辑的对话气泡', icon: 'comment' },
+        { kind: 'anniv', name: '纪念日', desc: '2×2 · 大数字倒数在一起的天数', icon: 'heart' },
+        { kind: 'level', name: '熟悉度', desc: '2×2 · 按聊天条数累积的等级', icon: 'zap' },
+        { kind: 'calendar', name: '日历', desc: '4×2 · 每天的聊天热力图', icon: 'calendar' },
+        { kind: 'reading', name: '在读', desc: '2×2 · 正在读的书与页码', icon: 'bookmark' },
+        { kind: 'diary', name: '日记', desc: '2×2 · 第几天，与最近一篇', icon: 'feather' },
+        { kind: 'clock', name: '时钟', desc: '4×2 · 大号时间与第几天', icon: 'clock' }
+      ]
+    };
+  },
   computed: {
     installed() { return Object.keys(APPS).filter((id) => A.appInLayout(id)); },
     removed() { return S.cfg.removedApps || []; },
@@ -278,7 +294,7 @@ STORE.Page = {
       <div class="app-head" style="padding-top:2px">
         <div class="ah-row">
           <div><h1>Store</h1><div class="desc">应用与组件。删掉的东西，都能在这里找回来。</div></div>
-          <div class="mark">8 CORE</div>
+          <div class="mark">{{Object.keys(APPS).length}} CORE</div>
         </div>
       </div>
       <div class="pad">
@@ -288,10 +304,26 @@ STORE.Page = {
               <span class="app-icon" :style="{background:meta(id).tint}"><ico :name="meta(id).icon" :size="18" :sw="1.5"/></span>
               <div class="grow"><div class="si-n">{{meta(id).name}}</div></div>
             </div>
-            <div class="si-d">{{A.appInLayout(id)?'已在桌面':'已移除，可重新下载'}}</div>
+            <div class="si-d">{{A.appInLayout(id)?'已在桌面':(removed.includes(id)?'已移除，可重新下载':'未在桌面，可添加')}}</div>
             <button class="si-btn" :class="{ok:!A.appInLayout(id)}" @click="A.appInLayout(id)?remove(id):download(id)">
-              {{A.appInLayout(id)?'移出桌面':'重新下载'}}
+              {{A.appInLayout(id)?'移出桌面':(removed.includes(id)?'重新下载':'加到桌面')}}
             </button>
+          </div>
+        </div>
+
+        <div class="section" style="padding:0;margin-top:22px">
+          <div class="section-head"><span class="section-title">桌面组件</span><span class="section-act">长按桌面也能编辑</span></div>
+          <div class="store-grid">
+            <div class="store-item" v-for="w in widgets" :key="w.kind">
+              <div class="si-top">
+                <span class="app-icon" style="background:rgba(255,255,255,.7);border:1px solid var(--line);color:var(--ink-2)"><ico :name="w.icon" :size="18" :sw="1.5"/></span>
+                <div class="grow"><div class="si-n">{{w.name}}</div></div>
+              </div>
+              <div class="si-d">{{w.desc}}</div>
+              <button class="si-btn" :class="{ok:!A.hasWidget(w.kind)}" @click="A.hasWidget(w.kind)?A.removeWidget(w.kind):A.addWidget(w.kind)">
+                {{A.hasWidget(w.kind)?'移除':'加到桌面'}}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -327,6 +359,10 @@ NOTICE.Page = {
     return {
       S, tab: 'log',
       log: [
+        '桌面新增：纪念日、熟悉度、日历热力三个组件，商店可增删',
+        '玻璃质感：组件、气泡、弹层统一为磨砂玻璃，壁纸预设扩到 6 套',
+        '「我的」改成封面资料卡 + 运行状态，一眼看到外观 / API / 存储',
+        '好友列表新增本周消息条，聊天室补上日期分隔',
         '桌面网格、明信片 / 拍立得 / 音乐盒 / 小对话组件',
         '聊天：登录注册、好友、气泡、思维链、旁白、长按编辑',
         '世界书前后中位注入 · 三层记忆 · 角色档案',
@@ -344,6 +380,18 @@ NOTICE.Page = {
       </div>
 
       <template v-if="tab==='log'">
+        <div class="note-card">
+          <div class="n-ver">v0.2.0 · LIFE</div>
+          <div class="n-t">把日子也装进手机里</div>
+          <div class="n-b" style="padding-left:0">
+            <div style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>音乐：播放列表、唱片与进度，桌面音乐盒同步</span></div>
+            <div style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>书架：在读 / 读完、页码进度、摘句收藏</span></div>
+            <div style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>时光：纪念日时间线 + 只给自己看的日记</span></div>
+            <div style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>桌面新增「在读」「日记」两个玻璃组件</span></div>
+            <div style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>发现页新增生活分区，三个应用可直接进入</span></div>
+          </div>
+          <div class="n-time">2026.11.04</div>
+        </div>
         <div class="note-card">
           <div class="n-ver">v0.1.0 · FRAMEWORK</div>
           <div class="n-t">小手机，第一次开机</div>

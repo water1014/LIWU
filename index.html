@@ -331,7 +331,7 @@ a{color:inherit;text-decoration:none}
 .wallpaper.noise:after{
   content:"";position:absolute;inset:0;
   background-image:radial-gradient(rgba(23,23,27,.16) .6px,transparent .6px);
-  background-size:4px 4px;opacity:.16;mix-blend-mode:multiply;
+  background-size:3.5px 3.5px;opacity:.26;mix-blend-mode:multiply;
 }
 .home-scrim{position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.22),transparent 22%,transparent 78%,rgba(255,255,255,.16))}
 .home-inner{position:absolute;inset:0;display:flex;flex-direction:column;padding:var(--status-h) 18px 0}
@@ -339,7 +339,7 @@ a{color:inherit;text-decoration:none}
 .pages::-webkit-scrollbar{display:none}
 .page-grid{
   min-width:100%;width:100%;scroll-snap-align:start;scroll-snap-stop:always;
-  display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:94px;gap:12px;
+  display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:98px;gap:12px;
   align-content:start;padding:6px 0 0;position:relative;
 }
 .home-foot{flex:none;display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px 0 22px}
@@ -436,7 +436,7 @@ a{color:inherit;text-decoration:none}
 .pol-tape{position:absolute;top:-4px;left:50%;transform:translateX(-50%) rotate(-4deg);width:34px;height:11px;background:rgba(226,220,205,.72);z-index:4}
 
 /* music */
-.music{background:linear-gradient(155deg,#FDFCFA,#F2EFE8);border:1px solid rgba(255,255,255,.8);box-shadow:0 12px 30px -22px rgba(23,23,27,.5);padding:13px;display:flex;flex-direction:column;justify-content:space-between}
+.music{background:rgba(255,255,255,.5);background-image:linear-gradient(155deg,rgba(255,255,255,.6),rgba(255,255,255,.16) 60%);backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);border:1px solid rgba(255,255,255,.68);box-shadow:0 16px 34px -26px rgba(23,23,27,.55),inset 0 1px 0 rgba(255,255,255,.6);padding:13px;display:flex;flex-direction:column;justify-content:space-between}
 .music-top{display:flex;gap:10px;align-items:flex-start}
 .music-art{width:54px;height:54px;border-radius:13px;flex:none;background:conic-gradient(from 210deg,#2E2E33,#54544F,#2A2A2F,#6B6B62,#2E2E33);position:relative;overflow:hidden;display:grid;place-items:center}
 .music-art:after{content:"";width:15px;height:15px;border-radius:50%;background:#F4F2EE;box-shadow:0 0 0 5px rgba(255,255,255,.1)}
@@ -455,7 +455,7 @@ a{color:inherit;text-decoration:none}
 .music-time{display:flex;justify-content:space-between;font-size:7.5px;color:var(--muted-2);font-variant-numeric:tabular-nums}
 
 /* dialogue */
-.dlg{display:flex;flex-direction:column;justify-content:center;gap:11px;padding:16px 12px;background:rgba(255,255,255,.34);border:1px solid rgba(255,255,255,.6);backdrop-filter:blur(10px);border-radius:24px}
+.dlg{display:flex;flex-direction:column;justify-content:center;gap:11px;padding:16px 12px;background:rgba(255,255,255,.44);background-image:linear-gradient(160deg,rgba(255,255,255,.5),rgba(255,255,255,.12) 64%);border:1px solid rgba(255,255,255,.66);backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4);box-shadow:0 16px 34px -26px rgba(23,23,27,.5),inset 0 1px 0 rgba(255,255,255,.6);border-radius:24px}
 .dlg-row{display:flex;align-items:flex-end;gap:6px;min-width:0}
 .dlg-row.me{flex-direction:row-reverse}
 .dlg-av{width:18px;height:18px;border-radius:50%;overflow:hidden;flex:none;background:#D8D4CB;display:grid;place-items:center;color:#fff;font-size:7px}
@@ -464,6 +464,69 @@ a{color:inherit;text-decoration:none}
 
 /* store / misc tiles */
 .tile{display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 4px;border-radius:18px;background:var(--surface);border:1px solid var(--line)}
+
+/* ============================================================
+   GLASS WIDGETS (anniversary / level / calendar)
+   ============================================================ */
+.glassw{
+  background:rgba(255,255,255,.46);
+  background-image:linear-gradient(158deg,rgba(255,255,255,.5),rgba(255,255,255,.12) 62%);
+  -webkit-backdrop-filter:blur(26px) saturate(1.55);
+  backdrop-filter:blur(26px) saturate(1.55);
+  border:1px solid rgba(255,255,255,.62);
+  box-shadow:0 16px 34px -26px rgba(23,23,27,.55),inset 0 1px 0 rgba(255,255,255,.6);
+  padding:14px;
+  display:flex;flex-direction:column;
+}
+.glassw:after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(160deg,rgba(255,255,255,.34),rgba(255,255,255,0) 42%);
+}
+.glassw > *{position:relative;z-index:1}
+.gw-top{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.gw-cap{font-size:7.5px;letter-spacing:.2em;color:rgba(23,23,27,.42);text-transform:uppercase;font-weight:600}
+.gw-ico{color:rgba(23,23,27,.34)}
+
+/* anniversary */
+.anniv-num{
+  font-size:46px;font-weight:300;line-height:.94;letter-spacing:-.035em;margin-top:auto;
+  font-variant-numeric:tabular-nums;color:#22222A;
+}
+.anniv-lab{font-size:10px;color:rgba(23,23,27,.58);margin-top:2px;letter-spacing:.04em}
+.anniv-date{margin-top:auto;font-size:8px;letter-spacing:.14em;color:rgba(23,23,27,.38);font-variant-numeric:tabular-nums}
+.anniv-num.sm{font-size:34px}
+
+/* level */
+.lv-row{display:flex;align-items:baseline;gap:6px;margin-top:auto}
+.lv-big{font-size:34px;font-weight:300;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.lv-badge{font-size:8px;letter-spacing:.12em;padding:2px 5px;border-radius:5px;background:rgba(23,23,27,.72);color:#fff}
+.lv-pct{margin-left:auto;font-size:9px;color:rgba(23,23,27,.45);font-variant-numeric:tabular-nums}
+.lv-bar{height:3px;border-radius:3px;background:rgba(23,23,27,.1);margin-top:9px;overflow:hidden}
+.lv-bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,rgba(23,23,27,.75),rgba(23,23,27,.45));transition:width .5s var(--ease)}
+.lv-sub{display:flex;justify-content:space-between;margin-top:7px;font-size:8px;color:rgba(23,23,27,.42)}
+
+/* calendar */
+.cal{padding:12px 12px 10px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cal-m{font-size:10.5px;font-weight:600;letter-spacing:.04em}
+.cal-m span{color:rgba(23,23,27,.4);font-weight:500;margin-left:4px;font-size:9px;letter-spacing:.1em}
+.cal-nav{display:flex;gap:2px}
+.cal-nav button{width:20px;height:20px;border-radius:7px;display:grid;place-items:center;color:rgba(23,23,27,.45)}
+.cal-nav button:active{background:rgba(23,23,27,.06)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:19px;gap:3px;flex:1;align-content:center}
+.cal-w{font-size:7px;text-align:center;color:rgba(23,23,27,.32);letter-spacing:.04em;padding-bottom:1px}
+.cal-d{
+  display:grid;place-items:center;border-radius:6px;font-size:8.5px;
+  color:rgba(23,23,27,.66);font-variant-numeric:tabular-nums;position:relative;transition:background .2s;
+}
+.cal-d.dim{color:rgba(23,23,27,.16)}
+.cal-d.today{box-shadow:inset 0 0 0 1px rgba(23,23,27,.45);font-weight:600;color:var(--ink)}
+.cal-foot{margin-top:5px;font-size:7.5px;color:rgba(23,23,27,.34);letter-spacing:.04em;text-align:center}
+
+/* 纯渐变壁纸时模糊不可见，省掉 backdrop-filter 换取滚动帧率 */
+.home:not(.wallimg) .glassw,
+.home:not(.wallimg) .dlg,
+.home:not(.wallimg) .music{-webkit-backdrop-filter:none;backdrop-filter:none}
 
 /* ============================================================
    CHAT
@@ -506,6 +569,7 @@ a{color:inherit;text-decoration:none}
 
 /* ---------- chat room ---------- */
 .room{background:#F3F1EC}
+.room:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(90% 55% at 14% 0%,rgba(255,255,255,.9),rgba(255,255,255,0) 62%),radial-gradient(80% 50% at 92% 100%,rgba(214,206,190,.5),rgba(214,206,190,0) 66%);z-index:0}
 .room-bg{position:absolute;inset:0;background-size:cover;background-position:center;z-index:0}
 .room-bg:after{content:"";position:absolute;inset:0;background:rgba(243,241,236,.82);backdrop-filter:blur(1px)}
 .room-layer{position:relative;z-index:1;display:flex;flex-direction:column;height:100%;min-height:0}
@@ -530,15 +594,17 @@ a{color:inherit;text-decoration:none}
 .day-sep span{font-size:8.5px;letter-spacing:.1em;color:var(--muted-2);background:rgba(255,255,255,.5);padding:3px 9px;border-radius:8px}
 .msg{display:flex;gap:8px;margin-bottom:16px;align-items:flex-start;position:relative}
 .msg.me{flex-direction:row-reverse}
-.msg-av{width:32px;flex:none;display:flex;flex-direction:column;align-items:center;gap:4px}
+.msg-av{width:34px;flex:none;display:flex;flex-direction:column;align-items:center;gap:5px;padding-top:1px}
 .msg-av .av{width:32px;height:32px;border-radius:11px;font-size:11px}
-.msg-time{font-size:8px;color:var(--muted-2);letter-spacing:.02em;font-variant-numeric:tabular-nums;white-space:nowrap;transform:scale(.94)}
-.msg-body{width:calc(100% - 84px);max-width:calc(100% - 84px);display:flex;flex-direction:column;gap:5px;min-width:0;align-items:flex-start}
+.msg-time{font-size:9px;color:var(--muted-2);letter-spacing:.02em;font-variant-numeric:tabular-nums;white-space:nowrap;line-height:1}
+.msg-body{width:calc(100% - 46px);max-width:calc(100% - 46px);display:flex;flex-direction:column;gap:5px;min-width:0;align-items:flex-start}
 .msg.me .msg-body{align-items:flex-end}
 .bubble{
   position:relative;font-size:13px;line-height:1.62;padding:9px 12px;border-radius:16px;
-  background:#fff;color:#26262B;box-shadow:0 1px 2px rgba(23,23,27,.04);
-  word-break:break-word;white-space:pre-wrap;width:fit-content;max-width:86%;
+  background:rgba(255,255,255,.9);color:#26262B;
+  backdrop-filter:blur(12px) saturate(1.3);-webkit-backdrop-filter:blur(12px) saturate(1.3);
+  box-shadow:0 1px 2px rgba(23,23,27,.05),0 8px 20px -18px rgba(23,23,27,.5);
+  word-break:break-word;white-space:pre-wrap;width:fit-content;max-width:82%;
   transition:transform .16s var(--ease),box-shadow .16s;
 }
 .msg.them .bubble{border-bottom-left-radius:5px}
@@ -700,6 +766,42 @@ a{color:inherit;text-decoration:none}
   backdrop-filter:blur(14px);box-shadow:0 2px 8px rgba(23,23,27,.06);color:var(--ink);
 }
 
+/* me · profile hero */
+.me-hero{
+  margin:8px 18px 0;border-radius:26px;overflow:hidden;
+  background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.82);
+  backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);
+  box-shadow:0 18px 40px -34px rgba(23,23,27,.6),inset 0 1px 0 rgba(255,255,255,.7);
+}
+.me-cover{
+  height:104px;position:relative;background-size:cover;background-position:center;
+  background-image:radial-gradient(120% 100% at 12% 0%,#DCD6C8 0%,rgba(220,214,200,0) 62%),linear-gradient(150deg,#C9C3B6,#8E9585);
+}
+.me-cover:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(23,23,27,.02),rgba(23,23,27,.2))}
+.me-cover-lab{position:absolute;right:16px;top:14px;z-index:2;font-size:7px;letter-spacing:.3em;color:rgba(255,255,255,.9)}
+.me-body{padding:0 18px 16px;position:relative}
+.me-av{width:60px;height:60px;border-radius:20px;padding:3px;background:#fff;margin-top:-30px;box-shadow:0 10px 24px -14px rgba(23,23,27,.55);display:inline-block}
+.me-name{font-size:17px;font-weight:600;margin-top:9px;letter-spacing:.01em}
+.me-sig{font-size:10.5px;color:var(--muted);margin-top:3px}
+.me-bio{font-size:11px;color:var(--ink-2);line-height:1.62;margin-top:8px}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#7E9670;box-shadow:0 0 0 3px rgba(126,150,112,.16);display:inline-block;margin-right:6px;vertical-align:1px}
+
+/* week strip */
+.week-strip{
+  margin:6px 18px 10px;padding:12px 14px 10px;border-radius:20px;
+  background:rgba(255,255,255,.62);border:1px solid rgba(255,255,255,.8);
+  backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);
+  box-shadow:0 12px 30px -26px rgba(23,23,27,.5),inset 0 1px 0 rgba(255,255,255,.7);
+}
+.ws-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:9px}
+.ws-cap{font-size:7.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted-2);font-weight:600}
+.ws-sum{font-size:9.5px;color:var(--muted)}
+.ws-days{display:flex;align-items:flex-end;gap:6px;height:44px}
+.ws-d{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%}
+.ws-d i{width:100%;max-width:9px;border-radius:5px;background:linear-gradient(180deg,rgba(23,23,27,.78),rgba(23,23,27,.42));transition:height .4s var(--ease),opacity .3s}
+.ws-d span{font-size:8px;color:var(--muted-2);letter-spacing:.02em;line-height:1}
+.ws-d.today span{color:var(--ink);font-weight:600}
+
 /* ============================================================
    APP PAGES · worldbook / memory / archive / store / notices /
    beauty / settings / data
@@ -794,8 +896,8 @@ a{color:inherit;text-decoration:none}
 .wp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .wp-cell{aspect-ratio:.62;border-radius:12px;border:1.5px solid transparent;position:relative;overflow:hidden;background-size:cover;background-position:center}
 .wp-cell.on{border-color:var(--ink)}
-.wp-cell.on:after{content:"";position:absolute;right:3px;bottom:3px;width:13px;height:13px;border-radius:50%;background:var(--ink);box-shadow:0 0 0 2px rgba(255,255,255,.85)}
-.wp-cell span{position:absolute;left:4px;top:4px;font-size:7px;color:rgba(255,255,255,.85);letter-spacing:.08em;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.wp-cell.on:after{content:"";position:absolute;right:4px;bottom:4px;width:14px;height:14px;border-radius:50%;background:var(--ink) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.5l5 5L20 6.5'/%3E%3C/svg%3E") center/8px 8px no-repeat;box-shadow:0 0 0 2px rgba(255,255,255,.9)}
+.wp-cell span{position:absolute;left:5px;top:5px;font-size:7px;color:rgba(23,23,27,.55);letter-spacing:.08em;padding:1.5px 4px;border-radius:5px;background:rgba(255,255,255,.62);backdrop-filter:blur(4px)}
 .editor-area{width:100%;min-height:130px;border-radius:14px;border:1px solid var(--line);background:#FBFBF9;padding:11px 12px;font-family:var(--mono);font-size:10.5px;line-height:1.7;color:#3E3E45}
 .editor-area:focus{outline:none;border-color:rgba(23,23,27,.22)}
 
@@ -844,6 +946,274 @@ a{color:inherit;text-decoration:none}
 @keyframes eq{from{transform:scaleY(.4)}to{transform:scaleY(1)}}
 .music-wave i{transform-origin:bottom}
 .music-wave.playing i{animation:eq .75s ease-in-out infinite alternate}
+
+/* ============================================================
+   LIFE APPS · music / books / time + reading & diary widgets
+   ============================================================ */
+
+/* ---------- home widgets: reading / diary ---------- */
+.readw,.diaryw{padding:14px 15px;display:flex;flex-direction:column}
+.rw-title{
+  font-size:14px;font-weight:600;letter-spacing:.01em;line-height:1.4;margin-top:11px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.rw-author{font-size:8.5px;color:rgba(23,23,27,.4);margin-top:4px;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rw-quote{
+  font-size:9.5px;line-height:1.65;color:rgba(23,23,27,.52);margin-top:8px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  font-family:"Songti SC","Noto Serif CJK SC",Georgia,serif;
+}
+.rw-bar{height:4px;border-radius:3px;background:rgba(23,23,27,.1);margin-top:auto;overflow:hidden}
+.rw-bar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,rgba(23,23,27,.42),rgba(23,23,27,.72));transition:width .4s var(--ease)}
+.rw-foot{display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:9px;color:rgba(23,23,27,.45);letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.rw-empty{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  font-size:11px;color:rgba(23,23,27,.45);
+}
+.rw-empty span{font-size:17px;font-weight:300;color:rgba(23,23,27,.35)}
+.dw-day{font-size:8px;letter-spacing:.1em;color:rgba(23,23,27,.42);font-family:var(--mono)}
+.dw-text{
+  font-size:11px;line-height:1.65;color:rgba(23,23,27,.68);margin-top:11px;flex:1;
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;
+  font-family:"Songti SC","Noto Serif CJK SC",Georgia,serif;
+}
+.dw-text.empty{color:rgba(23,23,27,.36);font-style:italic;font-family:inherit}
+.dw-foot{display:flex;justify-content:space-between;font-size:8.5px;color:rgba(23,23,27,.4);letter-spacing:.04em;margin-top:6px}
+
+/* clock widget */
+.clockw{padding:14px 15px;display:flex;flex-direction:column}
+.cw-time{font-size:56px;font-weight:300;letter-spacing:-.045em;line-height:1;margin-top:12px;font-variant-numeric:tabular-nums}
+.cw-date{font-size:9px;color:rgba(23,23,27,.45);margin-top:8px;letter-spacing:.04em}
+.cw-foot{display:flex;align-items:center;justify-content:space-between;margin-top:auto;font-size:8.5px;color:rgba(23,23,27,.4);letter-spacing:.06em}
+
+/* ---------- music ---------- */
+.now-card{
+  position:relative;overflow:hidden;border-radius:26px;padding:16px 18px 14px;
+  background:linear-gradient(155deg,#2A2A30 0%,#16161A 58%,#202026 100%);
+  color:#F2F1ED;box-shadow:0 22px 44px -26px rgba(23,23,27,.7);
+}
+.nc-glow{
+  position:absolute;width:210px;height:210px;border-radius:50%;right:-70px;top:-90px;
+  background:radial-gradient(circle,rgba(196,188,170,.26),transparent 68%);
+}
+.nc-top{position:relative;display:flex;align-items:center;justify-content:space-between}
+.nc-cap{font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.42)}
+.nc-eq{display:flex;align-items:flex-end;gap:2px;height:10px}
+.nc-eq i{width:2px;height:3px;border-radius:1px;background:rgba(255,255,255,.55)}
+.nc-eq.on i{animation:eq .7s ease-in-out infinite alternate}
+.nc-eq.on i:nth-child(2){animation-delay:.18s}
+.nc-eq.on i:nth-child(3){animation-delay:.34s}
+.nc-eq.on i:nth-child(4){animation-delay:.52s}
+
+.nc-body{position:relative;display:flex;align-items:center;gap:15px;margin-top:16px}
+.vinyl{
+  width:80px;height:80px;border-radius:50%;flex:none;position:relative;
+  background:
+    radial-gradient(circle at 50% 50%,#0D0D10 0 12%,#1B1B20 12.5% 30%,#101013 30.5% 31%,#1E1E23 31.5% 46%,#111114 46.5% 47%,#202025 47.5% 62%,#131316 62.5%);
+  box-shadow:0 8px 20px -8px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.08) inset;
+  display:grid;place-items:center;
+}
+.vinyl:before{
+  content:"";position:absolute;inset:6px;border-radius:50%;
+  background:conic-gradient(from 0deg,rgba(255,255,255,.14),transparent 22%,rgba(255,255,255,.08) 44%,transparent 62%,rgba(255,255,255,.12) 82%,transparent);
+  opacity:.6;
+}
+.vinyl span{
+  width:27px;height:27px;border-radius:50%;background:#E8E4D9;color:#1B1B1F;
+  display:grid;place-items:center;font-size:5.5px;letter-spacing:.06em;z-index:1;position:relative;
+  box-shadow:0 0 0 2px rgba(0,0,0,.3);
+}
+.vinyl.on{animation:spin 7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.nc-meta{flex:1;min-width:0}
+.nc-title{font-size:17px;font-weight:600;letter-spacing:-.01em;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nc-artist{font-size:10px;color:rgba(255,255,255,.5);margin-top:4px;letter-spacing:.03em}
+.nc-tag{font-size:8.5px;color:rgba(255,255,255,.34);margin-top:9px;letter-spacing:.06em}
+
+.nc-progress{margin-top:18px;padding:6px 0;cursor:pointer}
+.nc-track{height:3px;border-radius:2px;background:rgba(255,255,255,.16);position:relative}
+.nc-track i{display:block;height:100%;border-radius:2px;background:#F2F1ED;transition:width .25s linear}
+.nc-track b{position:absolute;top:50%;width:8px;height:8px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);box-shadow:0 0 0 3px rgba(255,255,255,.12)}
+.nc-times{display:flex;justify-content:space-between;font-size:8.5px;color:rgba(255,255,255,.38);font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.nc-ctrl{display:flex;align-items:center;justify-content:center;gap:26px;margin-top:12px}
+.nc-ctrl button{color:rgba(255,255,255,.72);transition:transform .16s,color .16s}
+.nc-ctrl button:active{transform:scale(.9)}
+.nc-play{
+  width:46px;height:46px;border-radius:50%;background:#F2F1ED;color:#17171B !important;
+  display:grid;place-items:center;box-shadow:0 8px 18px -8px rgba(0,0,0,.7);
+}
+
+.mode-row{display:flex;align-items:center;gap:6px;margin-top:16px}
+.mode-row .chip{height:24px;font-size:10px;padding:0 9px}
+.mode-total{margin-left:auto;font-size:8.5px;color:var(--muted-2);letter-spacing:.03em}
+.tk-note{font-size:9px;color:var(--muted-2);text-align:center;margin-top:14px;letter-spacing:.04em}
+
+.track{
+  display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:14px;
+  background:var(--surface);border:1px solid var(--line);margin-bottom:7px;transition:background .18s;
+}
+.track:active{background:var(--surface-2)}
+.track.on{background:#F4F3EE;border-color:rgba(23,23,27,.18)}
+.tk-idx{width:20px;flex:none;display:grid;place-items:center;font-size:8.5px;color:var(--muted-2);font-family:var(--mono)}
+.track.on .tk-idx{color:var(--ink)}
+.tk-main{flex:1;min-width:0}
+.tk-n{font-size:12.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track.on .tk-n{font-weight:600}
+.tk-a{font-size:9px;color:var(--muted);margin-top:2px;letter-spacing:.03em}
+.tk-d{font-size:9px;color:var(--muted-2);font-variant-numeric:tabular-nums;font-family:var(--mono);flex:none}
+.tk-del{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:var(--muted-2);flex:none}
+.tk-del:active{background:rgba(23,23,27,.06)}
+
+/* ---------- books ---------- */
+.bk-stats{display:flex;margin:0 18px 6px;padding:13px 6px;border-radius:18px;background:var(--surface);border:1px solid var(--line)}
+.bs{flex:1;text-align:center;position:relative}
+.bs + .bs:before{content:"";position:absolute;left:0;top:12%;height:76%;width:1px;background:var(--line)}
+.bs .n{font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.bs .l{font-size:9px;color:var(--muted);margin-top:3px;letter-spacing:.06em}
+
+.bk-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 12px}
+.bk-card{display:flex;flex-direction:column;gap:8px;transition:transform .18s}
+.bk-card:active{transform:scale(.985)}
+.bk-cover{
+  position:relative;aspect-ratio:.74;height:auto;border-radius:4px 11px 11px 4px;padding:15px 12px 13px 16px;overflow:hidden;
+  box-shadow:0 16px 26px -18px rgba(23,23,27,.75),0 0 0 1px rgba(255,255,255,.12) inset;
+  display:flex;flex-direction:column;
+}
+.bk-cover:after{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:7px;
+  background:linear-gradient(90deg,rgba(0,0,0,.26),rgba(0,0,0,.02));
+  border-right:1px solid rgba(255,255,255,.16);
+}
+.bk-cover:before{
+  content:"";position:absolute;inset:0;
+  background-image:
+    repeating-linear-gradient(116deg,rgba(255,255,255,.05) 0 1px,transparent 1px 4px),
+    radial-gradient(circle at 80% 88%,rgba(255,255,255,.2),transparent 62%);
+}
+.bk-cv-t{
+  font-size:13.5px;font-weight:600;line-height:1.5;color:rgba(255,255,255,.94);
+  letter-spacing:.02em;margin-left:5px;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;
+  font-family:"Songti SC","Noto Serif CJK SC",Georgia,serif;
+  position:relative;
+}
+.bk-cv-a{font-size:8px;color:rgba(255,255,255,.62);margin-top:auto;margin-left:5px;letter-spacing:.08em;position:relative}
+.bk-cv-line{width:16px;height:1px;background:rgba(255,255,255,.45);margin:8px 0 6px 5px;position:relative}
+.bk-cv-st{position:absolute;right:8px;top:8px;font-size:7px;letter-spacing:.08em;padding:2px 5px;border-radius:4px;background:rgba(255,255,255,.2);color:#fff;backdrop-filter:blur(4px)}
+.bk-info{padding:0 2px}
+.bk-t{font-size:11.5px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bk-bar{height:3px;border-radius:2px;background:var(--surface-3);margin-top:7px;overflow:hidden}
+.bk-bar i{display:block;height:100%;border-radius:2px;background:rgba(23,23,27,.55);transition:width .35s var(--ease)}
+.bk-foot{display:flex;justify-content:space-between;margin-top:6px;font-size:8.5px;color:var(--muted-2);font-variant-numeric:tabular-nums}
+
+.bd-hero{display:flex;gap:18px;padding:4px 22px 22px;align-items:flex-end}
+.bd-cover{
+  width:110px;height:152px;border-radius:4px 10px 10px 4px;padding:15px 8px 13px 16px;flex:none;position:relative;overflow:hidden;
+  box-shadow:0 22px 36px -22px rgba(23,23,27,.85),0 0 0 1px rgba(255,255,255,.14) inset;
+  display:flex;flex-direction:column;
+}
+.bd-cover:after{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:linear-gradient(90deg,rgba(0,0,0,.26),rgba(0,0,0,.02));border-right:1px solid rgba(255,255,255,.16)}
+.bd-cover:before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(116deg,rgba(255,255,255,.05) 0 1px,transparent 1px 4px),radial-gradient(circle at 80% 88%,rgba(255,255,255,.2),transparent 62%)}
+.bd-meta{flex:1;min-width:0;padding-bottom:4px}
+.bd-t{font-size:19px;font-weight:600;line-height:1.3;letter-spacing:-.01em}
+.bd-a{font-size:10.5px;color:var(--muted);margin-top:6px}
+.bd-progress{padding:15px;border-radius:20px;background:var(--surface);border:1px solid var(--line)}
+.bp-top{display:flex;align-items:center;justify-content:space-between}
+.bp-pct{font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
+.bp-bar{height:6px;border-radius:4px;background:var(--surface-3);margin-top:10px;overflow:hidden}
+.bp-bar i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,rgba(92,107,87,.55),rgba(92,107,87,.95));transition:width .35s var(--ease)}
+.bp-row{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+.bp-btn{width:32px;height:32px;border-radius:10px;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-2)}
+.bp-btn:active{background:var(--surface-3)}
+.bp-page{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bp-page b{color:var(--ink);font-size:13px;font-weight:600}
+
+.bd-stats{display:flex;margin-top:10px;padding:12px 6px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
+.bds{flex:1;text-align:center;position:relative}
+.bds + .bds:before{content:"";position:absolute;left:0;top:12%;height:76%;width:1px;background:var(--line)}
+.bds .n{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.bds .l{font-size:8.5px;color:var(--muted);margin-top:2px;letter-spacing:.04em}
+
+.quote{display:flex;gap:10px;padding:13px 14px;border-radius:16px;background:var(--surface);border:1px solid var(--line);margin-bottom:8px}
+.q-main{flex:1;min-width:0}
+.q-t{font-size:11.5px;line-height:1.75;color:var(--ink-2);white-space:pre-wrap;font-family:"Songti SC","Noto Serif CJK SC",Georgia,serif}
+.q-f{display:flex;align-items:center;justify-content:space-between;margin-top:9px;font-size:8.5px;color:var(--muted-2);font-family:var(--mono)}
+.q-del{color:var(--muted-2);width:18px;height:18px;display:grid;place-items:center;border-radius:50%}
+.q-del:active{background:rgba(23,23,27,.05)}
+.q-empty{font-size:10.5px;color:var(--muted);line-height:1.7;padding:22px 4px;text-align:center}
+
+/* ---------- time ---------- */
+.tm-hero{
+  position:relative;overflow:hidden;border-radius:26px;padding:18px 20px 20px;
+  background:linear-gradient(158deg,#26262C,#15151A 62%,#1F1F25);color:#F2F1ED;
+  box-shadow:0 22px 44px -28px rgba(23,23,27,.7);
+}
+.tm-hero.empty{
+  background:linear-gradient(158deg,#F5F3EE,#EAE7E0);color:var(--ink);
+  border:1px dashed rgba(23,23,27,.14);box-shadow:none;
+  display:flex;flex-direction:column;align-items:center;text-align:center;padding:22px 20px 24px;
+}
+.tm-hero.empty .tm-hero-top{width:100%}
+.tm-hero.empty .tm-num{
+  font-size:26px;font-weight:300;width:46px;height:46px;border-radius:50%;
+  border:1px dashed rgba(23,23,27,.2);display:grid;place-items:center;
+  margin:16px auto 0;letter-spacing:0;
+}
+.tm-hero-glow{position:absolute;width:190px;height:190px;border-radius:50%;right:-60px;bottom:-90px;background:radial-gradient(circle,rgba(205,196,178,.24),transparent 70%)}
+.tm-hero-top{display:flex;align-items:center;justify-content:space-between;position:relative}
+.tm-cap{font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.42)}
+.tm-hero.empty .tm-cap{color:var(--muted-2)}
+.tm-num{font-size:64px;font-weight:300;letter-spacing:-.04em;line-height:1;margin-top:14px;font-variant-numeric:tabular-nums;position:relative}
+.tm-lab{font-size:11px;color:rgba(255,255,255,.62);margin-top:8px;letter-spacing:.06em;position:relative}
+.tm-date{font-size:9px;color:rgba(255,255,255,.34);margin-top:6px;letter-spacing:.1em;font-family:var(--mono);position:relative}
+.tm-hero.empty .tm-lab{color:var(--ink-2)}
+.tm-hero.empty .tm-date{color:var(--muted-2)}
+
+.tl{position:relative;padding-left:2px}
+.tl-item{display:flex;gap:12px;position:relative;padding-bottom:14px}
+.tl-rail{width:11px;flex:none;display:flex;justify-content:center;position:relative}
+.tl-rail:before{content:"";position:absolute;top:6px;bottom:-16px;width:1px;background:var(--line-2)}
+.tl-item:last-child .tl-rail:before{display:none}
+.tl-rail i{width:7px;height:7px;border-radius:50%;background:var(--surface);border:1.5px solid rgba(23,23,27,.22);margin-top:6px;z-index:1}
+.tl-rail i.main{background:var(--ink);border-color:var(--ink);box-shadow:0 0 0 3px rgba(23,23,27,.06)}
+.tl-body{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 13px}
+.tl-date{display:flex;align-items:center;gap:6px;font-size:8.5px;color:var(--muted-2);letter-spacing:.08em;font-family:var(--mono)}
+.tl-t{font-size:13px;font-weight:600;margin-top:5px}
+.tl-note{font-size:10.5px;color:var(--ink-2);line-height:1.7;margin-top:6px}
+.tl-m{display:flex;align-items:center;justify-content:space-between;font-size:8.5px;color:var(--muted);margin-top:9px}
+.tl-main{font-size:8.5px;color:var(--accent-ink);padding:2px 6px;border-radius:5px;background:var(--accent-soft)}
+
+.dw-hero{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:18px 18px 17px;border-radius:24px;background:var(--surface);border:1px solid var(--line);
+  box-shadow:var(--shadow-s);
+}
+.dw-n{font-size:30px;font-weight:300;letter-spacing:-.02em;margin-top:9px;font-variant-numeric:tabular-nums}
+.dw-s{font-size:9px;color:var(--muted);margin-top:5px;letter-spacing:.04em}
+.dw-stats{
+  display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px;
+  font-size:9px;color:var(--muted);letter-spacing:.03em;
+}
+.dw-stats b{color:var(--ink-2);font-weight:600;font-variant-numeric:tabular-nums}
+.dw-stats i{width:2px;height:2px;border-radius:50%;background:var(--muted-2)}
+.dw-write{
+  width:42px;height:42px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;
+  box-shadow:0 10px 20px -10px rgba(23,23,27,.6);
+}
+.dw-write:active{transform:scale(.94)}
+.diary-item{
+  margin-top:10px;padding:14px;border-radius:18px;background:var(--surface);border:1px solid var(--line);
+  transition:background .18s;
+}
+.diary-item:active{background:var(--surface-2)}
+.di-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.di-date{font-size:8.5px;color:var(--muted-2);letter-spacing:.06em;font-family:var(--mono)}
+.di-mood{font-size:8px;padding:2.5px 7px;border-radius:6px;background:rgba(23,23,27,.05);color:var(--ink-2);letter-spacing:.02em}
+.di-text{
+  font-size:12px;line-height:1.85;color:var(--ink-2);margin-top:8px;white-space:pre-wrap;
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;
+  font-family:"Songti SC","Noto Serif CJK SC",Georgia,serif;
+}
 
 /* ============================================================
    layout fixes & responsive
@@ -933,6 +1303,8 @@ window.ICONS = {
   send: '<path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/>',
   play: '<path d="M8 5.5v13l11-6.5-11-6.5Z" fill="currentColor" stroke-linejoin="round"/>',
   pause: '<path d="M9 5.5v13M15 5.5v13" stroke-width="2.4"/>',
+  prev: '<path d="M18.5 5.5v13L8 12l10.5-6.5Z" fill="currentColor" stroke-linejoin="round"/><path d="M5.5 5.5v13"/>',
+  next: '<path d="M5.5 5.5v13L16 12 5.5 5.5Z" fill="currentColor" stroke-linejoin="round"/><path d="M18.5 5.5v13"/>',
   edit: '<path d="M4 20h4l10.3-10.3a2.2 2.2 0 0 0-3.1-3.1L5 17v3Z"/><path d="m13.8 7.4 3 3"/>',
   trash: '<path d="M4.5 7h15M9.5 7V5.2A1.2 1.2 0 0 1 10.7 4h2.6a1.2 1.2 0 0 1 1.2 1.2V7M6.5 7l.9 12.1a1.5 1.5 0 0 0 1.5 1.4h6.2a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/>',
   refresh: '<path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v4.5h-4.5"/>',
@@ -1208,6 +1580,9 @@ window.APPS = {
   book:     { id: 'book',     name: '世界书', icon: 'book',    tint: 'linear-gradient(150deg,#B0A6BC,#82788F)', route: 'worldbooks' },
   memory:   { id: 'memory',   name: '记忆',   icon: 'memory',  tint: 'linear-gradient(150deg,#C9B49C,#A08A72)', route: 'memories' },
   archive:  { id: 'archive',  name: '档案',   icon: 'archive', tint: 'linear-gradient(150deg,#9DADBC,#71818F)', route: 'archive' },
+  music:    { id: 'music',    name: '音乐',   icon: 'music',   tint: 'linear-gradient(150deg,#B4ABA0,#7E766C)', route: 'music' },
+  books:    { id: 'books',    name: '书架',   icon: 'bookmark',tint: 'linear-gradient(150deg,#B5BDAE,#7D8778)', route: 'books' },
+  time:     { id: 'time',     name: '时光',   icon: 'clock',   tint: 'linear-gradient(150deg,#C5B7A5,#94836F)', route: 'time' },
   store:    { id: 'store',    name: '商店',   icon: 'store',   tint: 'linear-gradient(150deg,#CDBD97,#A79367)', route: 'store' },
   notices:  { id: 'notices',  name: '通知',   icon: 'bell',    tint: 'linear-gradient(150deg,#B6B6BA,#8B8B91)', route: 'notices' },
   beauty:   { id: 'beauty',   name: '美化',   icon: 'palette', tint: 'linear-gradient(150deg,#C6A9B4,#9C7E8A)', route: 'beauty' },
@@ -1252,7 +1627,13 @@ function defaultCfg() {
           { id: 'w_dialog', x: 0, y: 4, w: 2, h: 2, kind: 'dialog' },
           { id: 'w_music', x: 2, y: 4, w: 2, h: 2, kind: 'music' }
         ],
-        []
+        [
+          { id: 'w_anniv', x: 0, y: 0, w: 2, h: 2, kind: 'anniv' },
+          { id: 'w_level', x: 2, y: 0, w: 2, h: 2, kind: 'level' },
+          { id: 'w_cal', x: 0, y: 2, w: 4, h: 2, kind: 'calendar' },
+          { id: 'w_read', x: 0, y: 4, w: 2, h: 2, kind: 'reading' },
+          { id: 'w_diary', x: 2, y: 4, w: 2, h: 2, kind: 'diary' }
+        ]
       ],
       dock: ['store', 'notices', 'beauty', 'settings']
     },
@@ -1261,6 +1642,7 @@ function defaultCfg() {
       bgKey: '', base: '#EFEBE3',
       polaroidKey: '', polaroidCap: 'slow morning',
       music: { title: 'Soft Static', artist: 'LIWU RADIO', dur: 214, played: 62 },
+      anniv: { date: '', label: '在一起' },
       dialog: [
         { text: '今天也会是很普通的一天吗？', who: 'them' },
         { text: '普通就很好。', who: 'me' }
@@ -1270,7 +1652,21 @@ function defaultCfg() {
     removedApps: [],
     moments: [],
     momentsCoverKey: '',
-    momentsSig: '把日子过成一张慢慢显影的照片。'
+    momentsSig: '把日子过成一张慢慢显影的照片。',
+    life: {
+      music: {
+        tracks: [
+          { id: 'tr_soft', title: 'Soft Static', artist: 'LIWU RADIO', dur: 214 },
+          { id: 'tr_late', title: 'Late Bus', artist: 'LIWU RADIO', dur: 187 },
+          { id: 'tr_window', title: 'Window Seat', artist: 'LIWU RADIO', dur: 243 }
+        ],
+        cur: 'tr_soft',
+        mode: 'loop'
+      },
+      books: [],
+      annivs: [],
+      diary: []
+    }
   };
 }
 
@@ -1291,6 +1687,7 @@ window.S = Vue.reactive({
   homePage: 0,
   musicPlaying: false,
   sizes: [],
+  stats: { total: 0, days: {} },
   busy: '',
   statusDark: false
 });
@@ -1359,6 +1756,16 @@ window.A = {
     // 新账号第一次进来时，明信片跟着昵称走，避免一直显示「未命名」
     if (!state.cfg.home.name || state.cfg.home.name === '未命名') state.cfg.home.name = acc.name || '未命名';
     state.cfg.ui = Object.assign(defaultCfg().ui, state.cfg.ui || {});
+    state.cfg.life = Object.assign(defaultCfg().life, state.cfg.life || {});
+    state.cfg.life.music = Object.assign(defaultCfg().life.music, state.cfg.life.music || {});
+    ['books', 'annivs', 'diary'].forEach((k) => { if (!Array.isArray(state.cfg.life[k])) state.cfg.life[k] = []; });
+    // 老账号：桌面上的那个纪念日，升级成时光里的第一条
+    if (!state.cfg.life.annivs.length && state.cfg.home.anniv && state.cfg.home.anniv.date) {
+      state.cfg.life.annivs = [{
+        id: U.uid('an'), date: state.cfg.home.anniv.date,
+        label: state.cfg.home.anniv.label || '在一起', note: '', main: true, ts: Date.now()
+      }];
+    }
     state.msgs = {};
     state.typing = {};
     state.editing = false;
@@ -1370,6 +1777,7 @@ window.A = {
       acc.avatarKey, state.cfg.ui.wallpaperKey
     ].filter(Boolean).map((k) => A.resolveImg(k)));
     A.applyGlobalBeauty();
+    A.ensureStats();
   },
 
   async register(form) {
@@ -1503,6 +1911,45 @@ window.A = {
     return state.msgs[chatId];
   },
 
+  /* ---------------- lightweight stats (level / calendar) ---------------- */
+  dayKey(ts) { const d = new Date(ts); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); },
+  statsKey() { return 'stats_' + (state.account ? state.account.id : 'anon'); },
+  async ensureStats(force) {
+    if (!state.account) return;
+    if (!force && state.stats && state.stats.total) return;
+    if (!force) {
+      const rec = await DB.get('meta', A.statsKey());
+      if (rec && rec.value) { state.stats = rec.value; return; }
+    }
+    const all = await DB.all('messages');
+    const days = {};
+    let total = 0;
+    for (const m of all) {
+      if (m.accountId !== state.account.id) continue;
+      total++;
+      const k = A.dayKey(m.ts);
+      days[k] = (days[k] || 0) + 1;
+    }
+    state.stats = { total, days };
+    A.saveStats();
+  },
+  saveStats() {
+    clearTimeout(A._stT);
+    A._stT = setTimeout(() => {
+      if (!state.account) return;
+      DB.put('meta', { key: A.statsKey(), value: JSON.parse(JSON.stringify(state.stats)) });
+    }, 600);
+  },
+  bumpStats(ts, delta) {
+    if (!state.stats) state.stats = { total: 0, days: {} };
+    const d = delta == null ? 1 : delta;
+    state.stats.total = Math.max(0, state.stats.total + d);
+    const k = A.dayKey(ts == null ? Date.now() : ts);
+    const n = (state.stats.days[k] || 0) + d;
+    if (n > 0) state.stats.days[k] = n; else delete state.stats.days[k];
+    A.saveStats();
+  },
+
   async appendMessage(chatId, role, raw, meta) {
     const chat = A.chatById(chatId);
     const seq = (chat ? chat.seq : 0) + 1;
@@ -1519,6 +1966,7 @@ window.A = {
       if (role === 'char') chat.unread = (chat.unread || 0) + 1;
       await DB.put('chats', JSON.parse(JSON.stringify(chat)));
     }
+    A.bumpStats(msg.ts, 1);
     // threshold check
     if (role === 'char' && chat) A.maybeSummarize(chat);
     return msg;
@@ -1888,6 +2336,193 @@ window.A = {
     });
   },
 
+  /* ---------------- life: music / books / anniversaries / diary ---------------- */
+  musicTrack(id) {
+    const m = state.cfg.life.music;
+    return (m.tracks || []).find((t) => t.id === id) || null;
+  },
+  playTrack(id, autoplay) {
+    const t = A.musicTrack(id);
+    if (!t) return;
+    state.cfg.life.music.cur = t.id;
+    state.cfg.home.music = Object.assign({}, state.cfg.home.music, {
+      title: t.title, artist: t.artist, dur: t.dur, played: 0
+    });
+    state.musicPlaying = autoplay !== false;
+    saveCfg();
+  },
+  toggleMusic() {
+    state.musicPlaying = !state.musicPlaying;
+    saveCfg();
+  },
+  setMusicMode(mode) {
+    state.cfg.life.music.mode = mode;
+    saveCfg();
+  },
+  nextTrack(dir, ended) {
+    const m = state.cfg.life.music;
+    const list = m.tracks || [];
+    if (!list.length) { state.musicPlaying = false; return; }
+    let i = list.findIndex((t) => t.id === m.cur);
+    if (i < 0) i = 0;
+    const mode = m.mode || 'loop';
+    if (ended && mode === 'one') { A.playTrack(list[i].id, true); return; }
+    if (mode === 'shuffle' && list.length > 1) {
+      let j = i;
+      while (j === i) j = Math.floor(Math.random() * list.length);
+      i = j;
+    } else {
+      i = (i + (dir || 1) + list.length) % list.length;
+    }
+    A.playTrack(list[i].id, state.musicPlaying !== false);
+  },
+  tickMusic() {
+    if (!state.musicPlaying || !state.account) return;
+    const m = state.cfg.home.music;
+    m.played = (m.played || 0) + 1;
+    if (m.played >= (m.dur || 1)) { A.nextTrack(1, true); return; }
+    if (m.played % 15 === 0) saveCfg();
+  },
+  addTrack(t) {
+    const list = state.cfg.life.music.tracks;
+    const rec = Object.assign({ id: U.uid('tr'), title: '未命名', artist: 'LIWU RADIO', dur: 200 }, t);
+    list.push(rec);
+    saveCfg();
+    return rec;
+  },
+  delTrack(id) {
+    const m = state.cfg.life.music;
+    m.tracks = m.tracks.filter((t) => t.id !== id);
+    if (m.cur === id) {
+      if (m.tracks.length) A.playTrack(m.tracks[0].id, state.musicPlaying);
+      else { m.cur = ''; state.musicPlaying = false; }
+    }
+    saveCfg();
+  },
+
+  bookById(id) { return (state.cfg.life.books || []).find((b) => b.id === id) || null; },
+  bookTint(title) {
+    const sets = [
+      'linear-gradient(155deg,#8E8577,#4F4A42)', 'linear-gradient(155deg,#8A9581,#49533F)',
+      'linear-gradient(155deg,#9A857C,#584741)', 'linear-gradient(155deg,#8894A3,#49525F)',
+      'linear-gradient(155deg,#A3937A,#5C5140)'
+    ];
+    return sets[Math.abs(U.hash(title || 'x').split('').reduce((a, c) => a + c.charCodeAt(0), 0)) % sets.length];
+  },
+  addBook(b) {
+    const rec = Object.assign({
+      id: U.uid('bk'), title: '未命名', author: '', total: 320, cur: 0,
+      status: 'reading', quotes: [], createdAt: Date.now()
+    }, b || {});
+    rec.tint = rec.tint || A.bookTint(rec.title);
+    state.cfg.life.books.unshift(rec);
+    saveCfg();
+    return rec;
+  },
+  updateBook(id, patch) {
+    const b = A.bookById(id);
+    if (!b) return null;
+    Object.assign(b, patch);
+    if (b.cur >= b.total) b.status = 'done';
+    saveCfg();
+    return b;
+  },
+  delBook(id) {
+    state.cfg.life.books = state.cfg.life.books.filter((b) => b.id !== id);
+    saveCfg();
+  },
+  addQuote(bookId, q) {
+    const b = A.bookById(bookId);
+    if (!b) return;
+    b.quotes = b.quotes || [];
+    b.quotes.unshift(Object.assign({ id: U.uid('q'), ts: Date.now() }, q));
+    saveCfg();
+  },
+  delQuote(bookId, qid) {
+    const b = A.bookById(bookId);
+    if (!b) return;
+    b.quotes = (b.quotes || []).filter((q) => q.id !== qid);
+    saveCfg();
+  },
+
+  mainAnniv() {
+    const list = state.cfg.life.annivs || [];
+    return list.find((a) => a.main) || list[0] || null;
+  },
+  syncAnniv() {
+    const m = A.mainAnniv();
+    if (!m) return;
+    state.cfg.home.anniv = { date: m.date, label: m.label };
+    saveCfg();
+  },
+  syncAnnivFromHome() {
+    const m = A.mainAnniv();
+    if (!m) {
+      if (state.cfg.home.anniv && state.cfg.home.anniv.date) {
+        state.cfg.life.annivs.push({
+          id: U.uid('an'), date: state.cfg.home.anniv.date,
+          label: state.cfg.home.anniv.label || '在一起', note: '', main: true, ts: Date.now()
+        });
+        saveCfg();
+      }
+      return;
+    }
+    m.date = state.cfg.home.anniv.date;
+    m.label = state.cfg.home.anniv.label;
+    saveCfg();
+  },
+  addAnniv(a) {
+    const list = state.cfg.life.annivs;
+    const rec = Object.assign({ id: U.uid('an'), date: '', label: '值得记住', note: '', ts: Date.now() }, a);
+    rec.main = !list.length;
+    list.push(rec);
+    if (rec.main) A.syncAnniv(); else saveCfg();
+    return rec;
+  },
+  updateAnniv(id, patch) {
+    const a = state.cfg.life.annivs.find((x) => x.id === id);
+    if (!a) return;
+    Object.assign(a, patch);
+    if (a.main) A.syncAnniv(); else saveCfg();
+  },
+  setMainAnniv(id) {
+    state.cfg.life.annivs.forEach((a) => { a.main = a.id === id; });
+    A.syncAnniv();
+  },
+  delAnniv(id) {
+    const list = state.cfg.life.annivs;
+    const was = list.find((a) => a.id === id);
+    state.cfg.life.annivs = list.filter((a) => a.id !== id);
+    if (was && was.main) {
+      if (state.cfg.life.annivs.length) { state.cfg.life.annivs[0].main = true; A.syncAnniv(); }
+      else { state.cfg.home.anniv = { date: '', label: '在一起' }; saveCfg(); }
+    } else saveCfg();
+  },
+  dayNo() {
+    const m = A.mainAnniv();
+    const base = m && m.date ? new Date(m.date + 'T00:00:00')
+      : new Date(state.account ? (state.account.createdAt || Date.now()) : Date.now());
+    if (isNaN(base)) return 1;
+    const now = new Date(); now.setHours(0, 0, 0, 0); base.setHours(0, 0, 0, 0);
+    return Math.max(1, Math.round((now - base) / 86400000) + 1);
+  },
+  addDiary(d) {
+    const rec = Object.assign({ id: U.uid('dy'), ts: Date.now(), text: '', mood: '平静' }, d || {});
+    state.cfg.life.diary.unshift(rec);
+    saveCfg();
+    return rec;
+  },
+  updateDiary(id, patch) {
+    const d = state.cfg.life.diary.find((x) => x.id === id);
+    if (!d) return;
+    Object.assign(d, patch);
+    saveCfg();
+  },
+  delDiary(id) {
+    state.cfg.life.diary = state.cfg.life.diary.filter((d) => d.id !== id);
+    saveCfg();
+  },
+
   /* ---------------- layout ---------------- */
   layout() { return state.cfg.layout; },
   appInLayout(app) {
@@ -1915,6 +2550,38 @@ window.A = {
     state.layoutKey++;
     saveCfg();
   },
+  /* ---------------- desktop widgets ---------------- */
+  widgetSize(kind) {
+    return ({ postcard: [4, 2], polaroid: [2, 2], music: [2, 2], dialog: [2, 2], anniv: [2, 2], level: [2, 2], calendar: [4, 2], reading: [2, 2], diary: [2, 2], clock: [4, 2] })[kind] || [2, 2];
+  },
+  hasWidget(kind) {
+    return state.cfg.layout.pages.some((p) => p.some((it) => it.kind === kind));
+  },
+  addWidget(kind) {
+    if (A.hasWidget(kind)) return A.toast('这个组件已经在桌面上了');
+    const [w, h] = A.widgetSize(kind);
+    const pages = state.cfg.layout.pages;
+    const freeIn = (items) => {
+      const occ = (x, y, it) => x < it.x + it.w && x + w > it.x && y < it.y + it.h && y + h > it.y;
+      for (let y = 0; y < 6; y++) for (let x = 0; x <= 4 - w; x++) if (!items.some((it) => occ(x, y, it))) return { x, y };
+      return null;
+    };
+    let target = null, slot = null;
+    for (const p of pages) { const f = freeIn(p); if (f) { target = p; slot = f; break; } }
+    if (!slot) { target = []; pages.push(target); slot = { x: 0, y: 0 }; }
+    target.push({ id: 'w_' + kind + '_' + U.uid('x'), x: slot.x, y: slot.y, w, h, kind });
+    state.layoutKey++;
+    saveCfg();
+    A.toast('已添加到桌面');
+  },
+  removeWidget(kind) {
+    state.cfg.layout.pages.forEach((p) => {
+      for (let i = p.length - 1; i >= 0; i--) if (p[i].kind === kind) p.splice(i, 1);
+    });
+    state.layoutKey++;
+    saveCfg();
+  },
+
   restoreApp(appId) {
     const page = state.cfg.layout.pages[0];
     const free = A.findFree(page, 1, 1);
@@ -2206,8 +2873,188 @@ HOME.Dialog = {
   </div>`
 };
 
+HOME.Anniv = {
+  computed: {
+    cfg() { return S.cfg.home.anniv || {}; },
+    days() {
+      if (!this.cfg.date) return null;
+      const t = new Date(this.cfg.date + 'T00:00:00');
+      if (isNaN(t)) return null;
+      const now = new Date(); now.setHours(0, 0, 0, 0);
+      return Math.round((now - t) / 86400000) + 1;
+    },
+    future() { return this.days != null && this.days < 1; },
+    big() { return this.days == null ? '＋' : Math.abs(this.days); },
+    dateText() { return this.cfg.date ? this.cfg.date.replace(/-/g, '.') : '点一下设置日期'; }
+  },
+  methods: { open() { if (!S.editing) this.$parent.editWidget('anniv'); } },
+  template: `<div class="widget glassw anniv" @click="open">
+    <div class="gw-top">
+      <span class="gw-cap">{{future ? 'still counting' : 'days together'}}</span>
+      <ico class="gw-ico" name="heart" :size="12" :sw="1.4"/>
+    </div>
+    <div class="anniv-num" :class="{sm:big>999}">{{big}}</div>
+    <div class="anniv-lab" v-if="days!=null">{{future ? '天后 · ' + (cfg.label || '见面') : '天 · ' + (cfg.label || '在一起')}}</div>
+    <div class="anniv-lab" v-else>设置一个纪念日</div>
+    <div class="anniv-date">{{dateText}}</div>
+  </div>`
+};
+
+HOME.Level = {
+  computed: {
+    total() { return (S.stats && S.stats.total) || 0; },
+    lv() { return 1 + Math.floor(this.total / 40); },
+    pct() { return Math.round(((this.total % 40) / 40) * 100); },
+    human() { return this.total >= 1000 ? (this.total / 1000).toFixed(1) + 'k' : this.total; },
+    tail() { return this.total < 10 ? '才刚刚开始' : this.total < 200 ? '慢慢熟起来' : '已经聊了很久'; }
+  },
+  methods: { open() { if (!S.editing) A.toast('熟悉度由聊天条数自动累积'); } },
+  template: `<div class="widget glassw lv" @click="open">
+    <div class="gw-top">
+      <span class="gw-cap">familiarity</span>
+      <span class="lv-badge">Lv.{{lv}}</span>
+    </div>
+    <div class="lv-row">
+      <span class="lv-big">{{pct}}<span style="font-size:13px;color:rgba(23,23,27,.4)">%</span></span>
+      <span class="lv-pct">{{40 - (total % 40)}} 条后升级</span>
+    </div>
+    <div class="lv-bar"><i :style="{width:Math.max(3,pct)+'%'}"></i></div>
+    <div class="lv-sub"><span>共 {{human}} 条对话</span><span>{{tail}}</span></div>
+  </div>`
+};
+
+HOME.Calendar = {
+  data() { return { off: 0 }; },
+  computed: {
+    month() { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() + this.off); return d; },
+    title() { return this.month.getFullYear() + ' 年 · ' + (this.month.getMonth() + 1) + ' 月'; },
+    heat() {
+      const src = (S.stats && S.stats.days) || {};
+      let max = 1;
+      for (const k in src) if (src[k] > max) max = src[k];
+      return { map: src, max };
+    },
+    cells() {
+      const y = this.month.getFullYear(), mo = this.month.getMonth();
+      const first = new Date(y, mo, 1).getDay();
+      const days = new Date(y, mo + 1, 0).getDate();
+      const today = new Date();
+      const isNow = today.getFullYear() === y && today.getMonth() === mo;
+      const out = [];
+      for (let i = 0; i < first; i++) out.push({ n: 0 });
+      for (let i = 1; i <= days; i++) {
+        const c = this.heat.map[y + '-' + (mo + 1) + '-' + i] || 0;
+        out.push({ n: i, c, today: isNow && today.getDate() === i });
+      }
+      return out;
+    }
+  },
+  methods: {
+    shade(c) {
+      if (!c) return {};
+      const max = this.heat.max || 1;
+      const a = 0.1 + 0.55 * Math.min(1, c / max);
+      return { background: 'rgba(92,107,87,' + a.toFixed(2) + ')', color: a > 0.4 ? '#fff' : 'inherit' };
+    },
+    open() { if (!S.editing) A.toast('颜色越深，那天聊得越多'); }
+  },
+  template: `<div class="widget glassw cal" @click="open">
+    <div class="cal-head">
+      <div class="cal-m">{{title}}<span>· {{cells.filter(c=>c.c).length}} 天有对话</span></div>
+      <div class="cal-nav">
+        <button @click.stop="off--"><ico name="chevronLeft" :size="11" :sw="2"/></button>
+        <button @click.stop="off++"><ico name="chevronRight" :size="11" :sw="2"/></button>
+      </div>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-w" v-for="w in ['日','一','二','三','四','五','六']" :key="w">{{w}}</div>
+      <div class="cal-d" v-for="(d,i) in cells" :key="i" :class="{dim:!d.n,today:d.today}" :style="shade(d.c)">{{d.n||''}}</div>
+    </div>
+    <div class="cal-foot">颜色越深，那天聊得越多</div>
+  </div>`
+};
+
+HOME.Clock = {
+  data() { return { time: '', date: '', tick: null }; },
+  computed: {
+    day() { return A.dayNo(); },
+    label() { const m = A.mainAnniv(); return m ? m.label : '还没有纪念日'; }
+  },
+  mounted() { this.paint(); this.tick = setInterval(this.paint, 15000); },
+  beforeUnmount() { clearInterval(this.tick); },
+  methods: {
+    paint() {
+      const d = new Date();
+      this.time = U.pad(d.getHours()) + ':' + U.pad(d.getMinutes());
+      this.date = (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 · 周' + '日一二三四五六'[d.getDay()];
+    },
+    open() { if (!S.editing) A.go('time'); }
+  },
+  template: `<div class="widget glassw clockw" @click="open">
+    <div class="gw-top">
+      <span class="gw-cap">local time</span>
+      <ico class="gw-ico" name="clock" :size="12" :sw="1.4"/>
+    </div>
+    <div class="cw-time">{{time}}</div>
+    <div class="cw-date">{{date}}</div>
+    <div class="cw-foot"><span>DAY {{day}}</span><span>{{label}}</span></div>
+  </div>`
+};
+
+HOME.Reading = {
+  computed: {
+    book() {
+      const bs = S.cfg.life.books || [];
+      return bs.find((b) => b.status === 'reading') || bs[0] || null;
+    },
+    pct() { return this.book ? Math.min(100, Math.round((this.book.cur || 0) / Math.max(1, this.book.total || 1) * 100)) : 0; },
+    quote() { return this.book && this.book.quotes && this.book.quotes.length ? this.book.quotes[0].text : ''; }
+  },
+  methods: {
+    open() { if (!S.editing) A.go('books'); }
+  },
+  template: `<div class="widget glassw readw" @click="open">
+    <div class="gw-top">
+      <span class="gw-cap">reading</span>
+      <ico class="gw-ico" name="book" :size="12" :sw="1.4"/>
+    </div>
+    <template v-if="book">
+      <div class="rw-title">{{book.title}}</div>
+      <div class="rw-author">{{book.author || '未署名'}}</div>
+      <div class="rw-quote" v-if="quote">「{{quote}}」</div>
+      <div class="rw-bar"><i :style="{width:Math.max(3,pct)+'%'}"></i></div>
+      <div class="rw-foot"><span>第 {{book.cur||0}} / {{book.total}} 页</span><span>{{pct}}%</span></div>
+    </template>
+    <template v-else>
+      <div class="rw-empty"><span>＋</span>放一本书进来</div>
+      <div class="rw-foot"><span>书架还是空的</span></div>
+    </template>
+  </div>`
+};
+
+HOME.Diary = {
+  computed: {
+    last() { return (S.cfg.life.diary || [])[0] || null; },
+    day() { return A.dayNo(); },
+    dateText() {
+      const d = new Date();
+      return (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日';
+    }
+  },
+  methods: { open() { if (!S.editing) A.go('time', { tab: 'diary' }); } },
+  template: `<div class="widget glassw diaryw" @click="open">
+    <div class="gw-top">
+      <span class="gw-cap">my diary</span>
+      <span class="dw-day">DAY {{day}}</span>
+    </div>
+    <div class="dw-text" :class="{empty:!last}">{{last ? last.text : '写点什么，留给以后。'}}</div>
+    <div class="dw-foot"><span>{{dateText}}</span><span v-if="last">{{last.mood}}</span></div>
+  </div>`
+};
+
 HOME.Home = {
-  components: { 'pc-card': HOME.Postcard, 'pol-card': HOME.Polaroid, 'music-card': HOME.Music, 'dlg-card': HOME.Dialog },
+  components: { 'pc-card': HOME.Postcard, 'pol-card': HOME.Polaroid, 'music-card': HOME.Music, 'dlg-card': HOME.Dialog,
+    'anniv-card': HOME.Anniv, 'lv-card': HOME.Level, 'cal-card': HOME.Calendar, 'read-card': HOME.Reading, 'diary-card': HOME.Diary, 'clock-card': HOME.Clock },
   data() {
     return {
       S, editing: false, press: null, drag: null, dragStyle: {},
@@ -2231,15 +3078,8 @@ HOME.Home = {
     'S.cfg.ui.wallpaperKey': { immediate: true, handler(k) { if (k) A.resolveImg(k); } },
     editing(v) { S.editing = v; }
   },
-  mounted() {
-    this.tick = setInterval(() => {
-      if (!S.musicPlaying) return;
-      const m = S.cfg.home.music;
-      m.played += 1;
-      if (m.played >= m.dur) { m.played = 0; S.musicPlaying = false; }
-    }, 1000);
-  },
-  beforeUnmount() { clearInterval(this.tick); },
+  mounted() {},
+  beforeUnmount() {},
   methods: {
     meta(id) { return window.appMeta(id); },
     cellStyle(it) {
@@ -2344,7 +3184,7 @@ HOME.Home = {
       if (!grid) { this.resetDrag(); return; }
       const rect = grid.getBoundingClientRect();
       const pi = Number(grid.dataset.page);
-      const gap = 12, rowH = 94, padTop = 6;
+      const gap = 12, rowH = 98, padTop = 6;
       const cellW = (rect.width - gap * 3) / 4;
       let col = Math.floor((x - rect.left) / (cellW + gap));
       let row = Math.floor((y - rect.top - padTop) / (rowH + gap));
@@ -2448,6 +3288,11 @@ HOME.Home = {
       saveCfg();
     },
     save() { saveCfg(); },
+    saveSheet() {
+      saveCfg(true);
+      if (this.sheet === 'anniv') A.syncAnnivFromHome();
+      this.sheet = '';
+    },
     resetPage() {
       if (!confirm('恢复默认桌面布局？自定义位置会丢失。')) return;
       S.cfg.layout = { pages: [JSON.parse(JSON.stringify(HOME.defaultPage())), []], dock: ['store', 'notices', 'beauty', 'settings'] };
@@ -2455,7 +3300,7 @@ HOME.Home = {
       saveCfg();
     }
   },
-  template: `<div class="home" :class="{editing}" id="home-stage">
+  template: `<div class="home" :class="{editing, wallimg:hasWall}" id="home-stage">
     <div class="wallpaper" :class="{tint:!hasWall,noise:!hasWall}" :style="wallStyle"></div>
     <div class="home-scrim"></div>
 
@@ -2477,6 +3322,12 @@ HOME.Home = {
             <template v-else-if="it.kind==='polaroid'"><pol-card :item="it"/></template>
             <template v-else-if="it.kind==='music'"><music-card :item="it"/></template>
             <template v-else-if="it.kind==='dialog'"><dlg-card :item="it"/></template>
+            <template v-else-if="it.kind==='anniv'"><anniv-card :item="it"/></template>
+            <template v-else-if="it.kind==='level'"><lv-card :item="it"/></template>
+            <template v-else-if="it.kind==='calendar'"><cal-card :item="it"/></template>
+            <template v-else-if="it.kind==='reading'"><read-card :item="it"/></template>
+            <template v-else-if="it.kind==='diary'"><diary-card :item="it"/></template>
+            <template v-else-if="it.kind==='clock'"><clock-card :item="it"/></template>
             <template v-else>
               <button class="app" @click.stop="onAppClick(it)">
                 <span class="app-icon" :style="{background:meta(it.app).tint}"><ico :name="meta(it.app).icon" :size="25" :sw="1.5"/></span>
@@ -2508,7 +3359,7 @@ HOME.Home = {
     <div class="home-hint" v-if="false">长按图标编辑桌面</div>
 
     <!-- widget editors -->
-    <sheet v-if="sheet" v-model="sheet" :title="sheet==='postcard'?'明信片':sheet==='music'?'音乐盒':sheet==='dialog'?'小对话':'拍立得'" :sub="sheet==='postcard'?'这一张卡片只属于你。':'组件的细节都可以慢慢改。'">
+    <sheet v-if="sheet" v-model="sheet" :title="sheet==='postcard'?'明信片':sheet==='music'?'音乐盒':sheet==='dialog'?'小对话':sheet==='anniv'?'纪念日':'拍立得'" :sub="sheet==='postcard'?'这一张卡片只属于你。':sheet==='anniv'?'写下一个日期，剩下的交给它。':'组件的细节都可以慢慢改。'">
       <div v-if="sheet==='postcard'" class="form-stack">
         <div class="avatar-upload">
           <div class="au-ring"><av :file-key="home.avatarKey" :name="home.name" :size="56"/></div>
@@ -2542,6 +3393,11 @@ HOME.Home = {
         <div class="field"><label>照片落款</label><input class="input" v-model="home.polaroidCap" maxlength="20" placeholder="slow morning"></div>
       </div>
 
+      <div v-else-if="sheet==='anniv'" class="form-stack">
+        <div class="field"><label>那一天</label><input class="input" type="date" v-model="home.anniv.date"></div>
+        <div class="field"><label>这件事叫什么</label><input class="input" v-model="home.anniv.label" maxlength="10" placeholder="在一起 / 第一次见面"></div>
+        <div class="helper">纪念日会显示在桌面卡片上，跨过零点自动加一天。</div>
+      </div>
       <div v-else-if="sheet==='music'" class="form-stack">
         <div class="field"><label>歌曲名</label><input class="input" v-model="home.music.title" maxlength="24"></div>
         <div class="field"><label>歌手 / 来源</label><input class="input" v-model="home.music.artist" maxlength="24" placeholder="LIWU RADIO"></div>
@@ -2556,9 +3412,22 @@ HOME.Home = {
         </div>
       </div>
 
-      <template #footer><button class="btn primary block" @click="saveCfg(true);sheet=''">保存</button></template>
+      <template #footer>
+        <button v-if="sheet==='music'" class="btn grow" @click="sheet='';A.go('music')"><ico name="music" :size="15"/>播放器</button>
+        <button class="btn primary grow" @click="saveSheet">保存</button>
+      </template>
     </sheet>
   </div>`
+};
+
+HOME.defaultPage2 = function () {
+  return [
+    { id: 'w_anniv', x: 0, y: 0, w: 2, h: 2, kind: 'anniv' },
+    { id: 'w_level', x: 2, y: 0, w: 2, h: 2, kind: 'level' },
+    { id: 'w_cal', x: 0, y: 2, w: 4, h: 2, kind: 'calendar' },
+    { id: 'w_read', x: 0, y: 4, w: 2, h: 2, kind: 'reading' },
+    { id: 'w_diary', x: 2, y: 4, w: 2, h: 2, kind: 'diary' }
+  ];
 };
 
 HOME.defaultPage = function () {
@@ -2733,6 +3602,40 @@ CHAT.Home = {
     me() { return S.account || {}; },
     stats() {
       return { friends: this.chats.length, chars: S.chars.length, mem: S.memories.length };
+    },
+    api() { return A.pickApi(null); },
+    apiLabel() {
+      if (!this.api) return '未配置';
+      return this.api.model || this.api.name || '已配置';
+    },
+    wallLabel() {
+      if (S.cfg.ui.wallpaperKey) return '自定义图片';
+      const p = (window.WALLS && WALLS[S.cfg.ui.wallpaperPreset || 0]);
+      return p ? p.name + ' · 预设' : '默认';
+    },
+    sizeLabel() {
+      const n = S.storageTotal || (S.sizes || []).reduce((a, b) => a + (b.bytes || 0), 0);
+      if (!n) return '—';
+      return n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+    },
+    week() {
+      const days = (S.stats && S.stats.days) || {};
+      const out = []; let max = 1;
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const k = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+        const c = days[k] || 0;
+        if (c > max) max = c;
+        out.push({ k, c, w: '日一二三四五六'[d.getDay()], today: i === 0 });
+      }
+      out.max = max;
+      return out;
+    },
+    weekTotal() { return this.week.reduce((a, b) => a + b.c, 0); },
+    coverStyle() {
+      const k = S.cfg.ui.wallpaperKey;
+      if (k && S.imgCache[k]) return { backgroundImage: 'url(' + S.imgCache[k] + ')' };
+      return {};
     }
   },
   methods: {
@@ -2774,6 +3677,18 @@ CHAT.Home = {
 
         <!-- friends -->
         <template v-if="tab==='friends'">
+          <div class="week-strip" v-if="chats.length">
+            <div class="ws-top">
+              <span class="ws-cap">this week</span>
+              <span class="ws-sum">{{weekTotal}} 条消息</span>
+            </div>
+            <div class="ws-days">
+              <div class="ws-d" v-for="d in week" :key="d.k" :class="{today:d.today}">
+                <i :style="{height:(4 + 24 * (d.c / week.max)) + 'px',opacity:d.c ? .3 + .7 * (d.c / week.max) : .12}"></i>
+                <span>{{d.w}}</span>
+              </div>
+            </div>
+          </div>
           <div class="search-pill">
             <ico name="search" :size="14"/>
             <input v-model="search" placeholder="搜索聊天">
@@ -2857,6 +3772,24 @@ CHAT.Home = {
                 <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
               </div>
             </div>
+            <div class="section-head" style="padding:2px 22px 8px"><span class="section-title">生活</span><span class="section-act">life</span></div>
+            <div class="group" style="margin:0 18px 12px">
+              <div class="row tap" @click="A.go('music')">
+                <div class="row-ico" style="background:#F1EEE9;color:#8A7E6C"><ico name="music" :size="15"/></div>
+                <div class="row-main"><div class="row-title">音乐</div><div class="row-sub">{{S.cfg.life.music.tracks.length}} 首 · 只在这个房间里响</div></div>
+                <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+              </div>
+              <div class="row tap" @click="A.go('books')">
+                <div class="row-ico" style="background:#EEF1EA;color:#6D7A66"><ico name="bookmark" :size="15"/></div>
+                <div class="row-main"><div class="row-title">书架</div><div class="row-sub">一起读的书、进度与摘句</div></div>
+                <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+              </div>
+              <div class="row tap" @click="A.go('time')">
+                <div class="row-ico" style="background:#F4EFE8;color:#8A7458"><ico name="clock" :size="15"/></div>
+                <div class="row-main"><div class="row-title">时光</div><div class="row-sub">纪念日与只给自己看的日记</div></div>
+                <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+              </div>
+            </div>
             <div style="height:20px"></div>
           </div>
         </template>
@@ -2864,12 +3797,15 @@ CHAT.Home = {
         <!-- me -->
         <template v-else>
           <div class="app-scroll">
-            <div class="profile-card">
-              <av :file-key="me.avatarKey" :name="me.name" :size="62" radius="22px"/>
-              <div class="grow">
-                <div class="profile-name">{{me.name}}</div>
-                <div class="profile-sig">@{{me.username}} · {{me.gender}}<span v-if="me.mbti"> · {{me.mbti}}</span></div>
-                <div class="profile-sig clamp2" style="margin-top:6px">{{me.persona}}</div>
+            <div class="me-hero">
+              <div class="me-cover" :style="coverStyle">
+                <div class="me-cover-lab">M Y &nbsp; P R O F I L E</div>
+              </div>
+              <div class="me-body">
+                <div class="me-av"><av :file-key="me.avatarKey" :name="me.name" :size="60" radius="20px"/></div>
+                <div class="me-name">{{me.name}}</div>
+                <div class="me-sig">@{{me.username}} · {{me.gender}}<span v-if="me.mbti"> · {{me.mbti}}</span></div>
+                <div class="me-bio clamp2">{{me.persona || '还没有写人设。'}}</div>
               </div>
             </div>
             <div class="stat-row">
@@ -2878,6 +3814,33 @@ CHAT.Home = {
               <div class="stat"><div class="n">{{stats.mem}}</div><div class="l">记忆</div></div>
             </div>
             <div class="section" style="margin-top:18px">
+              <div class="group">
+                <div class="row tap" @click="A.go('beauty')">
+                  <div class="row-ico"><ico name="image" :size="15"/></div>
+                  <div class="row-main"><div class="row-title">外观</div><div class="row-sub">壁纸 · 字体 · 桌面 CSS</div></div>
+                  <div class="row-val">{{wallLabel}}</div>
+                  <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+                </div>
+                <div class="row tap" @click="A.go('settings.api')">
+                  <div class="row-ico"><ico name="link" :size="15"/></div>
+                  <div class="row-main"><div class="row-title">API 通道</div><div class="row-sub">模型与协议</div></div>
+                  <div class="row-val">{{apiLabel}}</div>
+                  <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+                </div>
+                <div class="row tap" @click="A.go('settings.data')">
+                  <div class="row-ico"><ico name="database" :size="15"/></div>
+                  <div class="row-main"><div class="row-title">数据存储</div><div class="row-sub">IndexedDB · 本机</div></div>
+                  <div class="row-val">{{sizeLabel}}</div>
+                  <ico name="chevronRight" :size="14" style="color:var(--muted-2)"/>
+                </div>
+                <div class="row">
+                  <div class="row-ico"><ico name="zap" :size="15"/></div>
+                  <div class="row-main"><div class="row-title">运行状态</div><div class="row-sub">单文件 · 离线可用</div></div>
+                  <div class="row-val"><span class="live-dot"></span>Running</div>
+                </div>
+              </div>
+            </div>
+            <div class="section">
               <div class="group">
                 <div class="row tap" @click="A.go('settings')">
                   <div class="row-ico"><ico name="settings" :size="15"/></div>
@@ -4253,7 +5216,23 @@ ARCH.Edit = {
 const STORE = {};
 
 STORE.Page = {
-  data() { return { S, uploadSheet: false, name: '', html: '' }; },
+  data() {
+    return {
+      S, uploadSheet: false, name: '', html: '',
+      widgets: [
+        { kind: 'postcard', name: '明信片', desc: '4×2 · 头像、昵称、签名与背景', icon: 'image' },
+        { kind: 'polaroid', name: '拍立得', desc: '2×2 · 一张可以随时换的照片', icon: 'camera' },
+        { kind: 'music', name: '音乐盒', desc: '2×2 · 播放键、进度与曲名', icon: 'music' },
+        { kind: 'dialog', name: '小对话', desc: '2×2 · 一对可编辑的对话气泡', icon: 'comment' },
+        { kind: 'anniv', name: '纪念日', desc: '2×2 · 大数字倒数在一起的天数', icon: 'heart' },
+        { kind: 'level', name: '熟悉度', desc: '2×2 · 按聊天条数累积的等级', icon: 'zap' },
+        { kind: 'calendar', name: '日历', desc: '4×2 · 每天的聊天热力图', icon: 'calendar' },
+        { kind: 'reading', name: '在读', desc: '2×2 · 正在读的书与页码', icon: 'bookmark' },
+        { kind: 'diary', name: '日记', desc: '2×2 · 第几天，与最近一篇', icon: 'feather' },
+        { kind: 'clock', name: '时钟', desc: '4×2 · 大号时间与第几天', icon: 'clock' }
+      ]
+    };
+  },
   computed: {
     installed() { return Object.keys(APPS).filter((id) => A.appInLayout(id)); },
     removed() { return S.cfg.removedApps || []; },
@@ -4302,7 +5281,7 @@ STORE.Page = {
       <div class="app-head" style="padding-top:2px">
         <div class="ah-row">
           <div><h1>Store</h1><div class="desc">应用与组件。删掉的东西，都能在这里找回来。</div></div>
-          <div class="mark">8 CORE</div>
+          <div class="mark">{{Object.keys(APPS).length}} CORE</div>
         </div>
       </div>
       <div class="pad">
@@ -4312,10 +5291,26 @@ STORE.Page = {
               <span class="app-icon" :style="{background:meta(id).tint}"><ico :name="meta(id).icon" :size="18" :sw="1.5"/></span>
               <div class="grow"><div class="si-n">{{meta(id).name}}</div></div>
             </div>
-            <div class="si-d">{{A.appInLayout(id)?'已在桌面':'已移除，可重新下载'}}</div>
+            <div class="si-d">{{A.appInLayout(id)?'已在桌面':(removed.includes(id)?'已移除，可重新下载':'未在桌面，可添加')}}</div>
             <button class="si-btn" :class="{ok:!A.appInLayout(id)}" @click="A.appInLayout(id)?remove(id):download(id)">
-              {{A.appInLayout(id)?'移出桌面':'重新下载'}}
+              {{A.appInLayout(id)?'移出桌面':(removed.includes(id)?'重新下载':'加到桌面')}}
             </button>
+          </div>
+        </div>
+
+        <div class="section" style="padding:0;margin-top:22px">
+          <div class="section-head"><span class="section-title">桌面组件</span><span class="section-act">长按桌面也能编辑</span></div>
+          <div class="store-grid">
+            <div class="store-item" v-for="w in widgets" :key="w.kind">
+              <div class="si-top">
+                <span class="app-icon" style="background:rgba(255,255,255,.7);border:1px solid var(--line);color:var(--ink-2)"><ico :name="w.icon" :size="18" :sw="1.5"/></span>
+                <div class="grow"><div class="si-n">{{w.name}}</div></div>
+              </div>
+              <div class="si-d">{{w.desc}}</div>
+              <button class="si-btn" :class="{ok:!A.hasWidget(w.kind)}" @click="A.hasWidget(w.kind)?A.removeWidget(w.kind):A.addWidget(w.kind)">
+                {{A.hasWidget(w.kind)?'移除':'加到桌面'}}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -4351,6 +5346,10 @@ NOTICE.Page = {
     return {
       S, tab: 'log',
       log: [
+        '桌面新增：纪念日、熟悉度、日历热力三个组件，商店可增删',
+        '玻璃质感：组件、气泡、弹层统一为磨砂玻璃，壁纸预设扩到 6 套',
+        '「我的」改成封面资料卡 + 运行状态，一眼看到外观 / API / 存储',
+        '好友列表新增本周消息条，聊天室补上日期分隔',
         '桌面网格、明信片 / 拍立得 / 音乐盒 / 小对话组件',
         '聊天：登录注册、好友、气泡、思维链、旁白、长按编辑',
         '世界书前后中位注入 · 三层记忆 · 角色档案',
@@ -4368,6 +5367,18 @@ NOTICE.Page = {
       </div>
 
       <template v-if="tab==='log'">
+        <div class="note-card">
+          <div class="n-ver">v0.2.0 · LIFE</div>
+          <div class="n-t">把日子也装进手机里</div>
+          <div class="n-b" style="padding-left:0">
+            <div style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>音乐：播放列表、唱片与进度，桌面音乐盒同步</span></div>
+            <div style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>书架：在读 / 读完、页码进度、摘句收藏</span></div>
+            <div style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>时光：纪念日时间线 + 只给自己看的日记</span></div>
+            <div style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>桌面新增「在读」「日记」两个玻璃组件</span></div>
+            <div style="display:flex;gap:7px"><span style="color:var(--muted-2)">·</span><span>发现页新增生活分区，三个应用可直接进入</span></div>
+          </div>
+          <div class="n-time">2026.11.04</div>
+        </div>
         <div class="note-card">
           <div class="n-ver">v0.1.0 · FRAMEWORK</div>
           <div class="n-t">小手机，第一次开机</div>
@@ -4410,12 +5421,12 @@ NOTICE.Page = {
    Beauty · Settings · API · Prompts · Data
    ============================================================ */
 const WALLS = [
-  { name: '纸', css: 'linear-gradient(168deg,#F6F3EC,#EDE8DE 46%,#E3DED4)' },
-  { name: '雾', css: 'radial-gradient(90% 60% at 20% 0%,#F2F1EE,transparent 65%),linear-gradient(170deg,#E2E4E1,#CFD4CE)' },
-  { name: '潮', css: 'radial-gradient(70% 50% at 80% 10%,#D9DFE4,transparent 60%),linear-gradient(160deg,#E9E7E1,#C9D0D2)' },
-  { name: '暮', css: 'radial-gradient(80% 50% at 20% 10%,#EFE4DA,transparent 60%),linear-gradient(160deg,#E9DED4,#CBB7A8)' },
-  { name: '苔', css: 'radial-gradient(70% 60% at 70% 0%,#E4E8DD,transparent 62%),linear-gradient(165deg,#E6E4DA,#BFC7B8)' },
-  { name: '墨', css: 'linear-gradient(165deg,#2C2C31,#17171B 60%,#26262B)' }
+  { name: '纸', css: 'radial-gradient(90% 60% at 16% 4%,#FDFBF5 0%,rgba(253,251,245,0) 58%),radial-gradient(70% 50% at 92% 16%,#E9E1D0 0%,rgba(233,225,208,0) 62%),radial-gradient(80% 60% at 46% 108%,#D3CBB8 0%,rgba(211,203,184,0) 66%),linear-gradient(168deg,#F6F3EB,#E4DDCD)' },
+  { name: '雾', css: 'radial-gradient(80% 50% at 18% 6%,#F6F7F4 0%,rgba(246,247,244,0) 56%),radial-gradient(70% 54% at 86% 28%,#C3CBC4 0%,rgba(195,203,196,0) 60%),radial-gradient(90% 60% at 40% 106%,#9FAAA0 0%,rgba(159,170,160,0) 62%),linear-gradient(170deg,#E7E9E4,#C4CCC3)' },
+  { name: '潮', css: 'radial-gradient(76% 48% at 82% 6%,#DCE4EA 0%,rgba(220,228,234,0) 58%),radial-gradient(66% 52% at 20% 34%,#F0EEE7 0%,rgba(240,238,231,0) 60%),radial-gradient(90% 60% at 56% 108%,#A9B6BE 0%,rgba(169,182,190,0) 64%),linear-gradient(160deg,#EAE9E2,#C2CDD2)' },
+  { name: '暮', css: 'radial-gradient(80% 54% at 22% 6%,#F7EBDF 0%,rgba(247,235,223,0) 58%),radial-gradient(66% 50% at 86% 30%,#D9B9A2 0%,rgba(217,185,162,0) 62%),radial-gradient(90% 58% at 46% 108%,#B08D77 0%,rgba(176,141,119,0) 62%),linear-gradient(162deg,#F0E3D6,#C7AA95)' },
+  { name: '苔', css: 'radial-gradient(80% 50% at 76% 4%,#EDF0E4 0%,rgba(237,240,228,0) 58%),radial-gradient(70% 52% at 16% 30%,#D5DCC9 0%,rgba(213,220,201,0) 60%),radial-gradient(90% 60% at 54% 108%,#95A28C 0%,rgba(149,162,140,0) 62%),linear-gradient(166deg,#E9E8DA,#B9C4AE)' },
+  { name: '樱', css: 'radial-gradient(84% 52% at 24% 4%,#FDF6F4 0%,rgba(253,246,244,0) 58%),radial-gradient(68% 50% at 88% 24%,#EAD2D2 0%,rgba(234,210,210,0) 60%),radial-gradient(92% 60% at 40% 106%,#CFB6BB 0%,rgba(207,182,187,0) 64%),linear-gradient(168deg,#F7EEEC,#DFC9CC)' }
 ];
 
 const BEAUTY = {};
@@ -4972,6 +5983,600 @@ SET.Data = {
 };
 
 /* ============================================================
+   Life apps — music / books / time (anniversary + diary)
+   ============================================================ */
+const MUSIC = {};
+
+MUSIC.Page = {
+  data() {
+    return {
+      S, addSheet: false,
+      form: { title: '', artist: 'LIWU RADIO', dur: 200 }
+    };
+  },
+  computed: {
+    m() { return S.cfg.life.music; },
+    tracks() { return this.m.tracks || []; },
+    cur() { return A.musicTrack(this.m.cur) || this.tracks[0] || null; },
+    played() { return S.cfg.home.music.played || 0; },
+    dur() { return S.cfg.home.music.dur || 1; },
+    pct() { return Math.max(0, Math.min(100, (this.played / this.dur) * 100)); },
+    totalText() {
+      const s = this.tracks.reduce((a, b) => a + (b.dur || 0), 0);
+      return Math.round(s / 60) + ' 分钟';
+    },
+    mode() { return this.m.mode || 'loop'; },
+    modeLabel() { return { loop: '列表循环', one: '单曲循环', shuffle: '随机播放' }[this.mode]; }
+  },
+  methods: {
+    fmt(s) {
+      s = Math.max(0, Math.round(s || 0));
+      return Math.floor(s / 60) + ':' + U.pad(s % 60);
+    },
+    play(id) { A.playTrack(id, true); },
+    toggle() {
+      if (!this.tracks.length) { this.addSheet = true; return; }
+      if (!this.cur) A.playTrack(this.tracks[0].id, true);
+      else A.toggleMusic();
+    },
+    prev() { A.nextTrack(-1); },
+    next() { A.nextTrack(1); },
+    seek(e) {
+      const r = e.currentTarget.getBoundingClientRect();
+      const p = Math.max(0, Math.min(1, (e.clientX - r.left) / Math.max(1, r.width)));
+      S.cfg.home.music.played = Math.round(p * this.dur);
+      saveCfg();
+    },
+    add() {
+      if (!this.form.title.trim()) { A.toast('给这首歌起个名字'); return; }
+      A.addTrack({
+        title: this.form.title.trim(),
+        artist: this.form.artist.trim() || 'LIWU RADIO',
+        dur: Math.max(20, Math.min(900, Number(this.form.dur) || 200))
+      });
+      this.addSheet = false;
+      this.form = { title: '', artist: 'LIWU RADIO', dur: 200 };
+      A.toast('已加入播放列表');
+    },
+    del(t) {
+      if (!confirm('从播放列表移除「' + t.title + '」？')) return;
+      A.delTrack(t.id);
+    }
+  },
+  template: `<div class="page">
+    <nav-bar title=""></nav-bar>
+    <div class="body">
+      <div class="app-head" style="padding-top:2px">
+        <div class="ah-row">
+          <div>
+            <h1>Music</h1>
+            <div class="desc">一张不会跳针的唱片，让房间有一点声音。</div>
+          </div>
+          <div class="mark">{{tracks.length}} TRACKS</div>
+        </div>
+      </div>
+
+      <div class="pad">
+        <div class="now-card">
+          <div class="nc-glow"></div>
+          <div class="nc-top">
+            <span class="nc-cap">now playing</span>
+            <span class="nc-eq" :class="{on:S.musicPlaying}"><i></i><i></i><i></i><i></i></span>
+          </div>
+          <div class="nc-body">
+            <div class="vinyl" :class="{on:S.musicPlaying}"><span>LIWU</span></div>
+            <div class="nc-meta">
+              <div class="nc-title">{{cur ? cur.title : '还没有曲目'}}</div>
+              <div class="nc-artist">{{cur ? cur.artist : '添加一首，让它开始转'}}</div>
+              <div class="nc-tag">{{S.musicPlaying ? '正在播放' : '已暂停'}} </div>
+            </div>
+          </div>
+
+          <div class="nc-progress" @click="seek">
+            <div class="nc-track"><i :style="{width:pct+'%'}"></i><b :style="{left:pct+'%'}"></b></div>
+          </div>
+          <div class="nc-times"><span>{{fmt(played)}}</span><span>{{fmt(dur)}}</span></div>
+
+          <div class="nc-ctrl">
+            <button @click="prev" aria-label="上一首"><ico name="prev" :size="17" :sw="1.5"/></button>
+            <button class="nc-play" @click="toggle" aria-label="播放"><ico :name="S.musicPlaying?'pause':'play'" :size="19"/></button>
+            <button @click="next" aria-label="下一首"><ico name="next" :size="17" :sw="1.5"/></button>
+          </div>
+        </div>
+
+        <div class="mode-row">
+          <button class="chip" :class="{on:mode==='loop'}" @click="A.setMusicMode('loop')">列表循环</button>
+          <button class="chip" :class="{on:mode==='one'}" @click="A.setMusicMode('one')">单曲</button>
+          <button class="chip" :class="{on:mode==='shuffle'}" @click="A.setMusicMode('shuffle')">随机</button>
+          <span class="mode-total">{{tracks.length}} 首 · {{totalText}}</span>
+        </div>
+
+        <div class="section" style="padding:0;margin-top:20px">
+          <div class="section-head">
+            <span class="section-title">播放列表</span>
+            <span class="section-act" @click="addSheet=true"><ico name="plus" :size="12"/>添加</span>
+          </div>
+          <div class="track" v-for="(t,i) in tracks" :key="t.id" :class="{on:cur&&cur.id===t.id}" @click="play(t.id)">
+            <div class="tk-idx"><ico v-if="cur&&cur.id===t.id" name="music" :size="12"/><span v-else>{{U.pad(i+1)}}</span></div>
+            <div class="tk-main">
+              <div class="tk-n">{{t.title}}</div>
+              <div class="tk-a">{{t.artist}}</div>
+            </div>
+            <div class="tk-d">{{fmt(t.dur)}}</div>
+            <button class="tk-del" @click.stop="del(t)" aria-label="移除"><ico name="x" :size="11"/></button>
+          </div>
+          <div v-if="!tracks.length">
+            <empty icon="music" title="播放列表是空的" sub="加一首歌，桌面上的音乐盒就会有声音。">
+              <button class="btn sm" @click="addSheet=true">添加曲目</button>
+            </empty>
+          </div>
+        </div>
+        <div class="tk-note">唱片转完一面，就翻到下一首。</div>
+        <div style="height:26px"></div>
+      </div>
+    </div>
+
+    <sheet v-if="addSheet" v-model="addSheet" title="添加曲目" sub="不会真的播放音频，它只是这个小世界里的背景音。">
+      <div class="form-stack">
+        <div class="field"><label>曲名</label><input class="input" v-model="form.title" maxlength="24" placeholder="Soft Static"></div>
+        <div class="field"><label>歌手 / 来源</label><input class="input" v-model="form.artist" maxlength="24"></div>
+        <div class="field"><label>时长（秒）</label><input class="input" type="number" min="20" max="900" v-model.number="form.dur"></div>
+      </div>
+      <template #footer><button class="btn primary block" @click="add">加入播放列表</button></template>
+    </sheet>
+  </div>`
+};
+
+/* ---------------------------------------------------------- */
+/* Books                                                       */
+/* ---------------------------------------------------------- */
+const BOOKS = {};
+
+BOOKS.Page = {
+  data() {
+    return {
+      S, tab: 'all', sheet: false,
+      form: { title: '', author: '', total: 320, status: 'reading' }
+    };
+  },
+  computed: {
+    books() { return S.cfg.life.books || []; },
+    list() { return this.tab === 'all' ? this.books : this.books.filter((b) => b.status === this.tab); },
+    reading() { return this.books.filter((b) => b.status === 'reading'); },
+    done() { return this.books.filter((b) => b.status === 'done'); },
+    quotes() { return this.books.reduce((a, b) => a + ((b.quotes || []).length), 0); }
+  },
+  methods: {
+    pct(b) { return Math.min(100, Math.round(((b.cur || 0) / Math.max(1, b.total || 1)) * 100)); },
+    open(b) { A.go('book.detail', { bookId: b.id }); },
+    add() {
+      if (!this.form.title.trim()) { A.toast('先写书名'); return; }
+      const b = A.addBook({
+        title: this.form.title.trim(),
+        author: this.form.author.trim(),
+        total: Math.max(1, Number(this.form.total) || 320),
+        status: this.form.status
+      });
+      this.sheet = false;
+      this.form = { title: '', author: '', total: 320, status: 'reading' };
+      this.open(b);
+    }
+  },
+  template: `<div class="page">
+    <nav-bar title="">
+      <template #right><button class="icon-btn" @click="sheet=true"><ico name="plus" :size="20"/></button></template>
+    </nav-bar>
+    <div class="body">
+      <div class="app-head" style="padding-top:2px">
+        <div class="ah-row">
+          <div>
+            <h1>Books</h1>
+            <div class="desc">一起读过的书。停在哪一页，下次就从那里继续。</div>
+          </div>
+          <div class="mark">{{books.length}} BOOKS</div>
+        </div>
+      </div>
+
+      <div class="bk-stats">
+        <div class="bs"><div class="n">{{reading.length}}</div><div class="l">在读</div></div>
+        <div class="bs"><div class="n">{{done.length}}</div><div class="l">读完</div></div>
+        <div class="bs"><div class="n">{{quotes}}</div><div class="l">摘句</div></div>
+      </div>
+
+      <div class="pad">
+        <div class="segmented" style="margin:4px 0 16px">
+          <button :class="{on:tab==='all'}" @click="tab='all'">全部</button>
+          <button :class="{on:tab==='reading'}" @click="tab='reading'">在读</button>
+          <button :class="{on:tab==='done'}" @click="tab='done'">读完</button>
+        </div>
+
+        <div class="bk-grid" v-if="list.length">
+          <div class="bk-card" v-for="b in list" :key="b.id" @click="open(b)">
+            <div class="bk-cover" :style="{background:b.tint||'linear-gradient(160deg,#B9B3A4,#7E786C)'}">
+              <div class="bk-cv-t">{{b.title}}</div>
+              <div class="bk-cv-a">{{b.author || '未署名'}}</div>
+              <div class="bk-cv-line"></div>
+              <span class="bk-cv-st" v-if="b.status==='done'">读完</span>
+            </div>
+            <div class="bk-info">
+              <div class="bk-t">{{b.title}}</div>
+              <div class="bk-bar"><i :style="{width:Math.max(2,pct(b))+'%'}"></i></div>
+              <div class="bk-foot"><span>{{pct(b)}}%</span><span>第 {{b.cur||0}} / {{b.total}} 页</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else>
+          <empty icon="book" title="书架还是空的" sub="放一本书进来，哪怕只读到第二页。">
+            <button class="btn sm" @click="sheet=true">添加一本书</button>
+          </empty>
+        </div>
+        <div style="height:26px"></div>
+      </div>
+    </div>
+
+    <sheet v-if="sheet" v-model="sheet" title="添加一本书" sub="封面颜色会按书名自动生成。">
+      <div class="form-stack">
+        <div class="field"><label>书名</label><input class="input" v-model="form.title" maxlength="26" placeholder="你当像鸟飞往你的山"></div>
+        <div class="field"><label>作者</label><input class="input" v-model="form.author" maxlength="20" placeholder="可以留空"></div>
+        <div class="field"><label>总页数</label><input class="input" type="number" min="1" max="5000" v-model.number="form.total"></div>
+        <div class="field"><label>状态</label>
+          <div class="f g8">
+            <button class="chip" :class="{on:form.status==='reading'}" @click="form.status='reading'">在读</button>
+            <button class="chip" :class="{on:form.status==='done'}" @click="form.status='done'">读完</button>
+          </div>
+        </div>
+      </div>
+      <template #footer><button class="btn primary block" @click="add">放进书架</button></template>
+    </sheet>
+  </div>`
+};
+
+BOOKS.Detail = {
+  props: { params: Object },
+  data() {
+    return { S, qSheet: false, qText: '', qPage: '', edit: false, eForm: null };
+  },
+  computed: {
+    b() { return A.bookById(this.params.bookId); },
+    pct() { return this.b ? Math.min(100, Math.round((this.b.cur / Math.max(1, this.b.total)) * 100)) : 0; },
+    quotes() { return (this.b && this.b.quotes) || []; },
+    days() { return this.b ? Math.max(1, Math.round((Date.now() - (this.b.createdAt || Date.now())) / 86400000) + 1) : 0; }
+  },
+  methods: {
+    save() { if (this.b) A.updateBook(this.b.id, { cur: this.b.cur, status: this.b.status }); },
+    step(n) {
+      if (!this.b) return;
+      this.b.cur = Math.max(0, Math.min(this.b.total, (this.b.cur || 0) + n));
+      if (this.b.cur >= this.b.total) this.b.status = 'done';
+      this.save();
+    },
+    finish() {
+      if (!this.b) return;
+      this.b.cur = this.b.total;
+      this.b.status = 'done';
+      this.save();
+      A.toast('读完了。可以留一句摘句。');
+    },
+    reopen() { if (this.b) { this.b.status = 'reading'; this.save(); } },
+    addQuote() {
+      if (!this.qText.trim()) { A.toast('写点什么再保存'); return; }
+      A.addQuote(this.b.id, { text: this.qText.trim(), page: Number(this.qPage) || this.b.cur || 0 });
+      this.qText = ''; this.qPage = ''; this.qSheet = false;
+    },
+    delQuote(q) {
+      if (!confirm('删除这条摘句？')) return;
+      A.delQuote(this.b.id, q.id);
+    },
+    del() {
+      if (!confirm('把《' + this.b.title + '》从书架移除？')) return;
+      A.delBook(this.b.id);
+      A.back();
+    },
+    openEdit() {
+      this.eForm = { title: this.b.title, author: this.b.author, total: this.b.total, cur: this.b.cur };
+      this.edit = true;
+    },
+    saveEdit() {
+      if (!this.eForm.title.trim()) { A.toast('书名不能为空'); return; }
+      A.updateBook(this.b.id, {
+        title: this.eForm.title.trim(), author: this.eForm.author.trim(),
+        total: Math.max(1, Number(this.eForm.total) || 1), cur: Math.max(0, Number(this.eForm.cur) || 0)
+      });
+      this.edit = false;
+    }
+  },
+  template: `<div class="page" v-if="b">
+    <nav-bar title="">
+      <template #right>
+        <button class="icon-btn" @click="openEdit"><ico name="edit" :size="17"/></button>
+        <button class="icon-btn" @click="del"><ico name="trash" :size="17"/></button>
+      </template>
+    </nav-bar>
+    <div class="body">
+      <div class="bd-hero">
+        <div class="bd-cover" :style="{background:b.tint||'linear-gradient(160deg,#B9B3A4,#7E786C)'}">
+          <div class="bk-cv-t">{{b.title}}</div>
+          <div class="bk-cv-a">{{b.author || '未署名'}}</div>
+          <div class="bk-cv-line"></div>
+        </div>
+        <div class="bd-meta">
+          <div class="bd-t">{{b.title}}</div>
+          <div class="bd-a">{{b.author || '未署名'}}</div>
+          <div class="f g6" style="margin-top:9px">
+            <span class="tag" :class="{on:b.status==='done'}">{{b.status==='done'?'已读完':'在读'}}</span>
+            <span class="tag">{{quotes.length}} 条摘句</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pad">
+        <div class="bd-progress">
+          <div class="bp-top"><span class="eyebrow">progress</span><span class="bp-pct">{{pct}}%</span></div>
+          <div class="bp-bar"><i :style="{width:Math.max(2,pct)+'%'}"></i></div>
+          <div class="bp-row">
+            <button class="bp-btn" @click="step(-10)"><ico name="minus" :size="13"/></button>
+            <div class="bp-page">第 <b>{{b.cur||0}}</b> / {{b.total}} 页</div>
+            <button class="bp-btn" @click="step(10)"><ico name="plus" :size="13"/></button>
+          </div>
+          <button class="btn sm block" style="margin-top:12px" v-if="b.status!=='done'" @click="finish">标记读完</button>
+          <button class="btn sm block ghost" style="margin-top:12px" v-else @click="reopen">重新在读</button>
+        </div>
+
+        <div class="bd-stats">
+          <div class="bds"><div class="n">{{days}}</div><div class="l">共读天数</div></div>
+          <div class="bds"><div class="n">{{quotes.length}}</div><div class="l">摘句</div></div>
+          <div class="bds"><div class="n">{{Math.max(0,b.total-(b.cur||0))}}</div><div class="l">剩余页</div></div>
+        </div>
+
+        <div class="section" style="padding:0;margin-top:24px">
+          <div class="section-head">
+            <span class="section-title">摘句</span>
+            <span class="section-act" @click="qSheet=true"><ico name="plus" :size="12"/>记一句</span>
+          </div>
+          <div class="quote" v-for="q in quotes" :key="q.id">
+            <ico name="quote" :size="14" style="color:var(--muted-2);flex:none;margin-top:2px"/>
+            <div class="q-main">
+              <div class="q-t">{{q.text}}</div>
+              <div class="q-f">P.{{q.page||'—'}}<button class="q-del" @click="delQuote(q)"><ico name="x" :size="10"/></button></div>
+            </div>
+          </div>
+          <div v-if="!quotes.length" class="q-empty">还没有摘句。读到喜欢的那一行，就记下来。</div>
+        </div>
+        <div style="height:28px"></div>
+      </div>
+    </div>
+
+    <sheet v-if="qSheet" v-model="qSheet" title="记一句" sub="它会被收在这本书下面。">
+      <div class="form-stack">
+        <div class="field"><label>摘句</label><textarea class="textarea" v-model="qText" maxlength="200" placeholder="也许，就是这么回事。"></textarea></div>
+        <div class="field"><label>页码</label><input class="input" type="number" min="0" v-model.number="qPage" :placeholder="String(b.cur||0)"></div>
+      </div>
+      <template #footer><button class="btn primary block" @click="addQuote">收下</button></template>
+    </sheet>
+
+    <sheet v-if="edit" v-model="edit" title="编辑这本书">
+      <div class="form-stack">
+        <div class="field"><label>书名</label><input class="input" v-model="eForm.title" maxlength="26"></div>
+        <div class="field"><label>作者</label><input class="input" v-model="eForm.author" maxlength="20"></div>
+        <div class="field"><label>总页数</label><input class="input" type="number" min="1" v-model.number="eForm.total"></div>
+        <div class="field"><label>当前页</label><input class="input" type="number" min="0" v-model.number="eForm.cur"></div>
+      </div>
+      <template #footer><button class="btn primary block" @click="saveEdit">保存</button></template>
+    </sheet>
+  </div>`
+};
+
+/* ---------------------------------------------------------- */
+/* Time — anniversaries + diary                                */
+/* ---------------------------------------------------------- */
+const TIME = {};
+
+TIME.Page = {
+  props: { params: Object },
+  data() {
+    return {
+      S, tab: 'anniv',
+      aSheet: false, aEdit: '', aForm: { date: '', label: '', note: '' },
+      dSheet: false, dEdit: '', dForm: { text: '', mood: '平静' },
+      moods: ['平静', '想你', '开心', '低落', '疲惫']
+    };
+  },
+  computed: {
+    annivs() { return (S.cfg.life.annivs || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || '')); },
+    main() { return A.mainAnniv(); },
+    days() { return this.main ? this.daysOf(this.main.date) : null; },
+    diaries() { return (S.cfg.life.diary || []).slice().sort((a, b) => b.ts - a.ts); },
+    dayNo() { return A.dayNo(); },
+    monthCount() {
+      const n = new Date();
+      return this.diaries.filter((d) => {
+        const x = new Date(d.ts);
+        return x.getFullYear() === n.getFullYear() && x.getMonth() === n.getMonth();
+      }).length;
+    },
+    words() { return this.diaries.reduce((a, d) => a + (d.text || '').length, 0); },
+    streak() {
+      const days = new Set(this.diaries.map((d) => { const x = new Date(d.ts); x.setHours(0, 0, 0, 0); return x.getTime(); }));
+      let cur = new Date(); cur.setHours(0, 0, 0, 0);
+      if (!days.has(cur.getTime())) cur.setDate(cur.getDate() - 1);
+      let n = 0;
+      while (days.has(cur.getTime())) { n++; cur.setDate(cur.getDate() - 1); }
+      return n;
+    }
+  },
+  methods: {
+    daysOf(d) {
+      if (!d) return null;
+      const t = new Date(d + 'T00:00:00');
+      if (isNaN(t)) return null;
+      const now = new Date(); now.setHours(0, 0, 0, 0);
+      return Math.round((now - t) / 86400000) + 1;
+    },
+    ago(d) {
+      const n = this.daysOf(d);
+      if (n == null) return '';
+      if (n === 0) return '就是今天';
+      return n > 0 ? '已经 ' + n + ' 天' : '还有 ' + (-n + 1) + ' 天';
+    },
+    fmt(d) { return d ? d.replace(/-/g, '.') : '未设定'; },
+    dText(ts) {
+      const d = new Date(ts);
+      return (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 · ' + U.pad(d.getHours()) + ':' + U.pad(d.getMinutes());
+    },
+    openAnniv(a) {
+      this.aEdit = a ? a.id : '';
+      this.aForm = a ? { date: a.date, label: a.label, note: a.note || '' } : { date: new Date().toISOString().slice(0, 10), label: '', note: '' };
+      this.aSheet = true;
+    },
+    saveAnniv() {
+      if (!this.aForm.date) { A.toast('选一个日期'); return; }
+      if (!this.aForm.label.trim()) { A.toast('给这一天起个名字'); return; }
+      if (this.aEdit) A.updateAnniv(this.aEdit, { date: this.aForm.date, label: this.aForm.label.trim(), note: this.aForm.note.trim() });
+      else A.addAnniv({ date: this.aForm.date, label: this.aForm.label.trim(), note: this.aForm.note.trim() });
+      this.aSheet = false;
+      A.toast('记下了');
+    },
+    delAnniv() {
+      if (!this.aEdit) return;
+      if (!confirm('删除这一天？')) return;
+      A.delAnniv(this.aEdit);
+      this.aSheet = false;
+    },
+    setMain(a) { A.setMainAnniv(a.id); A.toast('已设为桌面上的那一天'); },
+    openDiary(d) {
+      this.dEdit = d ? d.id : '';
+      this.dForm = d ? { text: d.text, mood: d.mood || '平静' } : { text: '', mood: '平静' };
+      this.dSheet = true;
+    },
+    saveDiary() {
+      if (!this.dForm.text.trim()) { A.toast('写点什么'); return; }
+      if (this.dEdit) A.updateDiary(this.dEdit, { text: this.dForm.text.trim(), mood: this.dForm.mood });
+      else A.addDiary({ text: this.dForm.text.trim(), mood: this.dForm.mood });
+      this.dSheet = false;
+      A.toast('写好了');
+    },
+    delDiary() {
+      if (!this.dEdit || !confirm('删除这一篇？')) return;
+      A.delDiary(this.dEdit);
+      this.dSheet = false;
+    }
+  },
+  mounted() { if (this.params && this.params.tab) this.tab = this.params.tab; },
+  template: `<div class="page">
+    <nav-bar title=""></nav-bar>
+    <div class="body">
+      <div class="app-head" style="padding-top:2px">
+        <div class="ah-row">
+          <div>
+            <h1>Time</h1>
+            <div class="desc">把日子数出来，把想说的话留下来。</div>
+          </div>
+          <div class="mark">{{annivs.length}} DAYS · {{diaries.length}} NOTES</div>
+        </div>
+      </div>
+
+      <div class="pad">
+        <div class="segmented" style="margin:4px 0 16px">
+          <button :class="{on:tab==='anniv'}" @click="tab='anniv'">纪念日</button>
+          <button :class="{on:tab==='diary'}" @click="tab='diary'">日记</button>
+        </div>
+
+        <template v-if="tab==='anniv'">
+          <div class="tm-hero" v-if="main">
+            <div class="tm-hero-top"><span class="tm-cap">days together</span><ico name="heart" :size="12" :sw="1.4" style="opacity:.5"/></div>
+            <div class="tm-num">{{Math.abs(days)}}</div>
+            <div class="tm-lab">{{main.label}} · 第 {{days}} 天</div>
+            <div class="tm-date">{{fmt(main.date)}}</div>
+            <div class="tm-hero-glow"></div>
+          </div>
+          <div class="tm-hero empty" v-else @click="openAnniv(null)">
+            <div class="tm-hero-top"><span class="tm-cap">days together</span></div>
+            <div class="tm-num">＋</div>
+            <div class="tm-lab">设一个纪念日</div>
+            <div class="tm-date">比如第一次说话的那天</div>
+          </div>
+
+          <div class="section" style="padding:0;margin-top:22px">
+            <div class="section-head">
+              <span class="section-title">时间线</span>
+              <span class="section-act" @click="openAnniv(null)"><ico name="plus" :size="12"/>添加</span>
+            </div>
+            <div class="tl" v-if="annivs.length">
+              <div class="tl-item" v-for="a in annivs" :key="a.id" @click="openAnniv(a)">
+                <div class="tl-rail"><i :class="{main:a.main}"></i></div>
+                <div class="tl-body">
+                  <div class="tl-date">{{fmt(a.date)}} <span v-if="a.main" class="tag on">桌面</span></div>
+                  <div class="tl-t">{{a.label}}</div>
+                  <div class="tl-note" v-if="a.note">{{a.note}}</div>
+                  <div class="tl-m">{{ago(a.date)}}<button class="tl-main" v-if="!a.main" @click.stop="setMain(a)">设为桌面</button></div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="q-empty">还没有纪念日。第一个可以是「第一次说话」。</div>
+          </div>
+        </template>
+
+        <template v-else>
+          <div class="dw-hero">
+            <div>
+              <div class="tm-cap">my diary</div>
+              <div class="dw-n">DAY {{dayNo}}</div>
+              <div class="dw-s">{{diaries.length}} 篇 · 只写给自己看</div>
+            </div>
+            <button class="dw-write" @click="openDiary(null)"><ico name="edit" :size="16"/></button>
+          </div>
+          <div class="dw-stats" v-if="diaries.length">
+            <span>本月 <b>{{monthCount}}</b> 篇</span><i></i>
+            <span>共 <b>{{diaries.length}}</b> 篇</span><i></i>
+            <span>连续 <b>{{streak}}</b> 天</span><i></i>
+            <span>共 <b>{{words}}</b> 字</span>
+          </div>
+
+          <div class="diary-item" v-for="d in diaries" :key="d.id" @click="openDiary(d)">
+            <div class="di-top"><span class="di-date">{{dText(d.ts)}}</span><span class="di-mood">{{d.mood}}</span></div>
+            <div class="di-text">{{d.text}}</div>
+          </div>
+          <div v-if="!diaries.length">
+            <empty icon="feather" title="第一页是空白的" sub="写一句今天，明天再来看，它就有了重量。">
+              <button class="btn sm" @click="openDiary(null)">写一篇</button>
+            </empty>
+          </div>
+        </template>
+        <div style="height:26px"></div>
+      </div>
+    </div>
+
+    <sheet v-if="aSheet" v-model="aSheet" :title="aEdit?'编辑这一天':'添加纪念日'" sub="日期会一直算下去，跨过零点自动加一天。">
+      <div class="form-stack">
+        <div class="field"><label>日期</label><input class="input" type="date" v-model="aForm.date"></div>
+        <div class="field"><label>这一天叫什么</label><input class="input" v-model="aForm.label" maxlength="12" placeholder="在一起 / 第一次见面"></div>
+        <div class="field"><label>备注</label><textarea class="textarea" v-model="aForm.note" maxlength="120" placeholder="那天发生了什么"></textarea></div>
+      </div>
+      <template #footer>
+        <button v-if="aEdit" class="btn" style="color:var(--danger)" @click="delAnniv">删除</button>
+        <button class="btn primary grow" @click="saveAnniv">保存</button>
+      </template>
+    </sheet>
+
+    <sheet v-if="dSheet" v-model="dSheet" :title="dEdit?'这一篇':'写一篇'" sub="日记不会进入对话，也不会被角色看到。">
+      <div class="form-stack">
+        <div class="field"><label>今天</label><textarea class="textarea" style="min-height:150px" v-model="dForm.text" maxlength="1200" placeholder="今天没发生什么，但还是想写下来。"></textarea></div>
+        <div class="field"><label>心情</label>
+          <div class="f g6" style="flex-wrap:wrap">
+            <button class="chip" v-for="m in moods" :key="m" :class="{on:dForm.mood===m}" @click="dForm.mood=m">{{m}}</button>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <button v-if="dEdit" class="btn" style="color:var(--danger)" @click="delDiary">删除</button>
+        <button class="btn primary grow" @click="saveDiary">保存</button>
+      </template>
+    </sheet>
+  </div>`
+};
+
+/* ============================================================
    App shell, router, boot
    ============================================================ */
 const NAV = Vue.reactive({ stack: [], dir: 'push', seq: 0 });
@@ -5014,11 +6619,15 @@ window.loadDemoData = async function () {
     });
   }
   if (S.chars.some((c) => c.demo)) { A.toast('演示数据已经载入过了'); return; }
+  let spread = 0;
   const mk = async (data, lines) => {
     const c = await A.saveCharacter(Object.assign({ demo: true, avatarKey: '' }, data));
     const chat = await A.ensureChat(c.id);
-    for (const l of lines) {
-      await A.appendMessage(chat.id, l[0], l[1], l[2] || {});
+    for (let li = 0; li < lines.length; li++) {
+      const l = lines[li];
+      // 把演示对话摊到最近几天，日历热力图才有东西看
+      const ts = Date.now() - (lines.length - li) * 5 * 3600e3 - (spread++) * 26 * 3600e3;
+      await A.appendMessage(chat.id, l[0], l[1], Object.assign({ ts }, l[2] || {}));
     }
     const m = { id: U.uid('mem'), accountId: S.account.id, charId: c.id };
     await A.addMemory({ charId: c.id, type: 'permanent', title: '底色 · ' + c.name, content: data.perm, keywords: ['底色'] });
@@ -5085,6 +6694,32 @@ window.loadDemoData = async function () {
     imgs: [], ts: Date.now() - 3600e3, likes: [], comments: [], shares: 0
   });
   S.cfg.momentsSig = '把日子过成一张慢慢显影的照片。';
+  const ago = new Date(); ago.setDate(ago.getDate() - 61);
+  S.cfg.home.anniv = { date: ago.toISOString().slice(0, 10), label: '在一起' };
+  S.cfg.home.sign = '把日子过成一张慢慢显影的照片。';
+
+  // 时光：纪念日与日记
+  const back = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return d.toISOString().slice(0, 10); };
+  S.cfg.life.annivs = [
+    { id: U.uid('an'), date: back(88), label: '第一次说话', note: '在书店门口躲雨，问了句「这里还开着吗」。', main: false, ts: Date.now() },
+    { id: U.uid('an'), date: back(61), label: '在一起', note: '', main: true, ts: Date.now() },
+    { id: U.uid('an'), date: back(9), label: '第一次一起看完一部电影', note: '片尾字幕走完才起身。', main: false, ts: Date.now() }
+  ];
+  S.cfg.life.diary = [
+    { id: U.uid('dy'), ts: Date.now() - 5 * 3600e3, mood: '平静', text: '今天没做什么。窗外的雨下到下午就停了，地上还留着一点湿。\n给他拍了一张水的照片，他回得很快，说像一面没擦干净的镜子。' },
+    { id: U.uid('dy'), ts: Date.now() - 30 * 3600e3, mood: '想你', text: '忽然意识到，已经习惯了睡前把今天的事讲一遍。\n讲给谁听其实不重要，重要的是有人会在。' }
+  ];
+  // 书架：一起读的书
+  S.cfg.life.books = [
+    { id: U.uid('bk'), title: '你当像鸟飞往你的山', author: '塔拉·韦斯特弗', total: 388, cur: 214, status: 'reading', tint: A.bookTint('你当像鸟飞往你的山'), createdAt: Date.now() - 20 * 86400e3, quotes: [
+      { id: U.uid('q'), text: '你可以爱一个人，但仍然选择和他说再见。', page: 186, ts: Date.now() - 4 * 86400e3 }
+    ] },
+    { id: U.uid('bk'), title: '我与地坛', author: '史铁生', total: 246, cur: 246, status: 'done', tint: A.bookTint('我与地坛'), createdAt: Date.now() - 50 * 86400e3, quotes: [
+      { id: U.uid('q'), text: '就命运而言，休论公道。', page: 97, ts: Date.now() - 18 * 86400e3 }
+    ] },
+    { id: U.uid('bk'), title: '夏天、烟火和我的尸体', author: '乙一', total: 212, cur: 46, status: 'reading', tint: A.bookTint('夏天、烟火和我的尸体'), createdAt: Date.now() - 3 * 86400e3, quotes: [] }
+  ];
+  if (!S.cfg.home.name || S.cfg.home.name === '未命名') S.cfg.home.name = S.account.name;
   await saveCfg(true);
   await A.refreshSizes();
   A.toast('演示数据已载入');
@@ -5141,6 +6776,10 @@ const VIEWS = {
   'memories': MEM.Page,
   'archive': ARCH.List,
   'archive.edit': ARCH.Edit,
+  'music': MUSIC.Page,
+  'books': BOOKS.Page,
+  'book.detail': BOOKS.Detail,
+  'time': TIME.Page,
   'store': STORE.Page,
   'notices': NOTICE.Page,
   'beauty': BEAUTY.Page,
@@ -5224,6 +6863,7 @@ app.mount('#app');
 A.boot().then(async () => {
   if (S.cfg.ui.fontKey) await A.applyFont();
   A.applyGlobalBeauty();
+  setInterval(() => A.tickMusic(), 1000);
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && NAV.stack.length) A.back();
   });
