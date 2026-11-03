@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """把 src/ 下的 css / js 与 vue.js 打成单文件 liwu.html。
 
-用法：  python3 build.py        # 产物：同目录 liwu.html
+用法：  python3 build.py        # 产物：同目录 index.html（GitHub Pages 入口）与 liwu.html
 
 源码分层：
   css  01-tokens.css 设计变量 → 02-shell.css 外壳与桌面 → 03-chat.css 聊天
@@ -13,7 +13,8 @@ import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent
 SRC = ROOT / 'src'
-OUT = ROOT / 'liwu.html'
+OUT = ROOT / 'index.html'
+COPY = ROOT / 'liwu.html'
 
 css_files = ['01-tokens.css', '02-shell.css', '03-chat.css', '04-apps.css', '05-fix.css']
 js_files = ['10-icons.js', '11-db.js', '12-store.js', '13-ui.js', '20-home.js',
@@ -48,4 +49,5 @@ html = f"""<!doctype html>
 """
 
 OUT.write_text(html)
+COPY.write_text(html)
 print(f'built {OUT} · {len(html)/1024:.1f} KB · css {len(css)/1024:.1f}KB js {len(js)/1024:.1f}KB')
