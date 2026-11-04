@@ -464,6 +464,7 @@ HOME.Home = {
       this.dateText = (d.getMonth() + 1) + ' 月 ' + d.getDate() + ' 日 · 周' + '日一二三四五六'[d.getDay()];
     },
     meta(id) { return window.appMeta(id); },
+    badge(id) { return (S.badges && S.badges[id]) || 0; },
     gridStyle(cell) {
       const g = this.gridGap, row = this.gridRow;
       return {
@@ -697,6 +698,7 @@ HOME.Home = {
           <div class="hc-n">{{dayNo}}</div>
         </div>
       </div>
+      <div class="status-pill" v-if="OS.statusText()"><i class="sp-dot"></i><span>{{OS.statusText()}}</span></div>
       <div class="pages" ref="pages" @scroll.passive="onScroll">
         <div class="hp" v-for="(pg,pi) in homePages" :key="'hp'+pi" :data-page="pi">
           <div class="page-grid" :style="{height:pageH(pg)+'px','--cell-r':gridRow+'px','--cell-gap':gridGap+'px'}">
@@ -705,7 +707,9 @@ HOME.Home = {
                  :style="[gridStyle(cell), dragStyleFor(cell.key)]"
                  @pointerdown="downGrid($event,cell,pi)">
               <button v-if="cell.type==='app'" class="app" @click.stop="openApp(cell.appId)">
-                <span class="app-icon" :style="{'--tint':meta(cell.appId).tint}"><ico :name="meta(cell.appId).icon" :size="24" :sw="1.5"/></span>
+                <span class="app-icon" :style="{'--tint':meta(cell.appId).tint}"><ico :name="meta(cell.appId).icon" :size="24" :sw="1.5"/>
+                  <i class="app-badge" v-if="badge(cell.appId)">{{badge(cell.appId)>99?'99+':badge(cell.appId)}}</i>
+                </span>
                 <span class="app-label">{{meta(cell.appId).name}}</span>
               </button>
               <template v-else>
@@ -734,7 +738,9 @@ HOME.Home = {
           <div v-for="(appId,i) in dock" :key="appId" class="dock-slot" :style="dragStyleFor(null,appId)"
                @pointerdown="downDock($event,appId,i)">
             <button class="app" @click.stop="editing?null:A.openApp(appId)">
-              <span class="app-icon" :style="{'--tint':meta(appId).tint}"><ico :name="meta(appId).icon" :size="24" :sw="1.5"/></span>
+              <span class="app-icon" :style="{'--tint':meta(appId).tint}"><ico :name="meta(appId).icon" :size="24" :sw="1.5"/>
+                <i class="app-badge" v-if="badge(appId)">{{badge(appId)>99?'99+':badge(appId)}}</i>
+              </span>
               <span class="app-label">{{meta(appId).name}}</span>
             </button>
           </div>

@@ -13,7 +13,21 @@ window.APPS = {
   store:    { id: 'store',    name: '商店',   icon: 'store',   tint: 'linear-gradient(150deg,#CDBD97,#A79367)', route: 'store' },
   notices:  { id: 'notices',  name: '通知',   icon: 'bell',    tint: 'linear-gradient(150deg,#B6B6BA,#8B8B91)', route: 'notices' },
   beauty:   { id: 'beauty',   name: '美化',   icon: 'palette', tint: 'linear-gradient(150deg,#C6A9B4,#9C7E8A)', route: 'beauty' },
-  settings: { id: 'settings', name: '设置',   icon: 'settings',tint: 'linear-gradient(150deg,#8E9299,#63676D)', route: 'settings' }
+  settings: { id: 'settings', name: '设置',   icon: 'settings',tint: 'linear-gradient(150deg,#8E9299,#63676D)', route: 'settings' },
+  phone:    { id: 'phone',    name: '电话',   icon: 'phone',   tint: 'linear-gradient(150deg,#9FCBA6,#6E9C77)', route: 'phone' },
+  map:      { id: 'map',      name: '地图',   icon: 'map',     tint: 'linear-gradient(150deg,#A9C0CE,#7E9AAE)', route: 'map' },
+  moments:  { id: 'moments',  name: '动态',   icon: 'users',   tint: 'linear-gradient(150deg,#E0B5C0,#BB8794)', route: 'chat.moments' },
+  mailbox:  { id: 'mailbox',  name: '信箱',   icon: 'mail',    tint: 'linear-gradient(150deg,#C7B79E,#9C8B6F)', route: 'deeptalk' },
+  notes:    { id: 'notes',    name: '备忘录', icon: 'note',    tint: 'linear-gradient(150deg,#D9C79A,#B39C6A)', route: 'notes' },
+  camera:   { id: 'camera',   name: '相册',   icon: 'camera',  tint: 'linear-gradient(150deg,#B9BFC6,#8C949D)', route: 'camera' },
+  weather:  { id: 'weather',  name: '天气',   icon: 'sun',     tint: 'linear-gradient(150deg,#AFCDE0,#7EA6C2)', route: 'weather' },
+  calendar: { id: 'calendar', name: '日历',   icon: 'calendar',tint: 'linear-gradient(150deg,#D7A9B4,#B07F8C)', route: 'time' },
+  todo:     { id: 'todo',     name: '待办',   icon: 'check',   tint: 'linear-gradient(150deg,#B6CDA6,#8AA877)', route: 'todo' },
+  delivery: { id: 'delivery', name: '外卖',   icon: 'gift',    tint: 'linear-gradient(150deg,#E2B98F,#C1915C)', route: 'delivery' },
+  game:     { id: 'game',     name: '游戏',   icon: 'game',    tint: 'linear-gradient(150deg,#C6B6D8,#9A86B4)', route: 'game' },
+  voice:    { id: 'voice',    name: '语音',   icon: 'mic',     tint: 'linear-gradient(150deg,#C9C2B6,#9C9486)', route: 'voice' },
+  health:   { id: 'health',   name: '健康',   icon: 'pulse',   tint: 'linear-gradient(150deg,#E0A9A9,#BC7E7E)', route: 'health' },
+  dream:    { id: 'dream',    name: '梦境',   icon: 'moon',    tint: 'linear-gradient(150deg,#A9B0D2,#79809E)', route: 'dream' }
 };
 
 window.PROMPT_DEFS = {
@@ -100,7 +114,8 @@ function defaultCfg() {
       rooms: { todos: [], memos: [], wishes: [], checkins: {} },
       capsules: [],
       usage: { n: 0, fails: 0, inTok: 0, outTok: 0, days: {} }
-    }
+    },
+    os: { notices: [], status: { activity: '自由', place: '家', mood: '平静', text: '' }, seeded: false }
   };
 }
 
@@ -120,6 +135,9 @@ window.S = Vue.reactive({
   editing: false,
   homePage: 0,
   musicPlaying: false,
+  badges: {},
+  banner: null,
+  noticeOpen: false,
   sizes: [],
   stats: { total: 0, days: {} },
   busy: '',
@@ -201,6 +219,9 @@ window.A = {
     ['todos', 'memos', 'wishes'].forEach((k) => { if (!Array.isArray(state.cfg.extra.rooms[k])) state.cfg.extra.rooms[k] = []; });
     if (!state.cfg.extra.rooms.checkins || typeof state.cfg.extra.rooms.checkins !== 'object') state.cfg.extra.rooms.checkins = {};
     state.cfg.extra.usage = Object.assign({}, dEx.usage, state.cfg.extra.usage || {});
+    state.cfg.os = Object.assign({ notices: [], status: { activity: '自由', place: '家', mood: '平静', text: '' }, seeded: false }, state.cfg.os || {});
+    if (!Array.isArray(state.cfg.os.notices)) state.cfg.os.notices = [];
+    if (!state.cfg.os.status) state.cfg.os.status = {};
     if (!state.cfg.extra.usage.days) state.cfg.extra.usage.days = {};
     if (!Array.isArray(state.cfg.extra.capsules)) state.cfg.extra.capsules = [];
     // 老账号：桌面上的那个纪念日，升级成时光里的第一条

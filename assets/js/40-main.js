@@ -224,13 +224,17 @@ const StatusBar = {
   },
   beforeUnmount() { clearInterval(this.t); },
   methods: {
-    tick() { const d = new Date(); this.time = U.pad(d.getHours()) + ':' + U.pad(d.getMinutes()); }
+    tick() { const d = new Date(); this.time = U.pad(d.getHours()) + ':' + U.pad(d.getMinutes()); },
+    toggle() { S.noticeOpen = !S.noticeOpen; }
   },
   template: `<div class="statusbar" :class="{dark:S.statusDark}">
     <span :style="hideTime?{opacity:0}:{}">{{time}}</span>
     <div class="sb-r">
       <ico name="signal" :size="14"/>
       <ico name="wifi" :size="14"/>
+      <button class="sb-bell" @click="toggle"><ico name="bell" :size="14"/>
+        <i class="sb-badge" v-if="OS.unread()">{{OS.unread()>99?'99+':OS.unread()}}</i>
+      </button>
       <ico name="battery" :size="19"/>
     </div>
   </div>`
@@ -271,7 +275,19 @@ const VIEWS = {
   'settings.api.edit': SET.ApiEdit,
   'settings.prompt': SET.Prompt,
   'settings.data': SET.Data,
-  'custom': CUSTOM.Page
+  'custom': CUSTOM.Page,
+  'phone': APPX.Phone,
+  'map': APPX.Map,
+  'notes': APPX.Notes,
+  'camera': APPX.Camera,
+  'weather': APPX.Weather,
+  'todo': APPX.Todo,
+  'delivery': APPX.Delivery,
+  'game': APPX.Game,
+  'voice': APPX.Voice,
+  'health': APPX.Health,
+  'dream': APPX.Dream,
+  'coming': APPX.Coming
 };
 
 const Root = {
@@ -309,6 +325,25 @@ const Root = {
       const a = S.toast && S.toast.action;
       S.toast = null; clearTimeout(A._tt);
       if (a && a.run) a.run();
+    },
+    openBanner(b) {
+      S.banner = null;
+      if (!b) return;
+      if (b.action && b.action.run) return b.action.run();
+      if (b.route) { S.noticeOpen = false; A.go(b.route, b.params || {}); }
+    },
+    openNotice(n) {
+      OS.markNotice(n.id);
+      S.noticeOpen = false;
+      if (n.route) A.go(n.route, n.params || {});
+    },
+    clearNotices() { OS.clearAll(); },
+    meta(id) { return window.appMeta(id); },
+    fmtTs(t) {
+      const d = new Date(t), now = new Date();
+      const same = d.toDateString() === now.toDateString();
+      const p = (x) => (x < 10 ? '0' + x : x);
+      return same ? p(d.getHours()) + ':' + p(d.getMinutes()) : (d.getMonth() + 1) + '/' + d.getDate() + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
     }
   },
   computed: {
@@ -334,6 +369,26 @@ const Root = {
       <div class="screen">
         <div class="island"></div>
         <status-bar :hide-time="!top"></status-bar>
+
+        <div class="os-banner" v-if="S.banner" :class="'b-'+S.banner.app" @click="openBanner(S.banner)">
+          <div class="ob-ico" :style="{'--tint':meta(S.banner.app).tint}"><ico :name="S.banner.icon" :size="16"/></div>
+          <div class="ob-mid">
+            <div class="ob-title">{{S.banner.title}}</div>
+            <div class="ob-body">{{S.banner.body}}</div>
+          </div>
+          <ico name="chevronRight" :size="14"/>
+        </div>
+
+        <div class="os-center" v-if="S.noticeOpen" @click.self="S.noticeOpen=false">
+          <div class="oc-head"><span>通知</span><button class="oc-clear" @click="clearNotices">全部已读</button></div>
+          <div class="oc-list">
+            <div class="oc-item" v-for="n in S.cfg.os.notices" :key="n.id" :class="{un:n.read===false}" @click="openNotice(n)">
+              <div class="oc-ico" :style="{'--tint':meta(n.app).tint}"><ico :name="n.icon" :size="14"/></div>
+              <div class="oc-mid"><div class="oc-title">{{n.title}}<i v-if="n.read===false" class="oc-dot"></i></div><div class="oc-body">{{n.body}}</div><div class="oc-time">{{fmtTs(n.ts)}}</div></div>
+            </div>
+            <div v-if="!S.cfg.os.notices.length" class="oc-empty">还没有通知</div>
+          </div>
+        </div>
         <home-screen v-show="!top"></home-screen>
 
         <div class="lock" v-if="lock" :class="{hide:lockUp}" :style="lockWall"
@@ -406,6 +461,7 @@ app.config.globalProperties.A = A;
 app.config.globalProperties.S = S;
 app.config.globalProperties.DB = DB;
 app.config.globalProperties.APPS = APPS;
+app.config.globalProperties.OS = OS;
 app.config.globalProperties.saveCfg = saveCfg;
 app.config.globalProperties.PROMPT_DEFS = PROMPT_DEFS;
 app.mount('#app');
@@ -413,6 +469,7 @@ app.mount('#app');
 A.boot().then(async () => {
   if (S.cfg.ui.fontKey) await A.applyFont();
   A.applyGlobalBeauty();
+  OS.seedDemo();
   setInterval(() => A.tickMusic(), 1000);
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && NAV.stack.length) A.back();
