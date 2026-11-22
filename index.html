@@ -11,81 +11,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=40">
-<style>
-/* ===== 基础覆盖 ===== */
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0;height:100%}
-body{background:#eef3fb;color:#33445f;font-family:'Noto Serif SC',serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow:hidden}
-
-/* 3D 容器 */
-#scene-container{position:fixed;inset:0;z-index:1}
-#scene-container canvas{display:block;width:100%;height:100%;touch-action:none}
-
-/* 模式切换：desk 时显示 3D，隐藏 2D UI */
-body:not(.desk) #scene-container{display:none}
-body.desk #app,
-body.desk .scrim,
-body.desk .drawer,
-body.desk .view,
-body.desk .back-gate{display:none}
-
-/* 加载 */
-#loader{position:fixed;inset:0;z-index:200;background:#eef3fb;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .8s}
-#loader .t{font-family:'Noto Serif SC',serif;font-size:20px;letter-spacing:.35em;color:#a7a0dc}
-#loader .s{font-size:11px;color:#5a4e42;margin-top:14px;letter-spacing:.12em}
-#loader.done{opacity:0;pointer-events:none}
-
-/* 标题 */
-.room-title{position:fixed;left:50%;top:22px;transform:translateX(-50%);z-index:10;text-align:center;pointer-events:none;transition:opacity .6s;opacity:0;animation:fadeInTitle 1.5s 1.2s forwards}
-.room-title .cn{font-family:'Noto Serif SC',serif;font-size:22px;letter-spacing:.28em;color:rgba(66,82,119,.78)}
-.room-title .en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10px;letter-spacing:.18em;color:rgba(93,110,147,.56);margin-top:5px}
-@keyframes fadeInTitle{to{opacity:1}}
-
-/* 场景导航 */
-.scene-nav{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translateX(-50%);z-index:30;display:flex;gap:8px;padding:6px;border:1px solid rgba(255,255,255,.72);border-radius:999px;background:rgba(247,250,255,.68);box-shadow:0 8px 28px rgba(75,101,150,.12);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-.scene-nav button{appearance:none;border:0;border-radius:999px;padding:9px 18px;background:transparent;color:#667895;font:400 12px 'Noto Serif SC',serif;letter-spacing:.12em;cursor:pointer;transition:background .25s,color .25s,box-shadow .25s}
-.scene-nav button.active{background:rgba(255,255,255,.92);color:#526b9a;box-shadow:0 2px 10px rgba(77,102,151,.12)}
-.scene-nav button:active{transform:scale(.97)}
-@media(max-width:480px){.scene-nav{bottom:calc(env(safe-area-inset-bottom,0px) + 18px)}.scene-nav button{padding:8px 15px}}
-
-/* 提示 */
-.hint-3d{position:fixed;left:0;right:0;bottom:14px;text-align:center;font-size:10px;letter-spacing:.22em;color:rgba(82,101,139,.58);z-index:10;pointer-events:none;transition:opacity .6s;opacity:0;animation:fadeInHint 1.5s 2s forwards}
-@keyframes fadeInHint{to{opacity:1}}
-
-/* 常规二维界面：关闭 3D 展示层，恢复聊天主界面 */
-#scene-container,.room-title,.hint-3d,.scene-nav,#loader{display:none!important}
-#app{display:flex!important}
-</style>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-  }
-}
-</script>
+<link rel="stylesheet" href="assets/style.css?v=41">
 </head>
 <body data-theme="paper">
 
-<!-- 加载 -->
-<div id="loader">
-  <div class="t">里屋</div>
-  <div class="s">正在布置雨夜书房……</div>
+<div class="s">正在布置雨夜书房……</div>
 </div>
 
-<!-- 3D 场景 -->
-<div id="scene-container"></div>
-
-<!-- 标题 -->
-<div class="room-title">
-  <div class="cn">里屋</div>
-  <div class="en">Rainy Night Study</div>
+<div class="en">Rainy Night Study</div>
 </div>
-
-<!-- 提示 -->
-<div class="hint-3d">单指拖动探索 · 双指缩放 · 点击物件聚焦</div>
-<nav class="scene-nav" aria-label="空间视角"><button type="button" id="deskViewBtn" class="active">桌面</button><button type="button" id="windowViewBtn">窗边</button></nav>
 
 <!-- App —— 与原有结构完全一致 -->
 <div id="app">
@@ -97,7 +31,7 @@ body.desk .back-gate{display:none}
   <main class="thread" id="thread"></main>
   <footer class="composer">
     <form class="in-row" id="form">
-      <textarea id="input" rows="1" placeholder="说一句" autocapitalize="off"></textarea>
+      <textarea id="input" rows="1" placeholder="说一句" autocapitalize="off" aria-label="发消息给宋祁"></textarea>
       <button class="send" id="sendBtn" type="submit" aria-label="发">↑</button>
       <button class="stop" id="stopBtn" type="button" aria-label="停" hidden>■</button>
     </form>
@@ -111,7 +45,7 @@ body.desk .back-gate{display:none}
   <div class="drawer-in">
     <div class="drawer-top"><span class="brandmark">里屋</span><span class="drawer-days" id="drawerDays"></span></div>
     <button class="newchat" id="newChat" type="button">新的一段</button>
-    <input class="search" id="search" placeholder="找一段话" autocomplete="off">
+    <input class="search" id="search" placeholder="找一段话" autocomplete="off" aria-label="搜索会话">
     <div class="sessions" id="sessions"></div>
     <nav class="drawer-nav">
       <button type="button" data-view="home">回桌子</button>
@@ -129,11 +63,7 @@ body.desk .back-gate{display:none}
     <span class="view-title" id="viewTitle"></span><span class="view-en" id="viewEn"></span>
   </header>
   <div class="view-body" id="viewBody"></div>
-</section>
-
-<button class="back-gate" id="backGate" type="button">回桌子</button>
-
-<script>
+</section><script>
 window.addEventListener('error', function(e){
   var h = document.getElementById('hint');
   if (h) h.textContent = '出了点问题：' + (e.message || '未知');
