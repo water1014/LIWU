@@ -1100,7 +1100,7 @@
       openView('心情','Mood',html);
       var body=$('#viewBody');
       body.onclick=function(ev){
-        var choice=ev.target.closest('[data-mood-level]');if(choice){level=Number(choice.getAttribute('data-mood-level'));$$('.mood-choice',body).forEach(function(b){b.classList.toggle('active',Number(b.getAttribute('data-mood-level'))===level);});return;}
+        var choice=ev.target.closest('[data-mood-level]');if(choice){level=Number(choice.getAttribute('data-mood-level'));Array.from(body.querySelectorAll('.mood-choice')).forEach(function(b){b.classList.toggle('active',Number(b.getAttribute('data-mood-level'))===level);});return;}
         var del=ev.target.closest('[data-mood-delete]');if(del&&confirm('删除这条心情记录？')){simpleSave(key,simpleList(key).filter(function(x){return x.id!==del.getAttribute('data-mood-delete');}));render();toast('记录已删除。');}
       };
       body.oninput=function(ev){if(ev.target.id==='moodSearch'){var pos=ev.target.selectionStart;query=ev.target.value;render();var next=$('#moodSearch');next.focus();try{next.setSelectionRange(pos,pos);}catch(_){}}};
