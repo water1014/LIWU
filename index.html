@@ -3,47 +3,83 @@
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1'>
-<meta name='theme-color' content='#12141A'>
-<meta name='description' content='里屋。一张靠窗的书桌。'>
+<meta name='theme-color' content='#F3F0E9'>
+<meta name='description' content='里屋。屋子不大，够两个人住。'>
 <meta name='apple-mobile-web-app-capable' content='yes'>
 <title>里屋</title>
-<link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23EFE9DC%27/%3E%3Crect x=%2715.2%27 y=%277%27 width=%271.4%27 height=%2718%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
+<link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23F3F0E9%27/%3E%3Crect x=%2715.4%27 y=%278%27 width=%271.2%27 height=%2716%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
 <link rel='preconnect' href='https://fonts.googleapis.com'>
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
 <link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@300;400;500&display=swap' rel='stylesheet'>
-<link rel='stylesheet' href='assets/style.css?v=30'>
-<link rel='stylesheet' href='assets/desk.css?v=30'>
-<link rel='stylesheet' href='assets/smooth.css?v=30'>
+<link rel='stylesheet' href='assets/style.css?v=31'>
 <style>
-  #scene{display:block}
-  .up-btn{
-    position:absolute;right:14px;bottom:66px;z-index:7;
-    padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.22);
-    background:rgba(20,22,28,.52);color:#F2EEE6;
-    font:500 13px/1 -apple-system,'Noto Serif SC',serif;letter-spacing:.04em;
-    -webkit-backdrop-filter:none;backdrop-filter:none;
-    transition:transform .3s cubic-bezier(.22,.61,.36,1),background .3s;
+  :root{
+    --paper:#F3F0E9; --ink:#2C2A26; --mute:#8A857C; --line:#D9D3C6; --red:#8A3B2C;
   }
-  .up-btn:active{transform:scale(.93);background:rgba(30,33,40,.7)}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:'Noto Serif SC',serif; font-weight:300;
+    -webkit-font-smoothing:antialiased; overflow:hidden;
+  }
+
+  /* 门厅 */
+  .gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:32px 26px;overflow-y:auto}
+  body:not(.gate) .gate{display:none}
+  body.gate #app,body.gate .view,tbody.gate .drawer{display:none}
+  .gate-in{width:100%;max-width:340px;text-align:center}
+  .slit{width:1px;height:64px;background:var(--red);opacity:.55;margin:0 auto 22px}
+  .gate h1{
+    font-size:44px;font-weight:400;letter-spacing:.28em;margin:0 0 6px;text-indent:.28em;
+  }
+  .days{font-size:12px;letter-spacing:.1em;color:var(--mute);margin:0 0 4px}
+  .days b{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;font-weight:400;color:var(--ink);margin:0 3px}
+  .line{font-size:13px;color:var(--mute);letter-spacing:.04em;margin:0 0 38px}
+
+  .doors{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line)}
+  .doors button{
+    display:flex;align-items:baseline;gap:10px;
+    width:100%;padding:14px 2px;border:0;border-bottom:1px solid var(--line);
+    background:none;color:inherit;font-family:inherit;
+    text-align:left;cursor:pointer;
+    transition:transform .3s cubic-bezier(.22,.61,.36,1),opacity .3s;
+  }
+  .doors button:active{transform:scale(.985);opacity:.7}
+  .doors i{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:11px;color:var(--mute);width:16px}
+  .doors span{font-size:16px;letter-spacing:.08em;flex:1}
+  .doors em{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:11px;color:var(--mute);letter-spacing:.06em}
+
+  .foot{margin:30px 0 0;font-size:11px;color:var(--mute);letter-spacing:.06em}
+
+  /* 回到门厅的小按钮 */
+  .back-gate{
+    position:fixed;left:14px;bottom:14px;z-index:9;
+    padding:7px 13px;border-radius:999px;border:1px solid var(--line);
+    background:rgba(243,240,233,.9);color:var(--mute);font-family:inherit;font-size:12px;
+  }
+  body.gate .back-gate{display:none}
 </style>
 </head>
-<body data-theme='paper' class='home'>
-<script>
-(function(){try{
-  if ('serviceWorker' in navigator){ navigator.serviceWorker.getRegistrations().then(function(l){ for(var i=0;i<l.length;i++) l[i].unregister(); }).catch(function(){}); }
-  if (window.caches && caches.keys){ caches.keys().then(function(k){ for(var i=0;i<k.length;i++) caches.delete(k[i]); }).catch(function(){}); }
-}catch(e){}})();
-</script>
-<div id='desk-wrap'>
-  <div class='hud'>
-    <button class='hud-btn' id='hudMenu' type='button' aria-label='会话'>≡</button>
-    <div class='clock'><span class='t' id='hudTime'>--:--</span><span class='d' id='hudDate'></span></div>
-    <button class='pill' id='hudMode' type='button'>预览：白天</button>
+<body class='gate'>
+
+<div class='gate' id='gate'>
+  <div class='gate-in'>
+    <div class='slit'></div>
+    <h1>里屋</h1>
+    <p class='days'>第 <b id='gDays'>—</b> 天</p>
+    <p class='line'>屋子不大，够两个人住。</p>
+    <nav class='doors'>
+      <button type='button' data-go='chat'><i>01</i><span>说话</span><em>say something</em></button>
+      <button type='button' data-go='diary'><i>02</i><span>日记</span><em>diary</em></button>
+      <button type='button' data-go='album'><i>03</i><span>相册</span><em>album</em></button>
+      <button type='button' data-go='memory'><i>04</i><span>记忆</span><em>memory</em></button>
+      <button type='button' data-go='settings'><i>05</i><span>设置</span><em>settings</em></button>
+    </nav>
+    <p class='foot'>先把门立好。一间一间往里搬。</p>
   </div>
-  <div class='boot' id='boot'>正在推开窗……</div>
-  <div class='desk-foot'><span>场景基于 tangfanovo/qiaosi · 窗台（AGPL-3.0）修改</span></div>
-  <div class='desk-dock' id='deskDock'></div>
 </div>
+
 <div id='app'>
   <header class='top'>
     <button class='icon' id='menuBtn' type='button' aria-label='会话列表'>≡</button>
@@ -60,7 +96,9 @@
     <div class='hint' id='hint'></div>
   </footer>
 </div>
+
 <div class='scrim' id='scrim' hidden></div>
+
 <aside class='drawer' id='drawer' hidden>
   <div class='drawer-in'>
     <div class='drawer-top'><span class='brandmark'>里屋</span><span class='drawer-days' id='drawerDays'></span></div>
@@ -68,7 +106,7 @@
     <input class='search' id='search' placeholder='找一段话' autocomplete='off'>
     <div class='sessions' id='sessions'></div>
     <nav class='drawer-nav'>
-      <button type='button' data-view='home'>回桌子</button>
+      <button type='button' data-view='home'>回门厅</button>
       <button type='button' data-view='diary'>日记</button>
       <button type='button' data-view='album'>相册</button>
       <button type='button' data-view='memory'>记忆</button>
@@ -76,6 +114,7 @@
     </nav>
   </div>
 </aside>
+
 <section class='view' id='view' hidden>
   <header class='view-top'>
     <button class='icon' id='viewBack' type='button' aria-label='回去'>←</button>
@@ -83,15 +122,75 @@
   </header>
   <div class='view-body' id='viewBody'></div>
 </section>
+
+<button class='back-gate' id='backGate' type='button'>回门厅</button>
+
 <script>
 window.addEventListener('error', function(e){
   var h = document.getElementById('hint');
   if (h) h.textContent = '出了点问题：' + (e.message || '未知');
 });
 </script>
-<script src='data.js?v=30'></script>
-<script src='assets/app.js?v=30'></script>
-<script src='assets/smooth.js?v=30'></script>
-<script src='assets/scene.js?v=30'></script>
+<script src='data.js?v=31'></script>
+<script src='assets/app.js?v=31'></script>
+<script>
+(function(){
+  var D = window.LIWU || {};
+
+  function days(){
+    var s = D.since || localStorage.getItem('liwu.since') || '';
+    if (!s) return '';
+    var t = Date.parse(String(s).replace(/\./g, '-'));
+    if (isNaN(t)) return '';
+    var n = Math.floor((Date.now() - t) / 86400000);
+    return n >= 0 ? String(n) : '';
+  }
+  function paintDays(){
+    var v = days(), g = document.getElementById('gDays');
+    if (g) g.textContent = v || '—';
+    var d = document.querySelectorAll('.days');
+    for (var i = 0; i < d.length; i++) if (d[i].id !== 'gDays') d[i].textContent = v ? v : '';
+  }
+  paintDays();
+
+  function toGate(){
+    document.body.classList.add('gate');
+    var v = document.getElementById('view');
+    if (v) v.hidden = true;
+    paintDays();
+  }
+  function leaveGate(){
+    document.body.classList.remove('gate');
+  }
+
+  var doors = document.querySelectorAll('.doors button');
+  for (var i = 0; i < doors.length; i++){
+    doors[i].addEventListener('click', function(){
+      var key = this.getAttribute('data-go');
+      leaveGate();
+      if (key === 'chat'){
+        var inp = document.getElementById('input');
+        if (inp) setTimeout(function(){ inp.focus(); }, 180);
+        return;
+      }
+      var b = document.querySelector('.drawer-nav [data-view="' + key + '"]');
+      if (b) setTimeout(function(){ b.click(); }, 30);
+    });
+  }
+
+  document.getElementById('backGate').addEventListener('click', toGate);
+
+  var homeNav = document.querySelector('.drawer-nav [data-view="home"]');
+  if (homeNav) homeNav.addEventListener('click', function(){ setTimeout(toGate, 20); });
+
+  // 从内页返回：上一级回门厅，再上一级也回门厅（现在只有两层）
+  var vb = document.getElementById('viewBack');
+  if (vb) vb.addEventListener('click', function(){ setTimeout(function(){
+    var v = document.getElementById('view');
+    if (v && v.hidden) toGate();
+  }, 60); });
+
+})();
+</script>
 </body>
 </html>
