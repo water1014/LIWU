@@ -586,6 +586,8 @@
     else if (target === 'theme') viewSettingsSection('外观','主题','Theme');
     else if (target === 'data') viewSettingsSection('数据','数据管理','Data');
     else if (target === 'wallpaper') viewWallpaper();
+    else if (target === 'mcp') viewMcp();
+    else if (target === 'plugins') viewPlugins();
     else if (target === 'music') viewMusic();
     else if (target === 'game') viewGame();
     else if (target === 'window') viewWindow();
@@ -796,6 +798,8 @@
       else if (v === 'theme') viewSettingsSection('外观','主题','Theme');
       else if (v === 'data') viewSettingsSection('数据','数据管理','Data');
       else if (v === 'wallpaper') viewWallpaper();
+      else if (v === 'mcp') viewMcp();
+      else if (v === 'plugins') viewPlugins();
       else if (v === 'music') viewMusic();
       else if (v === 'game') viewGame();
       else if (v === 'window') viewWindow();
@@ -1509,6 +1513,50 @@
     body.onclick=function(ev){if(ev.target.id==='wallpaperRemove'&&confirm('移除首页照片？')){LS.set('liwu.wallpaper','');applySavedWallpaper();viewWallpaper();toast('首页照片已移除。');}};
   }
 
+
+  /* ================= 扩展连接 · MCP 与插件清单 ================= */
+  function viewMcp(){
+    var key='liwu.mcp.servers',editing='';
+    function render(){
+      var all=manageList(key),current=all.find(function(x){return x.id===editing;});
+      var html='<div class="planner-intro"><p class="lead">登记外部 MCP 服务地址与访问凭据，并可尝试发送初始化握手。浏览器跨域策略或服务端鉴权可能影响连接测试。</p><div class="planner-stat"><strong>'+all.length+'</strong><span>个服务</span></div></div>'+
+        '<div class="planner-toolbar"><button class="ghost solid" id="mcpNew" type="button">＋ 添加 MCP 服务</button></div>'+
+        '<form class="planner-form" id="mcpForm" '+(editing?'':'hidden')+'><strong>'+(editing?'修改服务':'添加 MCP 服务')+'</strong><input id="mcpName" maxlength="80" required value="'+esc(current?current.name:'')+'" placeholder="服务名称"><label class="field"><span>服务端点 URL</span><input id="mcpUrl" type="url" required value="'+esc(current?current.url:'')+'" placeholder="https://example.com/mcp"></label><div class="planner-fields"><label>传输方式<select id="mcpTransport"><option value="streamable">Streamable HTTP</option><option value="sse">SSE（兼容测试）</option></select></label><label>启用状态<select id="mcpEnabled"><option value="1">启用</option><option value="0">停用</option></select></label></div><label class="field"><span>Bearer Token（可选）</span><input id="mcpToken" type="password" autocomplete="off" value="'+esc(current?current.token:'')+'" placeholder="访问令牌"></label><textarea id="mcpNote" rows="2" placeholder="用途备注">'+esc(current?current.note:'')+'</textarea><div class="planner-form-actions"><button class="ghost solid" type="submit">保存服务</button><button class="ghost" type="button" id="mcpCancel">取消</button></div></form>'+
+        (all.length?'<div class="integration-list">'+all.map(function(x){return '<article class="integration-card"><div class="integration-head"><div><strong>'+esc(x.name)+'</strong><small>'+esc(x.transport==='sse'?'SSE':'Streamable HTTP')+' · '+(x.enabled?'已启用':'已停用')+'</small></div><span class="integration-status '+(x.lastStatus==='ok'?'ok':x.lastStatus==='error'?'error':'')+'">'+(x.lastStatus==='ok'?'握手成功':x.lastStatus==='error'?'连接失败':'未测试')+'</span></div><p>'+esc(x.url)+'</p>'+(x.note?'<p>'+esc(x.note)+'</p>':'')+'<div class="planner-item-actions"><button class="mini" type="button" data-mcp-test="'+esc(x.id)+'">测试握手</button><button class="mini" type="button" data-mcp-edit="'+esc(x.id)+'">编辑</button><button class="mini danger" type="button" data-mcp-delete="'+esc(x.id)+'">删除</button></div>'+(x.lastMessage?'<small class="integration-last">'+esc(x.lastMessage)+'</small>':'')+'</article>';}).join('')+'</div>':'<div class="blank">还没有登记 MCP 服务。</div>')+
+        '<p class="tip">当前页面负责连接信息管理与初始化测试。真正把远端工具接入聊天的调用循环还需要单独接入，不会把“已保存”显示成“已连接”。</p>';
+      openView('MCP','MCP',html);var body=$('#viewBody');
+      body.onclick=async function(ev){
+        if(ev.target.id==='mcpNew'){editing='';render();$('#mcpForm').hidden=false;$('#mcpName').focus();return;}
+        if(ev.target.id==='mcpCancel'){editing='';render();return;}
+        var edit=ev.target.closest('[data-mcp-edit]');if(edit){editing=edit.getAttribute('data-mcp-edit');render();$('#mcpForm').hidden=false;$('#mcpTransport').value=current&&current.transport||'streamable';$('#mcpEnabled').value=current&&current.enabled===false?'0':'1';return;}
+        var del=ev.target.closest('[data-mcp-delete]');if(del&&confirm('删除这个 MCP 服务？')){manageSave(key,manageList(key).filter(function(x){return x.id!==del.getAttribute('data-mcp-delete');}));editing='';render();return;}
+        var test=ev.target.closest('[data-mcp-test]');if(test){var item=manageList(key).find(function(x){return x.id===test.getAttribute('data-mcp-test');});if(!item)return;test.disabled=true;test.textContent='测试中…';try{var headers={'Content-Type':'application/json','Accept':'application/json, text/event-stream'};if(item.token)headers.Authorization='Bearer '+item.token;var res=await fetch(item.url,{method:'POST',headers:headers,body:JSON.stringify({jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2025-03-26',capabilities:{},clientInfo:{name:'LIWU',version:'1.0'}}})});var bodyText=await res.text();var status=res.ok?'ok':'error',message=res.ok?'HTTP '+res.status+'，已收到初始化响应':'HTTP '+res.status+' · '+bodyText.slice(0,120);var list=manageList(key);list=list.map(function(x){return x.id===item.id?Object.assign({},x,{lastStatus:status,lastMessage:message,lastTestAt:Date.now()}):x;});manageSave(key,list);render();toast(res.ok?'收到服务响应。':'连接未成功，请检查端点和权限。');}catch(err){var list=manageList(key);list=list.map(function(x){return x.id===item.id?Object.assign({},x,{lastStatus:'error',lastMessage:String(err.message||err).slice(0,140),lastTestAt:Date.now()}):x;});manageSave(key,list);render();toast('连接测试失败，可能是地址、鉴权或跨域限制。');}}
+      };
+      body.onsubmit=function(ev){if(ev.target.id!=='mcpForm')return;ev.preventDefault();var name=$('#mcpName').value.trim(),url=$('#mcpUrl').value.trim();if(!name||!/^https?:\/\//i.test(url)){toast('请填写名称和有效的 http(s) 地址。');return;}var list=manageList(key),item={id:editing||uid(),name:name,url:url,transport:$('#mcpTransport').value,enabled:$('#mcpEnabled').value==='1',token:$('#mcpToken').value.trim(),note:$('#mcpNote').value.trim(),createdAt:current?current.createdAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=Object.assign({},list[idx],item);else list.push(item);if(manageSave(key,list)){editing='';render();toast('MCP 服务信息已保存。');}};
+    }
+    render();
+  }
+  function viewPlugins(){
+    var key='liwu.plugins',editing='';
+    function render(){
+      var all=manageList(key),current=all.find(function(x){return x.id===editing;});
+      var html='<div class="planner-intro"><p class="lead">管理里屋的扩展清单。这里保存插件说明、服务地址和启用状态，尚未接入的插件不会假装已经能调用。</p><div class="planner-stat"><strong>'+all.filter(function(x){return x.enabled;}).length+'/'+all.length+'</strong><span>已启用</span></div></div>'+
+        '<div class="planner-toolbar"><button class="ghost solid" id="pluginNew" type="button">＋ 添加插件</button></div>'+
+        '<form class="planner-form" id="pluginForm" '+(editing?'':'hidden')+'><strong>'+(editing?'修改插件':'添加插件')+'</strong><input id="pluginName" maxlength="80" required value="'+esc(current?current.name:'')+'" placeholder="插件名称"><div class="planner-fields"><label>分类<select id="pluginCategory"><option>效率</option><option>创作</option><option>生活</option><option>媒体</option><option>其他</option></select></label><label>状态<select id="pluginEnabled"><option value="1">启用</option><option value="0">停用</option></select></label></div><input id="pluginEndpoint" type="url" value="'+esc(current?current.endpoint:'')+'" placeholder="服务地址（可选）"><textarea id="pluginDescription" rows="3" placeholder="功能说明与使用方式">'+esc(current?current.description:'')+'</textarea><div class="planner-form-actions"><button class="ghost solid" type="submit">保存插件</button><button class="ghost" id="pluginCancel" type="button">取消</button></div></form>'+
+        (all.length?'<div class="integration-list">'+all.map(function(x){return '<article class="integration-card"><div class="integration-head"><div><strong>'+esc(x.name)+'</strong><small>'+esc(x.category||'其他')+'</small></div><span class="integration-status '+(x.enabled?'ok':'')+'">'+(x.enabled?'已启用':'已停用')+'</span></div><p>'+esc(x.description||'暂无说明')+'</p>'+(x.endpoint?'<p>'+esc(x.endpoint)+'</p>':'')+'<div class="planner-item-actions"><button class="mini" type="button" data-plugin-toggle="'+esc(x.id)+'">'+(x.enabled?'停用':'启用')+'</button><button class="mini" type="button" data-plugin-edit="'+esc(x.id)+'">编辑</button><button class="mini danger" type="button" data-plugin-delete="'+esc(x.id)+'">删除</button></div></article>';}).join('')+'</div>':'<div class="blank">插件清单还空着。可以先登记你准备接入的扩展。</div>');
+      openView('插件','Plugins',html);var body=$('#viewBody');
+      body.onclick=function(ev){
+        if(ev.target.id==='pluginNew'){editing='';render();$('#pluginForm').hidden=false;$('#pluginName').focus();return;}
+        if(ev.target.id==='pluginCancel'){editing='';render();return;}
+        var edit=ev.target.closest('[data-plugin-edit]');if(edit){editing=edit.getAttribute('data-plugin-edit');render();$('#pluginForm').hidden=false;$('#pluginCategory').value=current&&current.category||'其他';$('#pluginEnabled').value=current&&current.enabled?'1':'0';return;}
+        var toggle=ev.target.closest('[data-plugin-toggle]');if(toggle){var list=manageList(key),item=list.find(function(x){return x.id===toggle.getAttribute('data-plugin-toggle');});if(item){item.enabled=!item.enabled;manageSave(key,list);render();}return;}
+        var del=ev.target.closest('[data-plugin-delete]');if(del&&confirm('删除这个插件配置？')){manageSave(key,manageList(key).filter(function(x){return x.id!==del.getAttribute('data-plugin-delete');}));editing='';render();}
+      };
+      body.onsubmit=function(ev){if(ev.target.id!=='pluginForm')return;ev.preventDefault();var name=$('#pluginName').value.trim();if(!name){toast('请填写插件名称。');return;}var list=manageList(key),item={id:editing||uid(),name:name,category:$('#pluginCategory').value,enabled:$('#pluginEnabled').value==='1',endpoint:$('#pluginEndpoint').value.trim(),description:$('#pluginDescription').value.trim(),createdAt:current?current.createdAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=item;else list.push(item);if(manageSave(key,list)){editing='';render();toast('插件配置已保存。');}};
+    }
+    render();
+  }
+
   /* ================= 世界书 · 笔记本与条目 ================= */
   var K_WORLDBOOKS = 'liwu.worldbooks';
   function worldbooks(){ return LS.get(K_WORLDBOOKS, []); }
@@ -1839,7 +1887,7 @@
         });
       }
       if (ev.target.id === 'cExport'){
-        var data = { v: 12, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), memory: LS.get(K_MEMORY, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites'), profile: LS.get(K_PROFILE, {}), notices: LS.get(K_NOTICES, []), noticeRead: LS.get(K_NOTICE_READ, []), ledger: manageList(K_LEDGER), health: manageList(K_HEALTH), period: LS.get(K_PERIOD, {cycleLength:28,periodLength:5,lastStart:'',starts:[]}), study: manageList(K_STUDY), classes: manageList(K_CLASS), music: manageList(K_MUSIC), games: manageList(K_GAMES), window: LS.get(K_WINDOW, {title:'窗边',description:'给今天留一扇窗。',image:''}), windowNotes: manageList(K_WINDOW_NOTES), wallpaper: LS.get('liwu.wallpaper','') };
+        var data = { v: 13, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), memory: LS.get(K_MEMORY, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites'), profile: LS.get(K_PROFILE, {}), notices: LS.get(K_NOTICES, []), noticeRead: LS.get(K_NOTICE_READ, []), ledger: manageList(K_LEDGER), health: manageList(K_HEALTH), period: LS.get(K_PERIOD, {cycleLength:28,periodLength:5,lastStart:'',starts:[]}), study: manageList(K_STUDY), classes: manageList(K_CLASS), music: manageList(K_MUSIC), games: manageList(K_GAMES), window: LS.get(K_WINDOW, {title:'窗边',description:'给今天留一扇窗。',image:''}), windowNotes: manageList(K_WINDOW_NOTES), wallpaper: LS.get('liwu.wallpaper',''), mcpServers: manageList('liwu.mcp.servers'), plugins: manageList('liwu.plugins') };
         var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -1886,6 +1934,8 @@
               if (obj.window && typeof obj.window === 'object') LS.set(K_WINDOW, obj.window);
               if (Array.isArray(obj.windowNotes)) LS.set(K_WINDOW_NOTES, obj.windowNotes);
               if (typeof obj.wallpaper === 'string') LS.set('liwu.wallpaper', obj.wallpaper);
+              if (Array.isArray(obj.mcpServers)) LS.set('liwu.mcp.servers', obj.mcpServers);
+              if (Array.isArray(obj.plugins)) LS.set('liwu.plugins', obj.plugins);
               applyTheme();
               renderAll();
               toast('导进来了。');
