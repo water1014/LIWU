@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e9eef3"><title>里屋 · 磨砂材质实验</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:#27313d;background:#e9eef3;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#e9eef3;color:#27313d}
+button{font:inherit;color:inherit;cursor:pointer}
+.scene{min-height:100svh;position:relative;overflow:hidden;padding:calc(env(safe-area-inset-top) + 18px) 16px calc(env(safe-area-inset-bottom) + 28px);isolation:isolate}
+.scene:before,.scene:after{content:"";position:absolute;z-index:-2;border-radius:50%;filter:blur(2px);pointer-events:none}
+.scene:before{width:440px;height:440px;left:-180px;top:110px;background:radial-gradient(circle at 60% 40%,#c8dce2 0,#d8e3e8 34%,#e9eef3 70%)}
+.scene:after{width:430px;height:430px;right:-210px;top:360px;background:radial-gradient(circle at 40% 40%,#d5d8e8 0,#e4e6ed 45%,#e9eef3 72%)}
+.wrap{max-width:650px;margin:auto}
+.topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}
+.brand{font-family:Georgia,serif;letter-spacing:.18em;font-size:13px}.tag{font-size:10px;letter-spacing:.12em;color:#758394}
+h1{font-size:clamp(27px,7vw,38px);font-weight:500;letter-spacing:-.04em;line-height:1.2;margin:0 0 7px}
+.sub{font-size:12px;color:#788696;margin:0 0 23px}
+.choices{display:flex;gap:7px;overflow-x:auto;padding:2px 1px 12px;scrollbar-width:none}
+.choices button{flex:0 0 auto;border:1px solid #ffffffa6;background:#ffffff54;border-radius:999px;padding:9px 13px;font-size:11px;color:#667486;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.choices button[aria-pressed=true]{background:#ffffffc9;color:#263342;border-color:#fff;box-shadow:0 3px 12px #56697b1a}
+.demo{--glass:rgba(255,255,255,.42);--blur:18px;--edge:rgba(255,255,255,.72);--shadow:0 18px 50px rgba(48,65,84,.10);--inner:inset 0 1px 0 rgba(255,255,255,.72);transition:all .25s ease}
+.demo[data-kind="clear"]{--glass:rgba(255,255,255,.30);--blur:12px;--edge:rgba(255,255,255,.62);--shadow:0 12px 34px rgba(48,65,84,.08)}
+.demo[data-kind="satin"]{--glass:rgba(255,255,255,.55);--blur:24px;--edge:rgba(255,255,255,.82);--shadow:0 18px 42px rgba(48,65,84,.10)}
+.demo[data-kind="mist"]{--glass:rgba(239,244,248,.64);--blur:30px;--edge:rgba(255,255,255,.76);--shadow:0 22px 54px rgba(48,65,84,.12)}
+.demo[data-kind="liquid"]{--glass:rgba(255,255,255,.36);--blur:20px;--edge:rgba(255,255,255,.9);--shadow:0 18px 46px rgba(48,65,84,.13);--inner:inset 0 1px 0 #ffffff, inset 0 -1px 0 rgba(255,255,255,.3)}
+.surface{background:var(--glass);border:1px solid var(--edge);box-shadow:var(--shadow),var(--inner);backdrop-filter:blur(var(--blur)) saturate(135%);-webkit-backdrop-filter:blur(var(--blur)) saturate(135%)}
+.sample{border-radius:25px;padding:17px;position:relative;overflow:hidden;min-height:410px}
+.sample:before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(145deg,#ffffff38,transparent 34%,#ffffff12 72%,#ffffff2b)}
+.sample>*{position:relative}
+.samplehead{display:flex;justify-content:space-between;align-items:center;padding:1px 1px 16px;border-bottom:1px solid #ffffff8a}
+.samplebrand{font-family:Georgia,serif;letter-spacing:.15em;font-size:13px}
+.round{width:35px;height:35px;border-radius:50%;display:grid;place-items:center;background:#ffffff5c;border:1px solid #ffffff9c;font-size:17px}
+.greeting{padding:22px 3px 17px}
+.date{font-size:9px;letter-spacing:.2em;color:#77889a}
+.greeting h2{font-size:24px;font-weight:450;letter-spacing:-.04em;margin:8px 0 3px}
+.greeting p{font-size:11px;color:#748394;margin:0}
+.glassrow{display:grid;grid-template-columns:1.15fr .85fr;gap:10px}
+.glasscard{border-radius:18px;padding:14px;min-height:112px}
+.glasscard strong{font-size:13px;font-weight:550;display:block;margin:6px 0}
+.glasscard small{font-size:10px;color:#718093}
+.symbol{font-size:18px;color:#637b91}
+.longcard{margin-top:10px;border-radius:18px;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.longcard strong{font-size:12px;font-weight:550}.longcard small{display:block;font-size:10px;color:#748394;margin-top:3px}
+.pip{width:7px;height:7px;border-radius:50%;background:#8ca6a8;box-shadow:0 0 0 4px #8ca6a822;flex:none}
+.composer{margin-top:14px;border-radius:18px;padding:11px 13px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#78899a}
+.send{width:29px;height:29px;border-radius:50%;display:grid;place-items:center;background:#ffffffa8;border:1px solid #fff;color:#526c83;font-size:15px}
+.meta{display:flex;justify-content:space-between;gap:12px;margin:13px 3px 0;color:#8290a0;font-size:10px}
+.note{font-size:11px;line-height:1.7;color:#758494;margin:18px 2px 0}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media(min-width:600px){.scene{padding-top:35px}.sample{padding:22px;min-height:440px}.glasscard{min-height:125px}}
+</style>
+</head>
+<body>
+<main class="scene">
+<div class="wrap">
+<div class="topline"><div class="brand">LIWU · 里屋</div><div class="tag">MATERIAL STUDY / 01</div></div>
+<h1>磨砂玻璃，<br>四种触感。</h1>
+<p class="sub">同一组内容，只比较材质，不代表最终页面布局。</p>
+<div class="choices" role="group" aria-label="选择玻璃材质">
+<button data-choice="clear" aria-pressed="false">轻透玻璃</button>
+<button data-choice="satin" aria-pressed="true">柔雾磨砂</button>
+<button data-choice="mist" aria-pressed="false">朦胧雾面</button>
+<button data-choice="liquid" aria-pressed="false">细腻液态</button>
+</div>
+<section class="demo" id="demo" data-kind="satin" aria-label="材质效果预览">
+<div class="sample surface">
+<header class="samplehead"><span class="samplebrand">LIWU</span><button class="round" aria-label="打开菜单">☰</button></header>
+<div class="greeting"><div class="date">MONDAY · 09:41</div><h2>今天也在这里。</h2><p>留一点空间，给我们慢慢生活。</p></div>
+<div class="glassrow">
+<div class="glasscard surface"><span class="symbol">◌</span><strong>日常</strong><small>今天的小小记录</small></div>
+<div class="glasscard surface"><span class="symbol">⌁</span><strong>记忆</strong><small>被好好收藏的事</small></div>
+</div>
+<div class="longcard surface"><div><strong>宋祁</strong><small>在这里，等你说话。</small></div><span class="pip"></span></div>
+<div class="composer surface"><span>说一句……</span><span class="send">↑</span></div>
+</div>
+<div class="meta"><span id="kindName">柔雾磨砂</span><span id="kindDesc">柔和漫反射 · 清晰边缘</span></div>
+</section>
+<p class="note">这里只比较透明度、模糊程度、边缘高光和层次。后续再单独探索首页、聊天和各个房间的布局。</p>
+</div>
+</main>
+<script>
+(function(){
+const names={clear:["轻透玻璃","低模糊 · 更清透"],satin:["柔雾磨砂","柔和漫反射 · 清晰边缘"],mist:["朦胧雾面","更柔和 · 更安静"],liquid:["细腻液态","细边高光 · 微妙反射"]};
+const demo=document.getElementById("demo"),name=document.getElementById("kindName"),desc=document.getElementById("kindDesc");
+document.querySelectorAll("[data-choice]").forEach(btn=>btn.addEventListener("click",()=>{
+ const kind=btn.dataset.choice;demo.dataset.kind=kind;name.textContent=names[kind][0];desc.textContent=names[kind][1];
+ document.querySelectorAll("[data-choice]").forEach(b=>b.setAttribute("aria-pressed",String(b===btn)));
+}));
+})();
+</script>
+</body></html>
