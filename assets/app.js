@@ -177,7 +177,7 @@
           '<span class="sess-title">' + esc(s.title) + '</span>' +
           '<span class="sess-sub">' + esc(last.slice(0, 30)) + ' · ' + when(s.updatedAt) + '</span>' +
         '</div>' +
-        '<button class="more" data-more="' + s.id + '">⋯</button>' +
+        '<button class="more" type="button" aria-label="会话操作" data-more="' + s.id + '">⋯</button>' +
       '</div>';
     }).join('');
   }
@@ -836,7 +836,7 @@
   function applyTheme(){
     document.body.setAttribute('data-theme', cfg.theme === 'night' ? 'night' : 'paper');
     var m = document.querySelector('meta[name=theme-color]');
-    if (m) m.setAttribute('content', cfg.theme === 'night' ? '#16161A' : '#F3F0E9');
+    if (m) m.setAttribute('content', cfg.theme === 'night' ? '#16161A' : '#F2F6FD');
   }
 
   /* ================= 启动 ================= */
