@@ -1562,3 +1562,25 @@ body.room-open{overscroll-behavior:none}
   .diary-tools .ghost{padding:8px 13px;white-space:nowrap}
   .album-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 }
+
+
+/* ---------- 完整功能导航与专属房间入口 ---------- */
+.drawer-in{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.drawer-nav{flex:0 0 auto}
+.drawer-nav button{min-height:54px}
+.drawer-nav .nav-subhead{padding:0 7px;margin:15px 4px 5px}
+.drawer-nav button.nav-current .nav-index,
+.drawer-nav button.nav-current .nav-arrow{color:var(--seal)}
+.feature-room{min-height:55vh;display:flex;flex-direction:column;align-items:flex-start;padding:8px 0 20px}
+.feature-room-mark{margin:8px 0 18px;color:var(--ink-3);font:italic 11px var(--num);letter-spacing:.2em;text-transform:uppercase}
+.feature-room h2{margin:0 0 12px;font:400 clamp(28px,7vw,42px)/1.2 var(--serif);letter-spacing:.03em;color:var(--ink)}
+.feature-room>.lead{max-width:520px;margin:0 0 28px;font-size:14px;line-height:2}
+.feature-room-note{display:flex;gap:12px;align-items:flex-start;width:100%;padding:17px;border:1px solid var(--line);border-radius:16px;background:var(--bg-2)}
+.feature-room-dot{width:7px;height:7px;flex:0 0 7px;margin-top:6px;border-radius:50%;background:var(--seal)}
+.feature-room-note strong{font-size:13px;font-weight:600}
+.feature-room-note p{margin:7px 0 0;color:var(--ink-2);font-size:12px;line-height:1.9}
+.feature-room-foot{margin-top:auto;padding-top:36px;color:var(--ink-3);font:9px var(--sans);letter-spacing:.18em}
+@media(max-height:740px){
+ .drawer-in{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 18px)}
+ .drawer-foot{margin-top:14px}
+}
