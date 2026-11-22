@@ -191,8 +191,9 @@
     var think = m.reasoning
       ? '<details class="think"><summary>它想了一下</summary><div>' + esc(m.reasoning) + '</div></details>'
       : '';
-    return '<div class="msg ' + (me ? 'me' : 'you') + (isLast ? ' live' : '') + '">' +
-      '<div class="meta">' + (me ? '我' : '他') + ' · ' + when(m.at) + '</div>' +
+    return '<div class="msg ' + (me ? 'me' : 'you') + (isLast ? ' live' : '') + '" data-index="' + i + '">' +
+      '<div class="msg-head"><div class="meta">' + (me ? '我' : '宋祁') + ' · ' + when(m.at) + '</div>' +
+      '<button class="msg-more" type="button" data-menu="' + i + '" aria-label="消息操作">···</button></div>' +
       think +
       '<div class="body">' + esc(m.content) + '</div>' +
       '<div class="acts">' +
@@ -238,6 +239,34 @@
     paintDays();
     renderThread();
     renderSessions();
+  }
+
+  function showMessageActions(index){
+    var s = cur();
+    var m = s && s.messages[index];
+    if (!m || (m.role !== 'user' && m.role !== 'assistant')) return;
+    var old = $('.message-action-backdrop');
+    if (old) old.remove();
+    var mine = m.role === 'user';
+    var overlay = document.createElement('div');
+    overlay.className = 'message-action-backdrop';
+    overlay.innerHTML =
+      '<section class="message-action-sheet" role="dialog" aria-modal="true" aria-label="消息操作">' +
+        '<div class="sheet-grab" aria-hidden="true"></div>' +
+        '<div class="sheet-head"><strong>' + (mine ? '你发出的消息' : '宋祁的消息') + '</strong><button type="button" data-sheet-close aria-label="关闭">完成</button></div>' +
+        '<p class="sheet-preview">' + esc((m.content || '').slice(0, 110)) + '</p>' +
+        '<div class="sheet-actions">' +
+          '<button type="button" data-act="copy" data-i="' + index + '"><span>复制文本</span><small>保存这条消息的文字</small></button>' +
+          (mine ? '<button type="button" data-act="resend" data-i="' + index + '"><span>重新发送</span><small>从这条消息继续对话</small></button>' : '<button type="button" data-act="regen" data-i="' + index + '"><span>重新生成</span><small>保留提问，再试一次回复</small></button>') +
+          '<button type="button" class="sheet-danger" data-act="del" data-i="' + index + '"><span>删除消息</span><small>从当前对话中移除</small></button>' +
+        '</div>' +
+      '</section>';
+    overlay.addEventListener('click', function(ev){
+      if (ev.target === overlay || ev.target.closest('[data-sheet-close]') || ev.target.closest('[data-act]')) overlay.remove();
+    });
+    $('#thread').appendChild(overlay);
+    var close = overlay.querySelector('[data-sheet-close]');
+    if (close) close.focus();
   }
 
   /* ================= 聊天 ================= */
@@ -511,7 +540,34 @@
 
   /* ================= 消息操作 ================= */
 
+  var messagePressTimer = 0;
+  var messagePressPoint = null;
+  $('#thread').addEventListener('pointerdown', function(ev){
+    var msg = ev.target.closest('.msg[data-index]');
+    if (!msg || ev.target.closest('button,a,input,textarea')) return;
+    messagePressPoint = { x: ev.clientX, y: ev.clientY };
+    var index = parseInt(msg.getAttribute('data-index'), 10);
+    messagePressTimer = window.setTimeout(function(){ showMessageActions(index); }, 560);
+  });
+  $('#thread').addEventListener('pointermove', function(ev){
+    if (!messagePressTimer || !messagePressPoint) return;
+    if (Math.abs(ev.clientX - messagePressPoint.x) > 10 || Math.abs(ev.clientY - messagePressPoint.y) > 10){
+      clearTimeout(messagePressTimer); messagePressTimer = 0; messagePressPoint = null;
+    }
+  });
+  function clearMessagePress(){
+    if (messagePressTimer) clearTimeout(messagePressTimer);
+    messagePressTimer = 0; messagePressPoint = null;
+  }
+  $('#thread').addEventListener('pointerup', clearMessagePress);
+  $('#thread').addEventListener('pointercancel', clearMessagePress);
+  $('#thread').addEventListener('contextmenu', function(ev){
+    if (ev.target.closest('.msg[data-index]')) ev.preventDefault();
+  });
+
   $('#thread').addEventListener('click', function(ev){
+    var menu = ev.target.closest('[data-menu]');
+    if (menu){ showMessageActions(parseInt(menu.getAttribute('data-menu'), 10)); return; }
     var say = ev.target.closest('[data-say]');
     if (say){
       $('#input').value = say.getAttribute('data-say');
@@ -584,6 +640,7 @@
     b.addEventListener('click', function(){
       var v = b.getAttribute('data-view');
       closeDrawer();
+      if (v === 'chat'){ closeView(); $('#input').focus(); }
       if (v === 'diary') viewDiary();
       if (v === 'album') viewAlbum();
       if (v === 'memory') viewMemory();
@@ -836,7 +893,7 @@
   function applyTheme(){
     document.body.setAttribute('data-theme', cfg.theme === 'night' ? 'night' : 'paper');
     var m = document.querySelector('meta[name=theme-color]');
-    if (m) m.setAttribute('content', cfg.theme === 'night' ? '#16161A' : '#F2F6FD');
+    if (m) m.setAttribute('content', cfg.theme === 'night' ? '#111419' : '#F7F8FA');
   }
 
   /* ================= 启动 ================= */

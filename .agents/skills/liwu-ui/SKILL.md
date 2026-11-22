@@ -16,7 +16,7 @@ Apply the upstream UI/UX Pro Max approach in a project-specific way:
 - Use semantic color and spacing tokens instead of scattered raw values.
 - Prioritize accessibility, touch interaction, responsive layout, and content clarity.
 - Use Apple Native Experience for interaction grammar, AI-Native UI for chat behavior, and Soft UI Evolution only for subtle visual finish.
-- Keep LIWU's cool blue-white palette and restrained lilac accent.
+- Use LIWU's monochrome black-white palette with restrained blue-grey accents.
 
 ## Required workflow
 1. Inspect the current page, CSS, JavaScript event handlers, and all shared usages.
