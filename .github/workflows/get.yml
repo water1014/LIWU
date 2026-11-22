@@ -1,0 +1,19 @@
+name: 取窗台
+on: { workflow_dispatch: {} }
+permissions: { contents: write }
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p windowsill/models
+          B=https://raw.githubusercontent.com/TangfanOVO/qiaosi/main/scenes/windowsill
+          curl -sSL $B/index.html -o windowsill/index.html
+          for m in bookcase laptop organizer phone; do
+            curl -sSL $B/models/$m.gltf.json -o windowsill/models/$m.gltf.json
+          done
+      - run: |
+          git config user.name liwu
+          git config user.email liwu@users.noreply.github.com
+          git add windowsill && git commit -m "引入窗台场景 AGPL-3.0" && git push
