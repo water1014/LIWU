@@ -1289,7 +1289,7 @@
       body.onclick=function(ev){
         if(ev.target.id==='ledgerNew'){editing='';render();$('#ledgerForm').hidden=false;$('#ledgerDate').value=today();$('#ledgerForm').scrollIntoView({behavior:'smooth',block:'nearest'});return;}
         if(ev.target.id==='ledgerCancel'){editing='';render();return;}
-        var edit=ev.target.closest('[data-ledger-edit]');if(edit){editing=edit.getAttribute('data-ledger-edit');render();$('#ledgerForm').hidden=false;$('#ledgerCategory').value=current&&current.category||'其他';return;}
+        var edit=ev.target.closest('[data-ledger-edit]');if(edit){editing=edit.getAttribute('data-ledger-edit');render();$('#ledgerForm').hidden=false;return;}
         var del=ev.target.closest('[data-ledger-delete]');if(del&&confirm('删除这笔记录？')){manageSave(K_LEDGER,manageList(K_LEDGER).filter(function(x){return x.id!==del.getAttribute('data-ledger-delete');}));editing='';render();toast('记录已删除。');}
       };
       body.onchange=function(ev){if(ev.target.id==='ledgerMonth'){month=ev.target.value||today().slice(0,7);editing='';render();}};
@@ -1313,7 +1313,7 @@
       body.onclick=function(ev){
         if(ev.target.id==='healthNew'){editing='';render();$('#healthForm').hidden=false;$('#healthForm').scrollIntoView({behavior:'smooth',block:'nearest'});return;}
         if(ev.target.id==='healthCancel'){editing='';render();return;}
-        var edit=ev.target.closest('[data-health-edit]');if(edit){editing=edit.getAttribute('data-health-edit');render();$('#healthForm').hidden=false;$('#healthActivity').value=current&&current.activity||'';return;}
+        var edit=ev.target.closest('[data-health-edit]');if(edit){editing=edit.getAttribute('data-health-edit');render();$('#healthForm').hidden=false;return;}
         var del=ev.target.closest('[data-health-delete]');if(del&&confirm('删除这条健康记录？')){manageSave(K_HEALTH,manageList(K_HEALTH).filter(function(x){return x.id!==del.getAttribute('data-health-delete');}));editing='';render();}
       };
       body.onsubmit=function(ev){if(ev.target.id!=='healthForm')return;ev.preventDefault();var date=$('#healthDate').value;if(!date){toast('请选择日期。');return;}var list=manageList(K_HEALTH),item={id:editing||uid(),date:date,sleep:$('#healthSleep').value,water:$('#healthWater').value,weight:$('#healthWeight').value,activity:$('#healthActivity').value,note:$('#healthNote').value.trim(),updatedAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=item;else list.unshift(item);if(manageSave(K_HEALTH,list)){editing='';render();toast('健康记录已保存。');}};
