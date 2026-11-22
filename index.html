@@ -42,6 +42,13 @@ body.desk .back-gate{display:none}
 .room-title .en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10px;letter-spacing:.18em;color:rgba(93,110,147,.56);margin-top:5px}
 @keyframes fadeInTitle{to{opacity:1}}
 
+/* 场景导航 */
+.scene-nav{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translateX(-50%);z-index:30;display:flex;gap:8px;padding:6px;border:1px solid rgba(255,255,255,.72);border-radius:999px;background:rgba(247,250,255,.68);box-shadow:0 8px 28px rgba(75,101,150,.12);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.scene-nav button{appearance:none;border:0;border-radius:999px;padding:9px 18px;background:transparent;color:#667895;font:400 12px 'Noto Serif SC',serif;letter-spacing:.12em;cursor:pointer;transition:background .25s,color .25s,box-shadow .25s}
+.scene-nav button.active{background:rgba(255,255,255,.92);color:#526b9a;box-shadow:0 2px 10px rgba(77,102,151,.12)}
+.scene-nav button:active{transform:scale(.97)}
+@media(max-width:480px){.scene-nav{bottom:calc(env(safe-area-inset-bottom,0px) + 18px)}.scene-nav button{padding:8px 15px}}
+
 /* 提示 */
 .hint-3d{position:fixed;left:0;right:0;bottom:14px;text-align:center;font-size:10px;letter-spacing:.22em;color:rgba(82,101,139,.58);z-index:10;pointer-events:none;transition:opacity .6s;opacity:0;animation:fadeInHint 1.5s 2s forwards}
 @keyframes fadeInHint{to{opacity:1}}
@@ -73,7 +80,8 @@ body.desk .back-gate{display:none}
 </div>
 
 <!-- 提示 -->
-<div class="hint-3d">拖拽旋转视角 · 点击桌面物品</div>
+<div class="hint-3d">单指拖动探索 · 双指缩放 · 点击物件聚焦</div>
+<nav class="scene-nav" aria-label="空间视角"><button type="button" id="deskViewBtn" class="active">桌面</button><button type="button" id="windowViewBtn">窗边</button></nav>
 
 <!-- App —— 与原有结构完全一致 -->
 <div id="app">
@@ -168,7 +176,9 @@ controls.minDistance = 1.8;
 controls.maxDistance = 5.5;
 controls.maxPolarAngle = Math.PI / 2.08;
 controls.minPolarAngle = 0.35;
-controls.enablePan = false;
+controls.enablePan = true;
+controls.panSpeed = 0.65;
+controls.screenSpacePanning = true;
 
 /* ---- 灯光 ---- */
 const ambientLight = new THREE.AmbientLight(0xb8c7e4, 0.4);
@@ -517,6 +527,34 @@ function enterView(goKey, targetObj) {
   }
   step();
 }
+
+/* 桌面 / 窗边视角：连续的 3D 镜头移动，不切换场景 */
+let sceneMoveToken = 0;
+function moveSceneCamera(position, target, activeButton) {
+  if (isTransitioning) return;
+  const token = ++sceneMoveToken;
+  const fromPos = camera.position.clone();
+  const fromTarget = controls.target.clone();
+  const toPos = new THREE.Vector3(...position);
+  const toTarget = new THREE.Vector3(...target);
+  let t = 0;
+  controls.enabled = false;
+  document.querySelectorAll('.scene-nav button').forEach(b => b.classList.toggle('active', b === activeButton));
+  function frame() {
+    if (token !== sceneMoveToken) return;
+    t = Math.min(1, t + 0.035);
+    const k = easeOutCubic(t);
+    camera.position.lerpVectors(fromPos, toPos, k);
+    controls.target.lerpVectors(fromTarget, toTarget, k);
+    if (t < 1) requestAnimationFrame(frame);
+    else { controls.enabled = true; controls.update(); }
+  }
+  requestAnimationFrame(frame);
+}
+const deskViewBtn = document.getElementById('deskViewBtn');
+const windowViewBtn = document.getElementById('windowViewBtn');
+deskViewBtn.addEventListener('click', () => moveSceneCamera([-0.8, 1.6, 3.2], [0, 0.85, 0], deskViewBtn));
+windowViewBtn.addEventListener('click', () => moveSceneCamera([-1.65, 1.55, -0.3], [-3.38, 1.15, -0.3], windowViewBtn));
 
 /* 回桌子 */
 document.getElementById('backGate').addEventListener('click', () => {
