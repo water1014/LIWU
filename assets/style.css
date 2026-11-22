@@ -1139,7 +1139,7 @@ body{
   background:color-mix(in srgb,var(--bg-2) var(--glass-opacity),transparent);
   -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(140%);
   backdrop-filter:blur(var(--glass-blur)) saturate(140%);
-  border-bottom-color:color-mix(in srgb,var(--ink) calc(var(--glass-edge)*.22),transparent);
+  border-bottom-color:color-mix(in srgb,var(--ink) var(--glass-edge),transparent);
 }
 .composer{
   background:color-mix(in srgb,var(--bg-2) var(--glass-opacity),transparent);
@@ -1150,15 +1150,15 @@ body{
   background:color-mix(in srgb,var(--bg-2) var(--glass-opacity),transparent);
   -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(135%);
   backdrop-filter:blur(var(--glass-blur)) saturate(135%);
-  border-color:color-mix(in srgb,var(--ink) calc(var(--glass-edge)*.24),var(--line));
+  border-color:color-mix(in srgb,var(--ink) var(--glass-edge),var(--line));
   border-radius:var(--glass-radius);
-  box-shadow:0 8px 26px color-mix(in srgb,var(--shadow) calc(var(--glass-shadow)*100%),transparent);
+  box-shadow:0 8px 26px color-mix(in srgb,var(--shadow) var(--glass-shadow),transparent);
 }
 .drawer{
   background:color-mix(in srgb,var(--bg-2) var(--glass-opacity),transparent);
   -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(145%);
   backdrop-filter:blur(var(--glass-blur)) saturate(145%);
-  border-right-color:color-mix(in srgb,var(--ink) calc(var(--glass-edge)*.28),var(--line));
+  border-right-color:color-mix(in srgb,var(--ink) var(--glass-edge),var(--line));
 }
 .view{
   background:color-mix(in srgb,var(--bg) 78%,transparent);
