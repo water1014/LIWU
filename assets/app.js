@@ -93,8 +93,8 @@
     var root = document.documentElement;
     root.style.setProperty('--glass-opacity', Math.max(10, Math.min(85, Number(g.opacity) || 48)) + '%');
     root.style.setProperty('--glass-blur', Math.max(0, Math.min(36, Number(g.blur) || 0)) + 'px');
-    root.style.setProperty('--glass-edge', Math.max(0, Math.min(100, Number(g.edge) || 0)) + '%');
-    root.style.setProperty('--glass-shadow', Math.max(0, Math.min(100, Number(g.shadow) || 0)) / 100);
+    root.style.setProperty('--glass-edge', (Math.max(0, Math.min(100, Number(g.edge) || 0)) * 0.36) + '%');
+    root.style.setProperty('--glass-shadow', (Math.max(0, Math.min(100, Number(g.shadow) || 0)) * 0.5) + '%');
     root.style.setProperty('--glass-radius', Math.max(0, Math.min(32, Number(g.radius) || 0)) + 'px');
   }
 
