@@ -11,7 +11,7 @@ LIWU is a private, mobile-first space for one person and her AI companion. It is
 Primary product surfaces:
 - Conversation: the main, always-available working surface.
 - Personal rooms: diary, album, memory, settings, and future tools.
-- Navigation: a clear side drawer with visible entries; no bottom tab bar.
+- Navigation: a clear side drawer with visible entries; a compact bottom tab bar is permitted on the homepage only.
 
 The interface should feel calm, intimate, capable, and dependable. Content and daily use take priority over decoration.
 
@@ -75,7 +75,7 @@ These values are a starting reference, not a final palette lock. Night theme mus
 - Mobile-first; verify at 360–390px widths before wider screens.
 - Respect `env(safe-area-inset-top)` and `env(safe-area-inset-bottom)`.
 - Keep the conversation composer anchored to the bottom safe area. The message list owns the remaining height and must scroll independently.
-- The side drawer remains the primary navigation. Keep feature entries visible and expanded; do not replace it with a bottom bar.
+- The side drawer remains the full feature navigation. A compact bottom tab bar may appear on the homepage only; it must be hidden on chat and all inner rooms.
 - A room opens as a distinct full-screen view with a clear back action. Avoid nested panels that make navigation ambiguous.
 - No decorative phone mockup shell.
 - No 3D scene or WebGL dependency in the active interface unless the user explicitly asks to revisit 3D.
