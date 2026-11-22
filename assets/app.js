@@ -979,7 +979,7 @@
     var d=new Date(value+'T12:00:00');
     return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日';
   }
-  function plannerEscDate(value){ return /^\\d{4}-\\d{2}-\\d{2}$/.test(value||'')?value:today(); }
+  function plannerEscDate(value){ return /^\d{4}-\d{2}-\d{2}$/.test(value||'')?value:today(); }
   function viewPlanner(key){
     var meta={calendar:{title:'日历',en:'Calendar'},schedule:{title:'安排',en:'Schedule'},todo:{title:'待办',en:'To-do'}}[key];
     if(!meta)return;
@@ -1289,7 +1289,7 @@
           '<button class="ghost" id="cImport" type="button">导入</button>' +
           '<button class="ghost" id="cWipe" type="button">清空对话</button>' +
         '</div>' +
-        '<p class="tip">导出 JSON 含会话、配置、日记、相册、世界书和起算日。Key 也在里面，别乱发。</p>' +
+        '<p class="tip">导出 JSON 含会话、配置、日记、相册、世界书、日历、安排、待办和起算日。Key 也在里面，别乱发。</p>' +
       '</div>' +
       '<div class="row"><button class="ghost solid" id="cSave" type="button">存好</button></div>' +
       '<p class="tip">改完不点存好，下次打开还是旧的。</p>';
@@ -1367,7 +1367,7 @@
         });
       }
       if (ev.target.id === 'cExport'){
-        var data = { v: 4, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), worldbooks: LS.get(K_WORLDBOOKS, []) };
+        var data = { v: 5, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []) };
         var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -1392,6 +1392,9 @@
               if (obj.diary) LS.set(K_DIARY, obj.diary);
               if (obj.album) LS.set(K_ALBUM, obj.album);
               if (Array.isArray(obj.worldbooks)) LS.set(K_WORLDBOOKS, obj.worldbooks);
+              if (Array.isArray(obj.calendar)) LS.set(PLANNER_KEYS.calendar, obj.calendar);
+              if (Array.isArray(obj.schedule)) LS.set(PLANNER_KEYS.schedule, obj.schedule);
+              if (Array.isArray(obj.todo)) LS.set(PLANNER_KEYS.todo, obj.todo);
               applyTheme();
               renderAll();
               toast('导进来了。');
