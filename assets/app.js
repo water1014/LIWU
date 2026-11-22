@@ -576,6 +576,11 @@
     else if (target === 'notice') viewNotices();
     else if (target === 'countdown') viewCountdown();
     else if (target === 'mood') viewMood();
+    else if (target === 'ledger') viewLedger();
+    else if (target === 'health') viewHealth();
+    else if (target === 'period') viewPeriod();
+    else if (target === 'study') viewStudy();
+    else if (target === 'class') viewClass();
     else if (target === 'moments') viewMoments();
     else if (target === 'quotes') viewQuotes();
     else if (target === 'favorite') viewFavorites();
@@ -775,6 +780,11 @@
       else if (v === 'notice') viewNotices();
       else if (v === 'countdown') viewCountdown();
       else if (v === 'mood') viewMood();
+      else if (v === 'ledger') viewLedger();
+      else if (v === 'health') viewHealth();
+      else if (v === 'period') viewPeriod();
+      else if (v === 'study') viewStudy();
+      else if (v === 'class') viewClass();
       else if (v === 'moments') viewMoments();
       else if (v === 'quotes') viewQuotes();
       else if (v === 'favorite') viewFavorites();
@@ -1255,6 +1265,128 @@
     body.onsubmit=function(ev){if(ev.target.id!=='noticeForm')return;ev.preventDefault();var title=$('#noticeTitle').value.trim();if(!title){toast('先写提醒标题。');return;}var list=LS.get(K_NOTICES,[]);list.push({id:uid(),title:title,date:$('#noticeDate').value||today(),body:$('#noticeBody').value.trim(),createdAt:Date.now()});if(LS.set(K_NOTICES,list)){viewNotices();toast('提醒已保存。');}};
   }
 
+
+  /* ================= 日常管理 · 账本 / 健康 / 经期 / 学习 / 课程表 ================= */
+  var K_LEDGER='liwu.ledger',K_HEALTH='liwu.health',K_PERIOD='liwu.period',K_STUDY='liwu.study',K_CLASS='liwu.class';
+  function manageList(key){var v=LS.get(key,[]);return Array.isArray(v)?v:[];}
+  function manageSave(key,list){return LS.set(key,list);}
+  function moneyText(value){return '¥'+Number(value||0).toFixed(2);}
+  function manageDayName(n){return ['周一','周二','周三','周四','周五','周六','周日'][Math.max(0,Math.min(6,n-1))];}
+
+  function viewLedger(){
+    var month=today().slice(0,7),editing='';
+    function render(){
+      var all=manageList(K_LEDGER),items=all.filter(function(x){return (x.date||'').slice(0,7)===month;}).sort(function(a,b){return (b.date||'').localeCompare(a.date||'')||(b.createdAt||0)-(a.createdAt||0);});
+      var income=items.filter(function(x){return x.type==='income';}).reduce(function(s,x){return s+Number(x.amount||0);},0);
+      var expense=items.filter(function(x){return x.type!=='income';}).reduce(function(s,x){return s+Number(x.amount||0);},0);
+      var current=all.find(function(x){return x.id===editing;});
+      var html='<div class="planner-intro"><p class="lead">把日常收支放进同一本账里。收入和支出分开统计，记录只保存在本机。</p><div class="planner-stat"><strong>'+items.length+'</strong><span>笔记录</span></div></div>'+
+        '<div class="ledger-summary"><div><small>收入</small><strong>'+moneyText(income)+'</strong></div><div><small>支出</small><strong>'+moneyText(expense)+'</strong></div><div><small>结余</small><strong>'+moneyText(income-expense)+'</strong></div></div>'+
+        '<div class="ledger-toolbar"><label>月份<input id="ledgerMonth" type="month" value="'+month+'"></label><button class="ghost solid" type="button" id="ledgerNew">＋ 记一笔</button></div>'+
+        '<form class="planner-form" id="ledgerForm" '+(editing?'':'hidden')+'><strong>'+(editing?'修改记录':'新增收支')+'</strong><div class="planner-fields"><label>类型<select id="ledgerType"><option value="expense" '+(!current||current.type!=='income'?'selected':'')+'>支出</option><option value="income" '+(current&&current.type==='income'?'selected':'')+'>收入</option></select></label><label>金额<input id="ledgerAmount" type="number" min="0.01" step="0.01" required value="'+esc(current?current.amount:'')+'" placeholder="0.00"></label></div><div class="planner-fields"><label>日期<input id="ledgerDate" type="date" required value="'+esc(current?current.date:today())+'"></label><label>分类<select id="ledgerCategory"><option>餐饮</option><option>购物</option><option>交通</option><option>居家</option><option>学习</option><option>娱乐</option><option>医疗</option><option>工资</option><option>其他</option></select></label></div><input id="ledgerNote" maxlength="120" placeholder="备注（可选）" value="'+esc(current?current.note:'')+'"><div class="planner-form-actions"><button class="ghost solid" type="submit">保存记录</button><button class="ghost" type="button" id="ledgerCancel">取消</button></div></form>'+
+        (items.length?'<div class="ledger-list">'+items.map(function(x){return '<article class="ledger-row"><div class="ledger-kind '+(x.type==='income'?'income':'expense')+'">'+(x.type==='income'?'＋':'－')+'</div><div class="ledger-copy"><strong>'+esc(x.category||'其他')+'</strong><small>'+esc(x.date)+(x.note?' · '+esc(x.note):'')+'</small></div><strong class="ledger-amount '+(x.type==='income'?'income':'expense')+'">'+(x.type==='income'?'+':'−')+moneyText(x.amount)+'</strong><div class="planner-item-actions"><button class="mini" type="button" data-ledger-edit="'+esc(x.id)+'">编辑</button><button class="mini danger" type="button" data-ledger-delete="'+esc(x.id)+'">删除</button></div></article>';}).join('')+'</div>':'<div class="blank">这个月还没有收支记录。</div>');
+      openView('账本','Ledger',html);var body=$('#viewBody');
+      body.onclick=function(ev){
+        if(ev.target.id==='ledgerNew'){editing='';render();$('#ledgerForm').hidden=false;$('#ledgerDate').value=today();$('#ledgerForm').scrollIntoView({behavior:'smooth',block:'nearest'});return;}
+        if(ev.target.id==='ledgerCancel'){editing='';render();return;}
+        var edit=ev.target.closest('[data-ledger-edit]');if(edit){editing=edit.getAttribute('data-ledger-edit');render();$('#ledgerForm').hidden=false;$('#ledgerCategory').value=current&&current.category||'其他';return;}
+        var del=ev.target.closest('[data-ledger-delete]');if(del&&confirm('删除这笔记录？')){manageSave(K_LEDGER,manageList(K_LEDGER).filter(function(x){return x.id!==del.getAttribute('data-ledger-delete');}));editing='';render();toast('记录已删除。');}
+      };
+      body.onchange=function(ev){if(ev.target.id==='ledgerMonth'){month=ev.target.value||today().slice(0,7);editing='';render();}};
+      body.onsubmit=function(ev){if(ev.target.id!=='ledgerForm')return;ev.preventDefault();var amount=Number($('#ledgerAmount').value),date=$('#ledgerDate').value;if(!isFinite(amount)||amount<=0||!date){toast('请填写正确的金额和日期。');return;}var list=manageList(K_LEDGER),item={id:editing||uid(),type:$('#ledgerType').value,amount:Math.round(amount*100)/100,date:date,category:$('#ledgerCategory').value,note:$('#ledgerNote').value.trim(),createdAt:current?current.createdAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=item;else list.unshift(item);if(manageSave(K_LEDGER,list)){month=date.slice(0,7);editing='';render();toast('账目已保存。');}};
+    }
+    render();
+  }
+
+  function viewHealth(){
+    var editing='';
+    function render(){
+      var all=manageList(K_HEALTH).slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
+      var current=all.find(function(x){return x.id===editing;});
+      var latest=all[0];
+      var html='<div class="planner-intro"><p class="lead">只做个人日常记录，不代替专业诊断。你可以按自己的习惯记录睡眠、饮水、活动和身体感受。</p><div class="planner-stat"><strong>'+all.length+'</strong><span>条记录</span></div></div>'+
+        (latest?'<div class="health-latest"><small>最近一次记录 · '+esc(latest.date)+'</small><div><span>睡眠 <strong>'+(latest.sleep||'—')+'</strong> 小时</span><span>饮水 <strong>'+(latest.water||'—')+'</strong> ml</span><span>体重 <strong>'+(latest.weight||'—')+'</strong> kg</span></div></div>':'')+
+        '<div class="planner-toolbar"><button class="ghost solid" id="healthNew" type="button">＋ 记录今天</button></div>'+
+        '<form class="planner-form" id="healthForm" '+(editing?'':'hidden')+'><strong>'+(editing?'修改健康记录':'新增健康记录')+'</strong><label>日期<input id="healthDate" type="date" required value="'+esc(current?current.date:today())+'"></label><div class="planner-fields"><label>睡眠（小时）<input id="healthSleep" type="number" min="0" max="24" step="0.1" value="'+esc(current?current.sleep:'')+'" placeholder="例如 7.5"></label><label>饮水（毫升）<input id="healthWater" type="number" min="0" max="10000" step="50" value="'+esc(current?current.water:'')+'" placeholder="例如 1500"></label></div><div class="planner-fields"><label>体重（kg，可选）<input id="healthWeight" type="number" min="0" max="500" step="0.1" value="'+esc(current?current.weight:'')+'"></label><label>活动情况<select id="healthActivity"><option value="">未记录</option><option value="休息">休息</option><option value="散步">散步</option><option value="运动">运动</option><option value="拉伸">拉伸</option></select></label></div><textarea id="healthNote" rows="3" placeholder="身体感受或备注（可选）">'+esc(current?current.note:'')+'</textarea><div class="planner-form-actions"><button class="ghost solid" type="submit">保存记录</button><button class="ghost" type="button" id="healthCancel">取消</button></div></form>'+
+        (all.length?'<div class="health-history">'+all.map(function(x){return '<article class="health-row"><time>'+esc(x.date)+'</time><div class="health-metrics">'+(x.sleep?'<span>睡眠 '+esc(x.sleep)+'h</span>':'')+(x.water?'<span>饮水 '+esc(x.water)+'ml</span>':'')+(x.weight?'<span>体重 '+esc(x.weight)+'kg</span>':'')+(x.activity?'<span>'+esc(x.activity)+'</span>':'')+'</div>'+(x.note?'<p>'+esc(x.note)+'</p>':'')+'<div class="planner-item-actions"><button class="mini" type="button" data-health-edit="'+esc(x.id)+'">编辑</button><button class="mini danger" type="button" data-health-delete="'+esc(x.id)+'">删除</button></div></article>';}).join('')+'</div>':'<div class="blank">还没有健康记录。你可以从今天开始，按自己的节奏记录。</div>');
+      openView('健康','Health',html);var body=$('#viewBody');
+      body.onclick=function(ev){
+        if(ev.target.id==='healthNew'){editing='';render();$('#healthForm').hidden=false;$('#healthForm').scrollIntoView({behavior:'smooth',block:'nearest'});return;}
+        if(ev.target.id==='healthCancel'){editing='';render();return;}
+        var edit=ev.target.closest('[data-health-edit]');if(edit){editing=edit.getAttribute('data-health-edit');render();$('#healthForm').hidden=false;$('#healthActivity').value=current&&current.activity||'';return;}
+        var del=ev.target.closest('[data-health-delete]');if(del&&confirm('删除这条健康记录？')){manageSave(K_HEALTH,manageList(K_HEALTH).filter(function(x){return x.id!==del.getAttribute('data-health-delete');}));editing='';render();}
+      };
+      body.onsubmit=function(ev){if(ev.target.id!=='healthForm')return;ev.preventDefault();var date=$('#healthDate').value;if(!date){toast('请选择日期。');return;}var list=manageList(K_HEALTH),item={id:editing||uid(),date:date,sleep:$('#healthSleep').value,water:$('#healthWater').value,weight:$('#healthWeight').value,activity:$('#healthActivity').value,note:$('#healthNote').value.trim(),updatedAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=item;else list.unshift(item);if(manageSave(K_HEALTH,list)){editing='';render();toast('健康记录已保存。');}};
+    }
+    render();
+  }
+
+  function viewPeriod(){
+    var data=Object.assign({cycleLength:28,periodLength:5,lastStart:'',starts:[]},LS.get(K_PERIOD,{}));
+    if(!Array.isArray(data.starts))data.starts=[];
+    function nextDate(){if(!data.lastStart)return '';var d=new Date(data.lastStart+'T12:00:00');d.setDate(d.getDate()+Number(data.cycleLength||28));return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());}
+    function render(){
+      var next=nextDate(),gap=next?Math.round((new Date(next+'T00:00:00')-new Date(today()+'T00:00:00'))/86400000):null;
+      var html='<div class="planner-intro"><p class="lead">记录周期和身体感受。预测日期只是按你填写的平均周期估算，不代表确定的生理时间。</p><div class="planner-stat"><strong>'+data.starts.length+'</strong><span>次记录</span></div></div>'+
+        '<section class="period-summary"><small>下次日期估算</small><strong>'+(next||'尚未记录')+'</strong><span>'+(gap===null?'先记录一次开始日期':gap>0?'按当前周期估算还有 '+gap+' 天':gap===0?'按当前周期估算为今天':'估算日期已过 '+Math.abs(gap)+' 天')+'</span></section>'+
+        '<form class="planner-form" id="periodSettings"><strong>周期设置</strong><div class="planner-fields"><label>平均周期（天）<input id="periodCycle" type="number" min="15" max="60" value="'+esc(data.cycleLength)+'"></label><label>经期时长（天）<input id="periodLength" type="number" min="1" max="15" value="'+esc(data.periodLength)+'"></label></div><button class="ghost solid" type="submit">保存周期设置</button></form>'+
+        '<form class="planner-form" id="periodLog"><strong>记录一次开始日期</strong><label>开始日期<input id="periodStart" type="date" value="'+today()+'" required></label><input id="periodNote" maxlength="160" placeholder="备注（可选）"><div class="planner-form-actions"><button class="ghost solid" type="submit">保存记录</button></div></form>'+
+        (data.starts.length?'<div class="period-history"><h3>历史记录</h3>'+data.starts.slice().sort(function(a,b){return b.date.localeCompare(a.date);}).map(function(x){return '<article class="period-row"><div><time>'+esc(x.date)+'</time>'+(x.note?'<p>'+esc(x.note)+'</p>':'')+'</div><button class="mini danger" type="button" data-period-delete="'+esc(x.id)+'">删除</button></article>';}).join('')+'</div>':'<div class="blank">还没有周期记录。保存一次开始日期后，就能看到基于平均周期的日期估算。</div>');
+      openView('经期','Period',html);var body=$('#viewBody');
+      body.onsubmit=function(ev){
+        if(ev.target.id==='periodSettings'){ev.preventDefault();var c=parseInt($('#periodCycle').value,10),p=parseInt($('#periodLength').value,10);if(!Number.isFinite(c)||c<15||c>60||!Number.isFinite(p)||p<1||p>15){toast('请检查周期和时长范围。');return;}data.cycleLength=c;data.periodLength=p;if(LS.set(K_PERIOD,data)){render();toast('周期设置已保存。');}return;}
+        if(ev.target.id==='periodLog'){ev.preventDefault();var date=$('#periodStart').value;if(!date){toast('请选择开始日期。');return;}data.starts.push({id:uid(),date:date,note:$('#periodNote').value.trim(),createdAt:Date.now()});data.lastStart=data.starts.slice().sort(function(a,b){return b.date.localeCompare(a.date);})[0].date;if(LS.set(K_PERIOD,data)){render();toast('周期记录已保存。');}}
+      };
+      body.onclick=function(ev){var del=ev.target.closest('[data-period-delete]');if(del&&confirm('删除这次周期记录？')){data.starts=data.starts.filter(function(x){return x.id!==del.getAttribute('data-period-delete');});data.lastStart=data.starts.slice().sort(function(a,b){return b.date.localeCompare(a.date);})[0]?.date||'';LS.set(K_PERIOD,data);render();}};
+    }
+    render();
+  }
+
+  function viewStudy(){
+    var editing='',filter='all';
+    function render(){
+      var all=manageList(K_STUDY).slice().sort(function(a,b){return Number(!!a.done)-Number(!!b.done)||(a.date||'9999').localeCompare(b.date||'9999')||(b.createdAt||0)-(a.createdAt||0);});
+      var done=all.filter(function(x){return x.done;}).length,current=all.find(function(x){return x.id===editing;});
+      var shown=all.filter(function(x){return filter==='all'||(filter==='done'?x.done:!x.done);});
+      var html='<div class="planner-intro"><p class="lead">把学习目标拆成一段段能完成的小任务。记录科目、日期和投入时间。</p><div class="planner-stat"><strong>'+done+'/'+all.length+'</strong><span>已完成</span></div></div>'+
+        '<div class="todo-filters"><button type="button" data-study-filter="all" class="'+(filter==='all'?'active':'')+'">全部</button><button type="button" data-study-filter="open" class="'+(filter==='open'?'active':'')+'">进行中</button><button type="button" data-study-filter="done" class="'+(filter==='done'?'active':'')+'">已完成</button><button class="ghost solid" type="button" id="studyNew">＋ 学习任务</button></div>'+
+        '<form class="planner-form" id="studyForm" '+(editing?'':'hidden')+'><strong>'+(editing?'修改任务':'新增学习任务')+'</strong><input id="studyTitle" maxlength="100" required value="'+esc(current?current.title:'')+'" placeholder="例如：复习英语单词"><div class="planner-fields"><label>科目<input id="studySubject" maxlength="50" value="'+esc(current?current.subject:'')+'" placeholder="科目 / 主题"></label><label>计划日期<input id="studyDate" type="date" value="'+esc(current?current.date:today())+'"></label></div><div class="planner-fields"><label>学习时长（分钟）<input id="studyMinutes" type="number" min="0" max="1440" step="5" value="'+esc(current?current.minutes:'')+'"></label><label>目标进度<select id="studyDone"><option value="0" '+(!current||!current.done?'selected':'')+'>进行中</option><option value="1" '+(current&&current.done?'selected':'')+'>已完成</option></select></label></div><textarea id="studyNote" rows="2" placeholder="笔记或下一步">'+esc(current?current.note:'')+'</textarea><div class="planner-form-actions"><button class="ghost solid" type="submit">保存任务</button><button class="ghost" type="button" id="studyCancel">取消</button></div></form>'+
+        (shown.length?'<div class="study-list">'+shown.map(function(x){return '<article class="planner-item"><label class="todo-check"><input type="checkbox" data-study-check="'+esc(x.id)+'" '+(x.done?'checked':'')+'><span></span></label><div class="planner-item-main"><strong>'+esc(x.title)+'</strong><p>'+esc([x.subject,x.date,x.minutes?x.minutes+' 分钟':''].filter(Boolean).join(' · '))+'</p>'+(x.note?'<p>'+esc(x.note)+'</p>':'')+'</div><div class="planner-item-actions"><button class="mini" type="button" data-study-edit="'+esc(x.id)+'">编辑</button><button class="mini danger" type="button" data-study-delete="'+esc(x.id)+'">删除</button></div></article>';}).join('')+'</div>':'<div class="blank">还没有学习任务。先从一个小目标开始。</div>');
+      openView('学习','Study',html);var body=$('#viewBody');
+      body.onclick=function(ev){
+        var f=ev.target.closest('[data-study-filter]');if(f){filter=f.getAttribute('data-study-filter');render();return;}
+        if(ev.target.id==='studyNew'){editing='';render();$('#studyForm').hidden=false;$('#studyTitle').focus();return;}
+        if(ev.target.id==='studyCancel'){editing='';render();return;}
+        var edit=ev.target.closest('[data-study-edit]');if(edit){editing=edit.getAttribute('data-study-edit');render();$('#studyForm').hidden=false;return;}
+        var del=ev.target.closest('[data-study-delete]');if(del&&confirm('删除这个学习任务？')){manageSave(K_STUDY,manageList(K_STUDY).filter(function(x){return x.id!==del.getAttribute('data-study-delete');}));editing='';render();}
+      };
+      body.onchange=function(ev){var check=ev.target.closest('[data-study-check]');if(!check)return;var list=manageList(K_STUDY),item=list.find(function(x){return x.id===check.getAttribute('data-study-check');});if(item){item.done=check.checked;manageSave(K_STUDY,list);render();}};
+      body.onsubmit=function(ev){if(ev.target.id!=='studyForm')return;ev.preventDefault();var title=$('#studyTitle').value.trim();if(!title){toast('先写下学习任务。');return;}var list=manageList(K_STUDY),item={id:editing||uid(),title:title,subject:$('#studySubject').value.trim(),date:$('#studyDate').value,minutes:$('#studyMinutes').value,note:$('#studyNote').value.trim(),done:$('#studyDone').value==='1',createdAt:current?current.createdAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=item;else list.unshift(item);if(manageSave(K_STUDY,list)){editing='';render();toast('学习任务已保存。');}};
+    }
+    render();
+  }
+
+  function viewClass(){
+    var editing='';
+    function render(){
+      var all=manageList(K_CLASS).slice().sort(function(a,b){return Number(a.weekday)-Number(b.weekday)||(a.start||'').localeCompare(b.start||'');});
+      var current=all.find(function(x){return x.id===editing;});
+      var html='<div class="planner-intro"><p class="lead">把每周固定课程放在这里，按星期和上课时间排列。</p><div class="planner-stat"><strong>'+all.length+'</strong><span>门课程</span></div></div>'+
+        '<div class="planner-toolbar"><button class="ghost solid" id="classNew" type="button">＋ 添加课程</button></div>'+
+        '<form class="planner-form" id="classForm" '+(editing?'':'hidden')+'><strong>'+(editing?'修改课程':'新增课程')+'</strong><input id="className" maxlength="80" required value="'+esc(current?current.name:'')+'" placeholder="课程名称"><div class="planner-fields"><label>星期<select id="classDay">'+[1,2,3,4,5,6,7].map(function(n){return '<option value="'+n+'" '+(current&&Number(current.weekday)===n?'selected':'')+'>'+manageDayName(n)+'</option>';}).join('')+'</select></label><label>地点<input id="classPlace" maxlength="80" value="'+esc(current?current.place:'')+'" placeholder="教室 / 线上"></label></div><div class="planner-fields"><label>开始时间<input id="classStart" type="time" required value="'+esc(current?current.start:'08:00')+'"></label><label>结束时间<input id="classEnd" type="time" required value="'+esc(current?current.end:'09:00')+'"></label></div><input id="classTeacher" maxlength="60" value="'+esc(current?current.teacher:'')+'" placeholder="老师 / 备注（可选）"><div class="planner-form-actions"><button class="ghost solid" type="submit">保存课程</button><button class="ghost" type="button" id="classCancel">取消</button></div></form>'+
+        (all.length?'<div class="class-week">'+[1,2,3,4,5,6,7].map(function(day){var rows=all.filter(function(x){return Number(x.weekday)===day;});return rows.length?'<section class="class-day"><h3>'+manageDayName(day)+'</h3>'+rows.map(function(x){return '<article class="class-row"><div class="class-time"><strong>'+esc(x.start)+'</strong><small>'+esc(x.end)+'</small></div><div class="class-copy"><strong>'+esc(x.name)+'</strong><p>'+esc([x.place,x.teacher].filter(Boolean).join(' · '))+'</p></div><div class="planner-item-actions"><button class="mini" type="button" data-class-edit="'+esc(x.id)+'">编辑</button><button class="mini danger" type="button" data-class-delete="'+esc(x.id)+'">删除</button></div></article>';}).join('')+'</section>':'';}).join('')+'</div>':'<div class="blank">课程表还空着。添加一门每周课程吧。</div>');
+      openView('课程表','Class',html);var body=$('#viewBody');
+      body.onclick=function(ev){
+        if(ev.target.id==='classNew'){editing='';render();$('#classForm').hidden=false;$('#className').focus();return;}
+        if(ev.target.id==='classCancel'){editing='';render();return;}
+        var edit=ev.target.closest('[data-class-edit]');if(edit){editing=edit.getAttribute('data-class-edit');render();$('#classForm').hidden=false;return;}
+        var del=ev.target.closest('[data-class-delete]');if(del&&confirm('删除这门课程？')){manageSave(K_CLASS,manageList(K_CLASS).filter(function(x){return x.id!==del.getAttribute('data-class-delete');}));editing='';render();}
+      };
+      body.onsubmit=function(ev){if(ev.target.id!=='classForm')return;ev.preventDefault();var name=$('#className').value.trim(),start=$('#classStart').value,end=$('#classEnd').value;if(!name||!start||!end||end<=start){toast('请检查课程名称和时间范围。');return;}var list=manageList(K_CLASS),item={id:editing||uid(),name:name,weekday:Number($('#classDay').value),place:$('#classPlace').value.trim(),start:start,end:end,teacher:$('#classTeacher').value.trim(),updatedAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=item;else list.push(item);if(manageSave(K_CLASS,list)){editing='';render();toast('课程已保存。');}};
+    }
+    render();
+  }
+
   /* ================= 世界书 · 笔记本与条目 ================= */
   var K_WORLDBOOKS = 'liwu.worldbooks';
   function worldbooks(){ return LS.get(K_WORLDBOOKS, []); }
@@ -1585,7 +1717,7 @@
         });
       }
       if (ev.target.id === 'cExport'){
-        var data = { v: 9, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), memory: LS.get(K_MEMORY, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites'), profile: LS.get(K_PROFILE, {}), notices: LS.get(K_NOTICES, []), noticeRead: LS.get(K_NOTICE_READ, []) };
+        var data = { v: 10, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), memory: LS.get(K_MEMORY, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites'), profile: LS.get(K_PROFILE, {}), notices: LS.get(K_NOTICES, []), noticeRead: LS.get(K_NOTICE_READ, []), ledger: manageList(K_LEDGER), health: manageList(K_HEALTH), period: LS.get(K_PERIOD, {cycleLength:28,periodLength:5,lastStart:'',starts:[]}), study: manageList(K_STUDY), classes: manageList(K_CLASS) };
         var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -1622,6 +1754,11 @@
               if (obj.profile && typeof obj.profile === 'object') LS.set(K_PROFILE, obj.profile);
               if (Array.isArray(obj.notices)) LS.set(K_NOTICES, obj.notices);
               if (Array.isArray(obj.noticeRead)) LS.set(K_NOTICE_READ, obj.noticeRead);
+              if (Array.isArray(obj.ledger)) LS.set(K_LEDGER, obj.ledger);
+              if (Array.isArray(obj.health)) LS.set(K_HEALTH, obj.health);
+              if (obj.period && typeof obj.period === 'object') LS.set(K_PERIOD, obj.period);
+              if (Array.isArray(obj.study)) LS.set(K_STUDY, obj.study);
+              if (Array.isArray(obj.classes)) LS.set(K_CLASS, obj.classes);
               applyTheme();
               renderAll();
               toast('导进来了。');
