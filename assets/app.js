@@ -1287,7 +1287,7 @@
         });
       }
       if (ev.target.id === 'cExport'){
-        var data = { v: 3, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []) };
+        var data = { v: 4, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), worldbooks: LS.get(K_WORLDBOOKS, []) };
         var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -1311,6 +1311,7 @@
               if (obj.since) LS.set(K_SINCE, obj.since);
               if (obj.diary) LS.set(K_DIARY, obj.diary);
               if (obj.album) LS.set(K_ALBUM, obj.album);
+              if (Array.isArray(obj.worldbooks)) LS.set(K_WORLDBOOKS, obj.worldbooks);
               applyTheme();
               renderAll();
               toast('导进来了。');
