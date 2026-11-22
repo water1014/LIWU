@@ -1579,7 +1579,7 @@
     var headers={'Authorization':'Bearer '+cfg.key},res;
     if(isEdit){
       var form=new FormData();form.append('model',cfg.model);form.append('prompt',prompt);form.append('size',cfg.size||'1024x1024');form.append('image',referenceFile,referenceFile.name||'reference.png');
-      Object.keys(custom).forEach(function(k){headers[k]=String(custom[k]);});
+      Object.keys(custom).forEach(function(k){if(k.toLowerCase()!=='content-type')headers[k]=String(custom[k]);});
       res=await fetch(url,{method:'POST',headers:headers,body:form});
     }else{
       headers['Content-Type']='application/json';Object.keys(custom).forEach(function(k){headers[k]=String(custom[k]);});
@@ -1969,7 +1969,7 @@
         });
       }
       if (ev.target.id === 'cExport'){
-        var data = { v: 13, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), memory: LS.get(K_MEMORY, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites'), profile: LS.get(K_PROFILE, {}), notices: LS.get(K_NOTICES, []), noticeRead: LS.get(K_NOTICE_READ, []), ledger: manageList(K_LEDGER), health: manageList(K_HEALTH), period: LS.get(K_PERIOD, {cycleLength:28,periodLength:5,lastStart:'',starts:[]}), study: manageList(K_STUDY), classes: manageList(K_CLASS), music: manageList(K_MUSIC), games: manageList(K_GAMES), window: LS.get(K_WINDOW, {title:'窗边',description:'给今天留一扇窗。',image:''}), windowNotes: manageList(K_WINDOW_NOTES), wallpaper: LS.get('liwu.wallpaper',''), mcpServers: manageList('liwu.mcp.servers'), plugins: manageList('liwu.plugins'), imageStudioConfig: imageConfig(), imageGallery: imageGallery(), proactiveImage: proactiveConfig() };
+        var data = { v: 14, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), memory: LS.get(K_MEMORY, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites'), profile: LS.get(K_PROFILE, {}), notices: LS.get(K_NOTICES, []), noticeRead: LS.get(K_NOTICE_READ, []), ledger: manageList(K_LEDGER), health: manageList(K_HEALTH), period: LS.get(K_PERIOD, {cycleLength:28,periodLength:5,lastStart:'',starts:[]}), study: manageList(K_STUDY), classes: manageList(K_CLASS), music: manageList(K_MUSIC), games: manageList(K_GAMES), window: LS.get(K_WINDOW, {title:'窗边',description:'给今天留一扇窗。',image:''}), windowNotes: manageList(K_WINDOW_NOTES), wallpaper: LS.get('liwu.wallpaper',''), mcpServers: manageList('liwu.mcp.servers'), plugins: manageList('liwu.plugins'), imageStudioConfig: imageConfig(), imageGallery: imageGallery(), proactiveImage: proactiveConfig() };
         var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
