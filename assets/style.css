@@ -1885,3 +1885,33 @@ body.room-open{overscroll-behavior:none}
 .integration-card>p{margin:9px 0 0;color:var(--ink-2);font-size:11px;line-height:1.65;overflow-wrap:anywhere}
 .integration-card .planner-item-actions{margin-top:12px}
 .integration-last{display:block;margin-top:10px;line-height:1.6;overflow-wrap:anywhere}
+
+/* ---------- 生图室与主动生图 ---------- */
+.image-prompt-form{display:grid;gap:12px;margin:16px 0 24px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--bg-2)}
+.image-prompt-form>strong{font-size:14px}
+.image-prompt-form>textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:13px;line-height:1.7;resize:vertical}
+.image-prompt-foot{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.image-prompt-foot small{font-size:10px;color:var(--ink-3)}
+.image-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.image-work{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--bg-2)}
+.image-work>img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;background:var(--bg-3)}
+.image-work-copy{padding:10px 11px 4px}
+.image-work-copy>small{font-size:9px;color:var(--ink-3)}
+.image-work-copy>p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin:5px 0;color:var(--ink-2);font-size:11px;line-height:1.6}
+.image-work .planner-item-actions{padding:7px 10px 10px;gap:5px;flex-wrap:wrap}
+.proactive-status{display:flex;align-items:center;gap:12px;margin:14px 0;padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--bg-2)}
+.proactive-status:before{content:"";width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:var(--ink-3)}
+.proactive-status:has(.status-dot.on):before{background:#5e9b7a;box-shadow:0 0 0 4px rgba(94,155,122,.12)}
+.proactive-status>div{display:grid;gap:3px}
+.proactive-status strong{font-size:13px}
+.proactive-status small{font-size:10px;color:var(--ink-3)}
+.proactive-warning{margin:12px 0;padding:12px 14px;border:1px solid rgba(180,135,76,.25);border-radius:11px;background:rgba(180,135,76,.08);color:var(--ink-2);font-size:11px;line-height:1.7}
+.chat-image-wrap{max-width:min(100%,360px);margin:8px 0 10px;overflow:hidden;border-radius:13px;border:1px solid var(--line);background:var(--bg-2)}
+.chat-image{display:block;width:100%;height:auto;max-height:480px;object-fit:contain}
+@media(max-width:430px){
+ .image-gallery{gap:8px}
+ .image-prompt-foot{align-items:flex-start;flex-direction:column}
+ .image-prompt-foot button{width:100%}
+ .image-work .planner-item-actions{padding:5px 7px 8px}
+ .image-work .mini{font-size:10px}
+}
