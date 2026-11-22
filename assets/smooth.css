@@ -1,0 +1,62 @@
+/* 里屋 · 手感
+   不改结构，只把“卡”和“生硬”的地方调顺：
+   1. 去掉最耗性能的毛玻璃（手机上它最容易拖慢）
+   2. 统一过渡曲线和时长
+   3. 消息、面板进场更轻
+   4. 按钮按下去有回应 */
+
+/* —— 统一曲线 —— */
+.view,
+.drawer{
+  transition:transform .32s cubic-bezier(.22,.82,.24,1), opacity .32s ease;
+  will-change:transform;
+}
+.view.dragging,
+.drawer.dragging{transition:none}
+.view.settling,
+.drawer.settling{transition:transform .26s cubic-bezier(.22,.82,.24,1)}
+
+/* —— 去掉毛玻璃：手机上它吃帧 —— */
+.scrim{-webkit-backdrop-filter:none !important;backdrop-filter:none !important;background:rgba(20,18,15,.34) !important}
+.hud-btn,.pill,.lookup{
+  -webkit-backdrop-filter:none !important;backdrop-filter:none !important;
+  background:rgba(255,255,255,.8) !important;
+}
+body[data-theme='night'] .hud-btn,
+body[data-theme='night'] .pill,
+body[data-theme='night'] .lookup{background:rgba(30,28,24,.78) !important}
+
+/* —— 按钮按下去有回应 —— */
+.icon,.hud-btn,.pill,.lookup,.ghost,.chip,.newchat,.sess,.desk-dock button{
+  transition:transform .16s cubic-bezier(.2,.8,.25,1), background .2s, color .2s, border-color .2s;
+}
+.icon:active,.hud-btn:active,.pill:active,.lookup:active{transform:scale(.93)}
+.ghost:active,.chip:active,.newchat:active{transform:scale(.97)}
+.desk-dock button:active{transform:scale(.94)}
+
+/* —— 消息进场 —— */
+.msg{animation:msgIn .24s cubic-bezier(.2,.8,.25,1) both}
+@keyframes msgIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* —— 面板 / 抽屉里滚动更顺 —— */
+.thread,.view-body,.sessions,.panel-in,.chat{
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+}
+
+/* —— 顶栏把手：暗示可以往下拖 —— */
+.view-top,.drawer-top{
+  touch-action:none;
+  cursor:grab;
+}
+.view-top::after{
+  content:'';position:absolute;left:50%;top:6px;width:34px;height:3px;margin-left:-17px;
+  border-radius:2px;background:currentColor;opacity:.12;
+}
+.view-top{position:relative}
+
+/* —— 抽屉里会话行按下去不跳 —— */
+.sess{-webkit-tap-highlight-color:transparent}
+
+/* —— 减少一点阴影层级，省性能 —— */
+.drawer{box-shadow:8px 0 28px rgba(33,31,28,.14)}
