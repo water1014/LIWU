@@ -1,5 +1,6 @@
 /* 里屋 · 一张靠窗的书桌（只拍桌面）
-   v27：给 three 的加载加了超时，出错会把话说出来，不再无限“正在推开窗”。 */
+   v28：three 的源换成国内可达的两个（staticfile / bootcdn），每个 5 秒超时。
+   还不通就把卡在哪一步写在页面上。 */
 
 (function(){
   'use strict';
@@ -16,9 +17,10 @@
   }
 
   var CDNS = [
+    'https://cdn.staticfile.net/three.js/0.160.0/three.module.min.js',
+    'https://cdn.bootcdn.net/ajax/libs/three.js/0.160.0/three.module.min.js',
     'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js',
-    'https://unpkg.com/three@0.160.0/build/three.module.js',
-    'https://esm.sh/three@0.160.0'
+    'https://unpkg.com/three@0.160.0/build/three.module.js'
   ];
 
   function withTimeout(p, ms){
@@ -31,16 +33,16 @@
   async function loadThree(){
     for (var i = 0; i < CDNS.length; i++){
       try{
-        var lib = await withTimeout(import(CDNS[i]), 6000);
+        var lib = await withTimeout(import(CDNS[i]), 5000);
         if (lib && lib.Scene) return lib;
       }catch(e){}
-      fail('还在拿 3D 库（' + (i + 1) + '/' + CDNS.length + '）…');
+      fail('正在拿 3D 库（第 ' + (i + 1) + ' 个，共 ' + CDNS.length + ' 个）…');
     }
     return null;
   }
 
   loadThree().then(function(THREE){
-    if (!THREE){ fail('3D 库没下来。网络不通，或者这三个地址都被挡了。底部那排一样能用。'); return; }
+    if (!THREE){ fail('3D 库没下来。四个地址都不通。底部那排还能用。'); return; }
     try{ init(THREE); }
     catch(e){ fail('场景出错：' + (e && e.message ? e.message : e)); }
   }).catch(function(e){
