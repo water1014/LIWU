@@ -843,7 +843,7 @@
 
   function viewAlbum(){
     var localKey = K_ALBUM;
-    function items(){ return (D.album || []).map(function(it){return Object.assign({local:false},it);}).concat(LS.get(localKey,[]).map(function(it,i){return Object.assign({local:true,id:i},it);})); }
+    function items(){ return (D.album || []).map(function(it,i){return Object.assign({local:false,id:i},it);}).concat(LS.get(localKey,[]).map(function(it,i){return Object.assign({local:true,id:i},it);})); }
     function render(){
       var all=items();
       var html='<div class="room-intro"><p class="lead">把照片放进来，留住一起生活的片刻。图片会压缩后保存在这台设备里。</p><div class="room-stat"><strong>'+all.length+'</strong><span>张照片</span></div></div>' +
