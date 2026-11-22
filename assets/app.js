@@ -565,6 +565,8 @@
     setDrawerCurrent(target);
     homeScreen.hidden = true; $('#app').hidden = true;
     if (target === 'calendar' || target === 'schedule' || target === 'todo') viewPlanner(target);
+    else if (target === 'countdown') viewCountdown();
+    else if (target === 'mood') viewMood();
     else if (target === 'diary') viewDiary();
     else if (target === 'album') viewAlbum();
     else if (target === 'memory') viewMemory();
@@ -742,6 +744,8 @@
       closeDrawer();
       homeScreen.hidden = true; $('#app').hidden = true;
       if (v === 'calendar' || v === 'schedule' || v === 'todo') viewPlanner(v);
+      else if (v === 'countdown') viewCountdown();
+      else if (v === 'mood') viewMood();
       else if (v === 'diary') viewDiary();
       else if (v === 'album') viewAlbum();
       else if (v === 'memory') viewMemory();
@@ -1043,6 +1047,60 @@
         if(existing)list=list.map(function(x){return x.id===editing?Object.assign({},x,record):x;});else list.push(Object.assign({createdAt:Date.now()},record));
         if(plannerSave(key,list)){if(key==='calendar')selected=record.date;editing='';render();toast('已保存。');}
       };
+    }
+    render();
+  }
+
+
+  /* ================= 倒计时与心情 ================= */
+  var K_COUNTDOWN='liwu.countdown';
+  var K_MOOD='liwu.mood';
+  function simpleList(key){var value=LS.get(key,[]);return Array.isArray(value)?value:[];}
+  function simpleSave(key,value){return LS.set(key,value);}
+  function dateDistance(value){
+    var a=new Date(today()+'T00:00:00'),b=new Date((value||today())+'T00:00:00');
+    return Math.round((b-a)/86400000);
+  }
+  function viewCountdown(){
+    var key=K_COUNTDOWN,editing='';
+    function render(){
+      var all=simpleList(key).slice().sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
+      var current=all.find(function(x){return x.id===editing;});
+      var html='<div class="planner-intro"><p class="lead">把想见的日子、纪念日和期待放在这里。天数会随日期自动变化。</p><div class="planner-stat"><strong>'+all.length+'</strong><span>个日期</span></div></div>'+
+        '<div class="planner-toolbar"><button class="ghost solid" type="button" id="countNew">＋ 添加日期</button><span class="tip">过去和未来的日期都会保留</span></div>'+
+        '<form class="planner-form" id="countForm" '+(editing?'':'hidden')+'><strong>'+(editing?'修改日期':'添加日期')+'</strong><input id="countTitle" maxlength="80" required placeholder="例如：生日、旅行、纪念日" value="'+esc(current?current.title:'')+'"><label class="count-field">日期<input id="countDate" type="date" required value="'+esc(current?current.date:today())+'"></label><textarea id="countNote" rows="2" placeholder="备注（可选）">'+esc(current?current.note:'')+'</textarea><div class="planner-form-actions"><button class="ghost solid" type="submit">保存</button><button class="ghost" type="button" id="countCancel">取消</button></div></form>';
+      if(!all.length)html+='<div class="blank planner-empty">还没有倒数的日子。先存下一个值得期待的日期。</div>';
+      else html+='<div class="countdown-list">'+all.map(function(x){var gap=dateDistance(x.date),tag=gap>0?'还有 '+gap+' 天':gap<0?'已经过去 '+Math.abs(gap)+' 天':'就是今天';return '<article class="countdown-row"><div class="countdown-number"><strong>'+Math.abs(gap)+'</strong><small>'+(gap>0?'DAYS TO GO':gap<0?'DAYS AGO':'TODAY')+'</small></div><div class="countdown-copy"><strong>'+esc(x.title)+'</strong><span>'+esc(x.date)+' · '+tag+'</span>'+(x.note?'<p>'+esc(x.note)+'</p>':'')+'</div><div class="planner-item-actions"><button class="mini" type="button" data-count-edit="'+esc(x.id)+'">编辑</button><button class="mini danger" type="button" data-count-delete="'+esc(x.id)+'">删除</button></div></article>';}).join('')+'</div>';
+      openView('倒计时','Countdown',html);
+      var body=$('#viewBody');
+      body.onclick=function(ev){
+        if(ev.target.id==='countNew'){editing='';render();$('#countForm').hidden=false;$('#countTitle').focus();return;}
+        if(ev.target.id==='countCancel'){editing='';render();return;}
+        var edit=ev.target.closest('[data-count-edit]');if(edit){editing=edit.getAttribute('data-count-edit');render();$('#countForm').hidden=false;$('#countTitle').focus();return;}
+        var del=ev.target.closest('[data-count-delete]');if(del&&confirm('删除这个日期？')){simpleSave(key,simpleList(key).filter(function(x){return x.id!==del.getAttribute('data-count-delete');}));editing='';render();toast('日期已删除。');}
+      };
+      body.onsubmit=function(ev){if(ev.target.id!=='countForm')return;ev.preventDefault();var title=$('#countTitle').value.trim(),date=$('#countDate').value;if(!title||!date){toast('名称和日期都要填写。');return;}var list=simpleList(key),item={id:editing||uid(),title:title,date:date,note:$('#countNote').value.trim(),updatedAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=Object.assign({},list[idx],item);else list.push(item);if(simpleSave(key,list)){editing='';render();toast('日期已保存。');}};
+    }
+    render();
+  }
+  function viewMood(){
+    var key=K_MOOD,level=3,labels={1:'低落',2:'疲惫',3:'平静',4:'不错',5:'很好'},query='';
+    function render(){
+      var all=simpleList(key).slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
+      var current=all.find(function(x){return x.date===today();});if(current)level=current.level||3;
+      var shown=all.filter(function(x){return !query||[x.date,x.note,labels[x.level]].join(' ').toLowerCase().indexOf(query.toLowerCase())>=0;});
+      var html='<div class="planner-intro"><p class="lead">不必把情绪解释得很完整。选一个最接近此刻的状态，给今天留个记号。</p><div class="planner-stat"><strong>'+all.length+'</strong><span>条记录</span></div></div>'+
+        '<form class="mood-compose" id="moodForm"><div class="mood-date">'+today()+(current?' · 今天已记录':' · 今天的心情')+'</div><div class="mood-choices">'+[1,2,3,4,5].map(function(n){return '<button type="button" class="mood-choice'+(level===n?' active':'')+'" data-mood-level="'+n+'"><strong>'+n+'</strong><span>'+labels[n]+'</span></button>';}).join('')+'</div><label class="field"><span>想说的话（可选）</span><textarea id="moodNote" rows="3" placeholder="今天是什么感觉？">'+esc(current?current.note:'')+'</textarea></label><button class="ghost solid" type="submit">保存今天</button></form>'+
+        '<div class="diary-tools"><input id="moodSearch" type="search" placeholder="搜索心情记录" value="'+esc(query)+'"></div>'+
+        (shown.length?'<div class="mood-history">'+shown.map(function(x){return '<article class="mood-history-row"><time>'+esc(x.date)+'</time><strong>'+x.level+' · '+labels[x.level]+'</strong><p>'+esc(x.note||'今天没有留下文字。')+'</p><button class="mini danger" type="button" data-mood-delete="'+esc(x.id)+'">删除</button></article>';}).join('')+'</div>':'<div class="blank">还没有心情记录。今天可以从这里开始。</div>');
+      openView('心情','Mood',html);
+      var body=$('#viewBody');
+      body.onclick=function(ev){
+        var choice=ev.target.closest('[data-mood-level]');if(choice){level=Number(choice.getAttribute('data-mood-level'));$('.mood-choice',body).forEach(function(b){b.classList.toggle('active',Number(b.getAttribute('data-mood-level'))===level);});return;}
+        var del=ev.target.closest('[data-mood-delete]');if(del&&confirm('删除这条心情记录？')){simpleSave(key,simpleList(key).filter(function(x){return x.id!==del.getAttribute('data-mood-delete');}));render();toast('记录已删除。');}
+      };
+      body.oninput=function(ev){if(ev.target.id==='moodSearch'){var pos=ev.target.selectionStart;query=ev.target.value;render();var next=$('#moodSearch');next.focus();try{next.setSelectionRange(pos,pos);}catch(_){}}};
+      body.onsubmit=function(ev){if(ev.target.id!=='moodForm')return;ev.preventDefault();var list=simpleList(key),old=list.find(function(x){return x.date===today();}),item={id:old?old.id:uid(),date:today(),level:level,note:$('#moodNote').value.trim(),updatedAt:Date.now()},idx=list.findIndex(function(x){return x.date===today();});if(idx>=0)list[idx]=item;else list.unshift(item);if(simpleSave(key,list)){render();toast('今天的心情收好了。');}};
     }
     render();
   }
@@ -1367,7 +1425,7 @@
         });
       }
       if (ev.target.id === 'cExport'){
-        var data = { v: 5, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []) };
+        var data = { v: 6, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD) };
         var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -1395,6 +1453,8 @@
               if (Array.isArray(obj.calendar)) LS.set(PLANNER_KEYS.calendar, obj.calendar);
               if (Array.isArray(obj.schedule)) LS.set(PLANNER_KEYS.schedule, obj.schedule);
               if (Array.isArray(obj.todo)) LS.set(PLANNER_KEYS.todo, obj.todo);
+              if (Array.isArray(obj.countdown)) LS.set(K_COUNTDOWN, obj.countdown);
+              if (Array.isArray(obj.mood)) LS.set(K_MOOD, obj.mood);
               applyTheme();
               renderAll();
               toast('导进来了。');
