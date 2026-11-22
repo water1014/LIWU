@@ -1,17 +1,59 @@
 /* 里屋 · 一张靠窗的书桌（只拍桌面）
-   不搭房间：没有墙、没有地板、没有书柜。
-   镜头就对着桌面，后面是窗，窗外是天和海，下雨。
-   桌上东西都能点，没有后处理，所以不虚。 */
+   v27：给 three 的加载加了超时，出错会把话说出来，不再无限“正在推开窗”。 */
 
-(async function(){
+(function(){
   'use strict';
+
+  var boot = document.getElementById('boot');
+
+  function fail(msg){
+    if (!boot) return;
+    boot.textContent = msg;
+    boot.style.opacity = '1';
+  }
+  function ok(){
+    if (boot) boot.textContent = '';
+  }
+
+  var CDNS = [
+    'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js',
+    'https://unpkg.com/three@0.160.0/build/three.module.js',
+    'https://esm.sh/three@0.160.0'
+  ];
+
+  function withTimeout(p, ms){
+    return Promise.race([
+      p,
+      new Promise(function(_, reject){ setTimeout(function(){ reject(new Error('timeout')); }, ms); })
+    ]);
+  }
+
+  async function loadThree(){
+    for (var i = 0; i < CDNS.length; i++){
+      try{
+        var lib = await withTimeout(import(CDNS[i]), 6000);
+        if (lib && lib.Scene) return lib;
+      }catch(e){}
+      fail('还在拿 3D 库（' + (i + 1) + '/' + CDNS.length + '）…');
+    }
+    return null;
+  }
+
+  loadThree().then(function(THREE){
+    if (!THREE){ fail('3D 库没下来。网络不通，或者这三个地址都被挡了。底部那排一样能用。'); return; }
+    try{ init(THREE); }
+    catch(e){ fail('场景出错：' + (e && e.message ? e.message : e)); }
+  }).catch(function(e){
+    fail('加载出错：' + (e && e.message ? e.message : e));
+  });
+
+  function init(THREE){
 
   var D = window.LIWU || {};
   var $ = function(s){ return document.querySelector(s); };
   var p2 = function(n){ return n < 10 ? '0' + n : '' + n; };
 
   var canvas = document.getElementById('stage');
-  var boot = document.getElementById('boot');
   var modeBtn = $('#hudMode');
 
   var WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
@@ -75,9 +117,8 @@
   });
 
   var NAV = [['chat', '说话'], ['diary', '日记'], ['album', '相册'], ['memory', '记忆'], ['settings', '设置']];
-  (function(){
-    var dock = document.getElementById('deskDock');
-    if (!dock) return;
+  var dock = document.getElementById('deskDock');
+  if (dock && !dock.childNodes.length){
     for (var i = 0; i < NAV.length; i++){
       (function(it){
         var b = document.createElement('button');
@@ -87,44 +128,11 @@
         dock.appendChild(b);
       })(NAV[i]);
     }
-  })();
+  }
 
   var cfg = {};
   try{ cfg = JSON.parse(localStorage.getItem('liwu.cfg3') || '{}') || {}; }catch(e){}
   var night = cfg.theme === 'night';
-
-  function applyMode(isNight){
-    night = !!isNight;
-    document.body.setAttribute('data-theme', night ? 'night' : 'paper');
-    if (modeBtn) modeBtn.textContent = night ? '预览：夜晚' : '预览：白天';
-    var meta = document.querySelector('meta[name=theme-color]');
-    if (meta) meta.setAttribute('content', night ? '#0E1015' : '#E8E1D3');
-    try{
-      var c = JSON.parse(localStorage.getItem('liwu.cfg3') || '{}') || {};
-      c.theme = night ? 'night' : 'paper';
-      localStorage.setItem('liwu.cfg3', JSON.stringify(c));
-    }catch(e){}
-    if (THREE) syncSky();
-  }
-
-  var CDNS = [
-    'https://unpkg.com/three@0.160.0/build/three.module.js',
-    'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js',
-    'https://esm.sh/three@0.160.0'
-  ];
-  var THREE = null;
-  for (var ci = 0; ci < CDNS.length; ci++){
-    try{
-      var lib = await import(CDNS[ci]);
-      if (lib && lib.Scene){ THREE = lib; break; }
-    }catch(e){}
-  }
-  if (!THREE){
-    if (boot) boot.textContent = '3D 没加载出来。底部那排一样能用。';
-    return;
-  }
-
-  applyMode(night);
 
   var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -152,14 +160,14 @@
   /* ---------- 天色 ---------- */
 
   var KF = [
-    { h: 0,  skyA: 0x0A1220, skyB: 0x1C2740, sea: 0x15233A, sun: 0x35507A, sunI: 0.30, hemi: 0x3D4E68, hemiI: 0.36, desk: 0x3A2E22, light: 0.4 },
-    { h: 5,  skyA: 0x25314A, skyB: 0x6E6A78, sea: 0x2C3A4E, sun: 0xB98A6A, sunI: 0.6,  hemi: 0x6A6A78, hemiI: 0.5,  desk: 0x4A3828, light: 0.5 },
-    { h: 7,  skyA: 0x8FA9C2, skyB: 0xE6D9C6, sea: 0x7E99A8, sun: 0xFFD6A8, sunI: 1.6,  hemi: 0xD9D3C6, hemiI: 0.8,  desk: 0x9A7550, light: 0.6 },
-    { h: 12, skyA: 0xA8C6DB, skyB: 0xF2EADB, sea: 0x9FBCC4, sun: 0xFFF3DC, sunI: 2.4,  hemi: 0xFFF1DC, hemiI: 0.95, desk: 0xB08A5E, light: 0 },
-    { h: 17, skyA: 0xD9B68C, skyB: 0xF6DFBE, sea: 0xB6A88E, sun: 0xFFC98C, sunI: 2.0,  hemi: 0xF2DCC0, hemiI: 0.85, desk: 0xAC8760, light: 0.3 },
-    { h: 19, skyA: 0x5A4A5C, skyB: 0xC08A6E, sea: 0x4A4652, sun: 0xE0956A, sunI: 0.85, hemi: 0x7A6A6A, hemiI: 0.55, desk: 0x6A5038, light: 1.2 },
-    { h: 22, skyA: 0x101828, skyB: 0x24304A, sea: 0x1A2740, sun: 0x3A5478, sunI: 0.34, hemi: 0x3D4E68, hemiI: 0.38, desk: 0x3C3024, light: 1.5 },
-    { h: 24, skyA: 0x0A1220, skyB: 0x1C2740, sea: 0x15233A, sun: 0x35507A, sunI: 0.30, hemi: 0x3D4E68, hemiI: 0.36, desk: 0x3A2E22, light: 0.4 }
+    { h: 0,  skyA: 0x0A1220, skyB: 0x1C2740, sea: 0x15233A, sun: 0x35507A, sunI: 0.34, hemi: 0x3D4E68, hemiI: 0.42, desk: 0x3A2E22, light: 0.5 },
+    { h: 5,  skyA: 0x25314A, skyB: 0x6E6A78, sea: 0x2C3A4E, sun: 0xB98A6A, sunI: 0.65, hemi: 0x6A6A78, hemiI: 0.55, desk: 0x4A3828, light: 0.6 },
+    { h: 7,  skyA: 0x8FA9C2, skyB: 0xE6D9C6, sea: 0x7E99A8, sun: 0xFFD6A8, sunI: 1.7,  hemi: 0xD9D3C6, hemiI: 0.85, desk: 0x9A7550, light: 0.7 },
+    { h: 12, skyA: 0xA8C6DB, skyB: 0xF2EADB, sea: 0x9FBCC4, sun: 0xFFF3DC, sunI: 2.5,  hemi: 0xFFF1DC, hemiI: 1.0,  desk: 0xB08A5E, light: 0 },
+    { h: 17, skyA: 0xD9B68C, skyB: 0xF6DFBE, sea: 0xB6A88E, sun: 0xFFC98C, sunI: 2.1,  hemi: 0xF2DCC0, hemiI: 0.9,  desk: 0xAC8760, light: 0.4 },
+    { h: 19, skyA: 0x5A4A5C, skyB: 0xC08A6E, sea: 0x4A4652, sun: 0xE0956A, sunI: 0.9,  hemi: 0x7A6A6A, hemiI: 0.6,  desk: 0x6A5038, light: 1.3 },
+    { h: 22, skyA: 0x101828, skyB: 0x24304A, sea: 0x1A2740, sun: 0x3A5478, sunI: 0.38, hemi: 0x3D4E68, hemiI: 0.44, desk: 0x3C3024, light: 1.6 },
+    { h: 24, skyA: 0x0A1220, skyB: 0x1C2740, sea: 0x15233A, sun: 0x35507A, sunI: 0.34, hemi: 0x3D4E68, hemiI: 0.42, desk: 0x3A2E22, light: 0.5 }
   ];
 
   function lerpCol(out, h1, h2, t){
@@ -208,7 +216,7 @@
   lampLight.position.set(-0.5, 0.36, 0.22);
   scene.add(lampLight);
 
-  /* ---------- 桌面（就是全部了） ---------- */
+  /* ---------- 桌面 ---------- */
 
   var DW = 1.62, DD = 1.18;
   var deskMat = M(0xB08A5E, 0.88);
@@ -218,13 +226,12 @@
   deskTop.castShadow = true;
   scene.add(deskTop);
 
-  // 桌沿一块稍暗的木板，让边缘不像切出来的
   var edgeMat = M(0x8A6A46, 0.9);
   var edge = new THREE.Mesh(new THREE.BoxGeometry(DW + 0.06, 0.035, 0.06), edgeMat);
   edge.position.set(0, -0.045, DD / 2 + 0.02);
   scene.add(edge);
 
-  /* ---------- 窗外：天、海、沙滩、山、云 ---------- */
+  /* ---------- 窗外 ---------- */
 
   var skyCv = document.createElement('canvas');
   skyCv.width = 16; skyCv.height = 256;
@@ -255,7 +262,7 @@
 
   var sandMat = new THREE.MeshBasicMaterial({ color: 0xDFD2B8 });
   var sand = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 0.35), sandMat);
-  sand.position.set(0, 0.0, SKYZ + 0.02);
+  sand.position.set(0, 0, SKYZ + 0.02);
   scene.add(sand);
 
   var hillMat = new THREE.MeshBasicMaterial({ color: 0x9AA0A0 });
@@ -311,7 +318,6 @@
   sill.receiveShadow = true;
   scene.add(sill);
 
-  // 窗台：一盆小绿植 + 一只杯子
   var pot = new THREE.Mesh(new THREE.CylinderGeometry(0.048, 0.037, 0.066, 14), M(0xB9A183, 0.9));
   pot.position.set(0.46, WY - WH / 2 + 0.02, WZ + 0.08);
   pot.castShadow = true;
@@ -331,7 +337,6 @@
   cupH.rotation.y = Math.PI / 2;
   scene.add(cupH);
 
-  // 窗帘（挂在窗两侧）
   var curtainMat = M(0xF1E7D6, 0.98);
   var curL = new THREE.Mesh(new THREE.PlaneGeometry(0.36, WH + 0.26), curtainMat);
   curL.position.set(-WW / 2 - 0.1, WY + 0.02, WZ + 0.11);
@@ -342,7 +347,7 @@
   curR.castShadow = true;
   scene.add(curR);
 
-  /* ---------- 桌上的东西 ---------- */
+  /* ---------- 桌上东西 ---------- */
 
   var things = [];
   function put(obj, key){
@@ -351,7 +356,6 @@
     things.push(obj);
   }
 
-  // 笔记本 → 日记
   var book = new THREE.Group();
   var bCover = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.015, 0.24), M(0x8A3B2C, 0.85));
   bCover.position.y = 0.008; bCover.castShadow = true;
@@ -366,7 +370,6 @@
   book.rotation.y = 0.18;
   put(book, 'diary');
 
-  // 相框（里面是相册第一张）→ 相册
   var shotImg = null;
   var photoTex = canvasTex(220, 280, function(g, w, h){
     g.fillStyle = '#E4DCCC'; g.fillRect(0, 0, w, h);
@@ -410,7 +413,6 @@
     im.src = firstShot;
   }
 
-  // 收音机 → 说话
   var radio = new THREE.Group();
   var rBody = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.11, 0.13), M(0x7E6A55, 0.75));
   rBody.position.y = 0.055; rBody.castShadow = true;
@@ -426,7 +428,6 @@
   radio.rotation.y = -0.3;
   put(radio, 'chat');
 
-  // 一叠书 → 记忆
   var stack = new THREE.Group();
   var bcols = [0x6E7A5A, 0x8A3B2C, 0x4B5A6B];
   for (var bi = 0; bi < 3; bi++){
@@ -439,7 +440,6 @@
   stack.position.set(-0.58, 0.02, -0.20);
   put(stack, 'memory');
 
-  // 台灯 → 设置
   var lamp = new THREE.Group();
   var lBase = new THREE.Mesh(new THREE.CylinderGeometry(0.068, 0.078, 0.022, 16), M(0x4A3C2E, 0.7));
   lBase.position.y = 0.011; lBase.castShadow = true;
@@ -453,9 +453,8 @@
   lamp.position.set(-0.55, 0.02, 0.26);
   put(lamp, 'settings');
 
-  /* ---------- 瞎想的三样 ---------- */
+  /* ---------- 沙漏、罐子、猫 ---------- */
 
-  // 沙漏
   var hour = new THREE.Group();
   var hGlass = M(0xE8EFF2, 0.3, 0.1);
   var hTop = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.062, 14), hGlass);
@@ -476,7 +475,6 @@
   hour.position.set(0.0, 0.11, -0.34);
   scene.add(hour);
 
-  // 玻璃罐，里面折着纸条
   var jar = new THREE.Group();
   var jarGlass = new THREE.MeshStandardMaterial({ color: 0xEAF1F0, roughness: 0.15, metalness: 0.05, transparent: true, opacity: 0.38 });
   var jarBody = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.058, 0.14, 18, 1, true), jarGlass);
@@ -497,7 +495,6 @@
   jar.position.set(0.54, 0.02, 0.18);
   scene.add(jar);
 
-  // 趴着的小猫
   var cat = new THREE.Group();
   var furM = M(0x8C7B66, 0.98);
   var catBody = new THREE.Mesh(new THREE.SphereGeometry(0.078, 16, 12), furM);
@@ -562,7 +559,7 @@
     render();
   }
 
-  /* ---------- 相机：只对桌面 ---------- */
+  /* ---------- 相机 ---------- */
 
   var center = new THREE.Vector3(0, 0.16, 0.02);
   var radius = 2.45, pitch = 0.63;
@@ -582,6 +579,10 @@
     camLook.copy(center);
   }
 
+  function render(){
+    renderer.render(scene, camera);
+  }
+
   function fit(){
     var w = window.innerWidth, h = window.innerHeight;
     if (!w || !h) return;
@@ -596,48 +597,46 @@
     render();
   }
 
-  var raf = null;
-  function render(){
-    if (raf) return;
-    raf = requestAnimationFrame(function(){ raf = null; renderer.render(scene, camera); });
-  }
-
   var t0 = 0;
   function loop(now){
     requestAnimationFrame(loop);
-    if (!document.body.classList.contains('home')) return;
+
+    var home = document.body.classList.contains('home');
+
     if (!t0) t0 = now || 1;
     var t = ((now || 0) - t0) / 1000;
 
-    curL.rotation.z = Math.sin(t * 0.7) * 0.032;
-    curR.rotation.z = -Math.sin(t * 0.7 + 0.6) * 0.032;
+    if (home){
+      curL.rotation.z = Math.sin(t * 0.7) * 0.032;
+      curR.rotation.z = -Math.sin(t * 0.7 + 0.6) * 0.032;
 
-    for (var i = 0; i < clouds.length; i++){
-      clouds[i].position.x += 0.0014;
-      if (clouds[i].position.x > 2.2) clouds[i].position.x = -2.2;
-    }
+      for (var i = 0; i < clouds.length; i++){
+        clouds[i].position.x += 0.0014;
+        if (clouds[i].position.x > 2.2) clouds[i].position.x = -2.2;
+      }
 
-    if (rainGroup.visible){
-      for (var j = 0; j < drops.length; j++){
-        drops[j].position.y -= 0.024;
-        if (drops[j].position.y < -0.05){
-          drops[j].position.y = 1.9;
-          drops[j].position.x = -1.6 + Math.random() * 3.2;
+      if (rainGroup.visible){
+        for (var j = 0; j < drops.length; j++){
+          drops[j].position.y -= 0.024;
+          if (drops[j].position.y < -0.05){
+            drops[j].position.y = 1.9;
+            drops[j].position.x = -1.6 + Math.random() * 3.2;
+          }
         }
       }
-    }
 
-    var br = 1 + Math.sin(t * 1.4) * 0.012;
-    cat.scale.set(1, br, 1);
+      var br = 1 + Math.sin(t * 1.4) * 0.012;
+      cat.scale.set(1, br, 1);
 
-    if (!pushing){
-      yawNow += (yawT - yawNow) * 0.10;
-      computeCam();
-      camera.position.lerp(camPos, 0.16);
-      camLook.lerp(center, 0.16);
-      camera.lookAt(camLook);
+      if (!pushing){
+        yawNow += (yawT - yawNow) * 0.10;
+        computeCam();
+        camera.position.lerp(camPos, 0.16);
+        camLook.lerp(center, 0.16);
+        camera.lookAt(camLook);
+      }
+      renderer.render(scene, camera);
     }
-    renderer.render(scene, camera);
   }
 
   /* ---------- 拖与点 ---------- */
@@ -655,7 +654,9 @@
   }
 
   canvas.addEventListener('pointerdown', function(ev){
-    downX = ev.clientX; dragging = true;(function(){}); movedFar = false;
+    downX = ev.clientX;
+    dragging = true;
+    movedFar = false;
     try{ canvas.setPointerCapture(ev.pointerId); }catch(e){}
   });
 
@@ -665,7 +666,6 @@
     if (Math.abs(dx) > 5) movedFar = true;
     yawT = Math.max(-0.36, Math.min(0.36, yawT - dx * 0.0016));
     downX = ev.clientX;
-    render();
   });
 
   canvas.addEventListener('pointerup', function(ev){
@@ -705,6 +705,20 @@
     });
   }
 
+  function applyMode(isNight){
+    night = !!isNight;
+    document.body.setAttribute('data-theme', night ? 'night' : 'paper');
+    if (modeBtn) modeBtn.textContent = night ? '预览：夜晚' : '预览：白天';
+    var meta = document.querySelector('meta[name=theme-color]');
+    if (meta) meta.setAttribute('content', night ? '#0E1015' : '#E8E1D3');
+    try{
+      var c = JSON.parse(localStorage.getItem('liwu.cfg3') || '{}') || {};
+      c.theme = night ? 'night' : 'paper';
+      localStorage.setItem('liwu.cfg3', JSON.stringify(c));
+    }catch(e){}
+    syncSky();
+  }
+
   if (modeBtn) modeBtn.addEventListener('click', function(){ applyMode(!night); });
 
   computeCam();
@@ -713,10 +727,12 @@
 
   window.addEventListener('resize', fit);
   fit();
-  syncSky();
+  applyMode(night);
   setInterval(syncSky, 60000);
 
-  setTimeout(function(){ if (boot) boot.textContent = ''; }, 900);
+  ok();
   requestAnimationFrame(loop);
+
+  }
 
 })();
