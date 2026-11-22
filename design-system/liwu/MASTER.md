@@ -13,37 +13,41 @@ Primary product surfaces:
 - Personal rooms: diary, album, memory, settings, and future tools.
 - Navigation: a clear side drawer with visible entries; no bottom tab bar.
 
-The interface should feel calm, intimate, capable, and dependable. Use monochrome surfaces with quiet blue-grey accents. Content and daily use take priority over decoration.
+The interface should feel calm, intimate, capable, and dependable. Content and daily use take priority over decoration.
 
 ## 2. Chosen design direction
 
-Use a deliberate combination of three upstream design ideas, each with a separate job:
+The confirmed material direction is **refined frosted glass**. The overall page layout is intentionally undecided and must be explored before being standardized. Do not treat this material decision as approval for a particular dashboard, card grid, or navigation composition.
+
+Use a deliberate combination of three design ideas, each with a separate job:
 
 1. **Apple Native Experience** for interaction grammar: semantic controls, predictable navigation, adaptive surfaces, system typography, safe areas, and restrained transitions.
-2. **AI-Native UI** for conversation: minimal chrome, readable message flow, clear streaming/loading/stopped/error states, and a composer that remains reachable.
-3. **Soft UI Evolution** for visual finish: subtle surface separation, soft but legible shadows, measured radii, and restrained depth.
+2. **AI-Native UI** for conversation: readable message flow, clear streaming/loading/stopped/error states, and a composer that remains reachable.
+3. **Frosted Glass** for material character: translucent layered surfaces, soft background diffusion, fine edge highlights, controlled reflections, and subtle depth.
 
-Do not combine every visual effect from these styles. Apple-like clarity is the foundation; the soft treatment is a finish, not the structure.
+Glass should feel like a real material rather than a filter placed over the whole screen. Use it where it creates useful depth or separation, while keeping text and controls crisp. Mix glass with clear, quiet surfaces so every page does not become a stack of identical translucent cards.
+
+Explore each room according to its content and purpose. The chat, diary, album, memory, settings, and home may use different compositions. Do not lock the layout system until the user has reviewed alternatives.
 
 ## 3. Visual tokens
 
-Paper is the default and primary theme: a cool near-white canvas (#F7F8FA), white elevated surfaces, soft cool-grey separators, and restrained blue-grey details. Night is optional. Do not use cream, brown, purple-dominant gradients, or generic SaaS indigo.
+A light-first direction is preferred for exploration, but the final palette is not locked. Night remains a required theme. Avoid cream, brown, purple-dominant gradients, and generic SaaS indigo. Explore cool neutral, misty blue-grey, and other restrained color relationships without assuming one is final.
 
 ### Color roles
 
 | Token | Value | Use |
 |---|---|---|
-| Background | #F7F8FA | Main light canvas |
-| Background elevated | #FFFFFF | Sheets, panels, composer |
+| Background | #F7F8FA | Initial cool light canvas reference |
+| Background elevated | #FFFFFF | Clear elevated surfaces |
 | Background muted | #EEF1F5 | Pressed/quiet surfaces |
 | Primary text | #252B34 | Main text and primary actions |
 | Secondary text | #657181 | Supporting text |
 | Tertiary text | #8C97A5 | Metadata only, never essential instructions |
 | Separator | rgba(35,47,63,.10) | Dividers and subtle outlines |
-| Accent | #7B8FA8 | Restrained blue-grey emphasis and selected states |
+| Accent | #7B8FA8 | Initial restrained blue-grey reference |
 | Shadow | rgba(24,37,54,.07) | Low-elevation separation |
 
-Night theme: background #111419, elevated #191E25, muted #242B34, primary text #F1F3F6, secondary #B1BAC5, tertiary #85909D, accent #91A4BC. Preserve the same semantic roles and test contrast independently.
+These values are a starting reference, not a final palette lock. Night theme must preserve the same semantic roles and be checked independently.
 
 ### Typography
 
@@ -54,23 +58,26 @@ Night theme: background #111419, elevated #191E25, muted #242B34, primary text #
 - Secondary labels: 12px minimum where practical. Smaller metadata must never carry essential meaning.
 - Avoid using letter spacing on ordinary Chinese body text.
 
-### Shape, spacing, depth
+### Shape, spacing, depth, and glass
 
 - Use a 4px spacing base; common steps: 4, 8, 12, 16, 20, 24, 32.
-- Controls: 10–14px radius. Larger sheets/panels: 14–18px.
-- Borders are thin and low-contrast; use them to define structure, not decorate every element.
-- Shadows are soft and sparse. Avoid stacked neumorphic shadows.
-- Glass is reserved for small overlays or navigation surfaces when it improves separation. Never put heavy blur over the whole page.
-- Do not use large gradient blobs, neon glows, ornamental noise, or decorative scanlines.
+- Controls: 10–14px radius. Larger surfaces may use a larger radius when the composition calls for it; do not force every component into one card shape.
+- Use thin, low-contrast borders and fine inner highlights to define glass edges.
+- Frosted surfaces may use translucent fills, backdrop blur, restrained saturation, and soft ambient shadows. Tune blur and opacity per surface rather than applying one global setting.
+- Preserve enough contrast behind and within glass. Essential text must remain crisp and readable in both themes.
+- Avoid stacked glass-on-glass panels, thick white outlines, strong reflections, excessive blur, striped textures, neon glow, ornamental noise, and decorative scanlines.
+- Do not blur the entire page as a shortcut. Keep the underlying scene calm and legible; use glass as a material layer with clear hierarchy.
 
 ## 4. Layout and navigation
 
+- Layout direction is open for exploration. Do not assume a bento dashboard, uniform card grid, magazine/editorial page, or virtual-phone shell.
+- Let each room's content determine its composition. The final system may combine distinct page layouts while sharing typography, spacing, glass materials, and interaction rules.
 - Mobile-first; verify at 360–390px widths before wider screens.
 - Respect `env(safe-area-inset-top)` and `env(safe-area-inset-bottom)`.
 - Keep the conversation composer anchored to the bottom safe area. The message list owns the remaining height and must scroll independently.
 - The side drawer remains the primary navigation. Keep feature entries visible and expanded; do not replace it with a bottom bar.
 - A room opens as a distinct full-screen view with a clear back action. Avoid nested panels that make navigation ambiguous.
-- No magazine/editorial grid, dashboard bento wall, or decorative phone mockup shell.
+- No decorative phone mockup shell.
 - No 3D scene or WebGL dependency in the active interface unless the user explicitly asks to revisit 3D.
 
 ## 5. Interaction rules
@@ -94,6 +101,7 @@ Night theme: background #111419, elevated #191E25, muted #242B34, primary text #
 - Streaming must update in place without jumping the page or losing the user's scroll position.
 - The composer stays reachable above the system gesture area and must not cover the final message.
 - Stop, send, attachment, and file actions need clear feedback and adequate hit areas.
+- Glass may be used for the composer or transient controls only when it improves separation and does not reduce typing or message readability.
 
 ## 7. Preservation and scope guardrails
 
@@ -114,6 +122,7 @@ These are hard constraints, not aesthetic suggestions:
 - [ ] Header, drawer, full-screen views, and composer respect safe areas.
 - [ ] No content is hidden behind fixed elements or the keyboard.
 - [ ] Main text contrast is at least 4.5:1 against its surface.
+- [ ] Glass surfaces retain readable contrast in light and night themes.
 - [ ] Touch targets meet the 44px baseline.
 - [ ] Keyboard focus is visible; controls have semantic labels.
 - [ ] Reduced-motion preference is respected.
@@ -128,7 +137,8 @@ For every UI task:
 2. Inspect the current page and its existing behavior before editing.
 3. Identify the smallest component/page scope that solves the request.
 4. Preserve existing features and data contracts.
-5. Implement, then run the quality gate above.
-6. Report exactly what changed and what was not tested.
+5. Explore layout alternatives before standardizing page composition.
+6. Implement, then run the quality gate above.
+7. Report exactly what changed and what was not tested.
 
 Page-specific exceptions belong in `design-system/liwu/pages/<page-name>.md`. They may refine this system but may not silently override preservation constraints.
