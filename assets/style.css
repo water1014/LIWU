@@ -321,7 +321,7 @@ input[type='range']{width:100%;accent-color:var(--seal)}
 }
 .acts{gap:6px}
 .acts button{
-  min-height:40px;padding:6px 8px;
+  min-height:44px;padding:6px 8px;
 }
 :where(button,a,input,textarea,select,[tabindex]):focus-visible{
   outline:2px solid var(--seal);
