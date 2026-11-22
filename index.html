@@ -3,81 +3,285 @@
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1'>
-<meta name='theme-color' content='#F3F0E9'>
+<meta name='theme-color' content='#1A1714'>
 <meta name='description' content='里屋。屋子不大，够两个人住。'>
 <meta name='apple-mobile-web-app-capable' content='yes'>
 <title>里屋</title>
-<link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23F3F0E9%27/%3E%3Crect x=%2715.4%27 y=%278%27 width=%271.2%27 height=%2716%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
+<link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23F6F2E8%27/%3E%3Crect x=%2715.4%27 y=%278%27 width=%271.2%27 height=%2716%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
 <link rel='preconnect' href='https://fonts.googleapis.com'>
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
 <link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@300;400;500&display=swap' rel='stylesheet'>
-<link rel='stylesheet' href='assets/style.css?v=31'>
+<link rel='stylesheet' href='assets/style.css?v=32'>
 <style>
-  :root{
-    --paper:#F3F0E9; --ink:#2C2A26; --mute:#8A857C; --line:#D9D3C6; --red:#8A3B2C;
-  }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{margin:0;padding:0;height:100%}
-  body{
-    background:var(--paper); color:var(--ink);
-    font-family:'Noto Serif SC',serif; font-weight:300;
-    -webkit-font-smoothing:antialiased; overflow:hidden;
-  }
+:root{
+  --paper:#F6F2E8; --ink:#2B2823; --mute:#8B857A; --line:#DAD3C4; --red:#8A3B2C; --pink:#E8B7B7;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:#1A1714; color:var(--ink); overflow:hidden;
+  font-family:'Noto Serif SC',serif; font-weight:300; -webkit-font-smoothing:antialiased;
+}
+body:not(.desk) .stage{display:none}
+body.desk #app,body.desk .view,body.desk .drawer,body.desk .back-gate{display:none}
 
-  /* 门厅 */
-  .gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:32px 26px;overflow-y:auto}
-  body:not(.gate) .gate{display:none}
-  body.gate #app,body.gate .view,tbody.gate .drawer{display:none}
-  .gate-in{width:100%;max-width:340px;text-align:center}
-  .slit{width:1px;height:64px;background:var(--red);opacity:.55;margin:0 auto 22px}
-  .gate h1{
-    font-size:44px;font-weight:400;letter-spacing:.28em;margin:0 0 6px;text-indent:.28em;
-  }
-  .days{font-size:12px;letter-spacing:.1em;color:var(--mute);margin:0 0 4px}
-  .days b{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:20px;font-weight:400;color:var(--ink);margin:0 3px}
-  .line{font-size:13px;color:var(--mute);letter-spacing:.04em;margin:0 0 38px}
+/* ---------- 立体桌子 ---------- */
+.stage{
+  position:fixed; inset:0;
+  perspective:1250px; perspective-origin:50% 42%;
+  overflow:hidden;
+  background:radial-gradient(120% 90% at 50% 0%, #2A241E 0%, #14110E 70%);
+}
+.desk{
+  position:absolute; inset:-7%;
+  transform-style:preserve-3d;
+  transform:rotateX(5deg) rotateZ(-.4deg);
+  transition:transform .55s cubic-bezier(.22,.61,.36,1);
+}
 
-  .doors{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line)}
-  .doors button{
-    display:flex;align-items:baseline;gap:10px;
-    width:100%;padding:14px 2px;border:0;border-bottom:1px solid var(--line);
-    background:none;color:inherit;font-family:inherit;
-    text-align:left;cursor:pointer;
-    transition:transform .3s cubic-bezier(.22,.61,.36,1),opacity .3s;
-  }
-  .doors button:active{transform:scale(.985);opacity:.7}
-  .doors i{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:11px;color:var(--mute);width:16px}
-  .doors span{font-size:16px;letter-spacing:.08em;flex:1}
-  .doors em{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:11px;color:var(--mute);letter-spacing:.06em}
+/* 纸：杂志铺开的那一面 */
+.paper{
+  position:absolute; inset:0;
+  background:
+    repeating-linear-gradient(0deg, rgba(160,148,124,.05) 0 1px, transparent 1px 4px),
+    radial-gradient(140% 100% at 50% 0%, #FBF8F0 0%, #F3EEE2 55%, #EAE3D3 100%);
+  box-shadow:
+    0 40px 90px rgba(0,0,0,.55),
+    0 12px 26px rgba(0,0,0,.35),
+    inset 0 0 70px rgba(168,152,124,.18);
+}
+.paper::after{
+  content:''; position:absolute; inset:0;
+  background:repeating-linear-gradient(92deg, rgba(120,104,80,.035) 0 1px, transparent 1px 7px);
+  pointer-events:none;
+}
 
-  .foot{margin:30px 0 0;font-size:11px;color:var(--mute);letter-spacing:.06em}
+/* 杂志版面（全 DOM 文字，所以永远清楚） */
+.mag{position:absolute; inset:0; padding:26px 22px 30px; display:flex; flex-direction:column}
+.mag-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px}
+.mag-time{font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:300; letter-spacing:.02em; line-height:1}
+.mag-date{font-size:10px; letter-spacing:.14em; color:var(--mute); margin-top:6px}
+.mag-vol{text-align:right; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:11px; color:var(--mute); letter-spacing:.08em}
 
-  /* 回到门厅的小按钮 */
-  .back-gate{
-    position:fixed;left:14px;bottom:14px;z-index:9;
-    padding:7px 13px;border-radius:999px;border:1px solid var(--line);
-    background:rgba(243,240,233,.9);color:var(--mute);font-family:inherit;font-size:12px;
-  }
-  body.gate .back-gate{display:none}
+.masthead{margin:16px 0 0; text-align:center}
+.masthead h1{
+  margin:0; font-size:clamp(34px,10.5vw,48px); font-weight:400; letter-spacing:.3em; text-indent:.3em; line-height:1.1;
+}
+.masthead .en{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:10px; letter-spacing:.24em; color:var(--mute); margin-top:6px}
+.masthead .rule{width:52px; height:1px; background:var(--red); opacity:.6; margin:12px auto 0}
+
+.lede{margin:20px 0 0; text-align:center}
+.lede .big{font-size:20px; letter-spacing:.14em; line-height:1.9}
+.lede .big span{display:block}
+.lede .sub{font-size:11px; color:var(--mute); letter-spacing:.08em; margin-top:8px; font-family:'Cormorant Garamond',serif; font-style:italic}
+
+/* 左栏：备忘 */
+.col-left{position:absolute; left:22px; top:46%; width:44%}
+.col-label{font-size:9px; letter-spacing:.2em; color:var(--mute); border-bottom:1px solid var(--line); padding-bottom:5px; margin-bottom:9px}
+.col-left .row{font-size:10.5px; line-height:1.62; color:#4A453D; margin-bottom:8px; padding-left:11px; position:relative}
+.col-left .row::before{content:'○'; position:absolute; left:0; font-size:8px; color:var(--mute); top:1px}
+
+/* 右栏：专栏 */
+.col-right{position:absolute; right:22px; top:46%; width:36%; text-align:left}
+.col-right .box{margin-bottom:14px}
+.col-right .tag{font-size:8.5px; letter-spacing:.16em; background:var(--ink); color:var(--paper); padding:2px 6px; display:inline-block; margin-bottom:6px}
+.col-right .t{font-size:12px; letter-spacing:.06em; line-height:1.5}
+.col-right .wx{font-family:'Cormorant Garamond',serif; font-size:34px; font-weight:300; line-height:1}
+.col-right .wx small{font-size:11px; letter-spacing:.1em; color:var(--mute); display:block; margin-top:4px; font-family:'Noto Serif SC',serif}
+
+.mag-foot{margin-top:auto; display:flex; align-items:center; justify-content:space-between; gap:10px; border-top:1px solid var(--line); padding-top:9px}
+.mag-foot .l{font-size:9px; letter-spacing:.14em; color:var(--mute)}
+.mag-foot .r{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:10px; color:var(--mute)}
+
+/* ---------- 压在纸上的东西 ---------- */
+.item{
+  position:absolute; transform-style:preserve-3d; cursor:grab; touch-action:none;
+  user-select:none; -webkit-user-select:none;
+  will-change:transform;
+  transition:box-shadow .28s ease, filter .28s ease;
+}
+.item.grabbing{cursor:grabbing; filter:brightness(1.03)}
+
+/* 拍立得 */
+.polaroid{
+  width:31%; padding:5% 5% 0;
+  background:#FFFDF7;
+  box-shadow:0 14px 26px rgba(60,44,26,.34), 0 3px 6px rgba(60,44,26,.22);
+}
+.polaroid .ph{width:100%; padding-top:118%; position:relative; background:#E7DFCE; overflow:hidden}
+.polaroid .ph img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
+.polaroid .ph .empty{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; font-size:9px; line-height:1.7; color:#A79C86; padding:8px}
+.polaroid .cap{padding:7px 0 9px; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:10px; color:#6B6355; text-align:center}
+.tape{
+  position:absolute; width:34%; height:16px; left:33%; top:-8px;
+  background:rgba(232,196,196,.75); box-shadow:0 2px 5px rgba(120,90,80,.2);
+  transform:rotate(-3deg);
+}
+
+/* 便签 */
+.note{
+  width:25%; padding:12px 10px 16px;
+  background:linear-gradient(174deg,#FAEDA8 0%,#F4E28E 100%);
+  box-shadow:0 10px 20px rgba(80,64,30,.3), 0 2px 4px rgba(80,64,30,.18);
+  font-size:10.5px; line-height:1.75; color:#5D5232;
+}
+.note b{display:block; font-weight:400; font-size:10px; letter-spacing:.1em; margin-bottom:4px; color:#6B5D33}
+.note .dot{width:4px; height:4px; border-radius:50%; background:#8A3B2C; opacity:.6; display:inline-block; margin-left:2px}
+
+/* 唱片机 */
+.vinyl{
+  width:40%; padding-top:40%; border-radius:50%;
+  background:radial-gradient(circle at 50% 50%, #2A2A2A 0 16%, #141414 16.5% 100%);
+  box-shadow:0 16px 30px rgba(20,16,10,.55), 0 3px 8px rgba(20,16,10,.4);
+  position:absolute;
+}
+.vinyl .label{
+  position:absolute; left:50%; top:50%; width:26%; height:26%; margin:-13% 0 0 -13%;
+  border-radius:50%; background:radial-gradient(circle at 40% 35%, #B4553C 0%, #8A3B2C 100%);
+  display:flex; align-items:center; justify-content:center;
+  font-size:7.5px; letter-spacing:.1em; color:#F7EFE4; text-align:center; line-height:1.3;
+}
+.vinyl .groove{position:absolute; inset:8%; border-radius:50%; border:1px solid rgba(255,255,255,.07)}
+.vinyl .groove.g2{inset:16%}
+.vinyl .groove.g3{inset:24%}
+.vinyl .hole{position:absolute; left:50%; top:50%; width:4px; height:4px; margin:-2px 0 0 -2px; border-radius:50%; background:#0E0C0A}
+
+/* 工牌 */
+.badge{
+  width:19%; padding:7px 7px 9px; background:#FFFDF8;
+  box-shadow:0 12px 22px rgba(50,40,26,.32), 0 2px 5px rgba(50,40,26,.2);
+  border-radius:4px;
+}
+.badge .pic{width:100%; padding-top:120%; background:#EDE6D6; border-radius:2px; position:relative; overflow:hidden}
+.badge .pic .face{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Cormorant Garamond',serif; font-size:22px; color:#B7AC96}
+.badge .nm{margin-top:7px; font-size:9px; letter-spacing:.12em}
+.badge .en{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:8px; color:var(--mute); margin-top:2px}
+.badge .cord{
+  position:absolute; left:50%; bottom:100%; width:2px; height:34px; margin-left:-1px;
+  background:linear-gradient(#6F7F5A,#8A9A72);
+}
+
+/* 小卡叠（记忆） */
+.cards{width:22%; padding-top:30%; position:absolute}
+.cards .c{
+  position:absolute; inset:0; border-radius:3px;
+  background:#FFFDF7; box-shadow:0 9px 18px rgba(60,44,26,.3);
+}
+.cards .c:nth-child(1){transform:rotate(-5deg) translate(-4px,2px)}
+.cards .c:nth-child(2){transform:rotate(2deg) translate(3px,-3px)}
+.cards .c:nth-child(3){transform:rotate(-1deg); display:flex; flex-direction:column; justify-content:center; padding:9px}
+.cards .c:nth-child(3) .k{font-size:9px; letter-spacing:.1em}
+.cards .c:nth-child(3) .v{font-family:'Cormorant Garamond',serif; font-size:26px; line-height:1; margin-top:4px}
+.cards .c:nth-child(3) .u{font-size:8px; color:var(--mute); letter-spacing:.1em; margin-top:2px}
+
+/* 小东西 */
+.pen{width:34%; height:5px; border-radius:3px; background:linear-gradient(90deg,#3A3630,#5C564C 70%,#C9BFA8); box-shadow:0 6px 12px rgba(20,16,10,.4)}
+.cd{width:15%; padding-top:15%; border-radius:50%; background:conic-gradient(from 20deg,#7FA6C4,#B7C8D6,#6E8FA8,#9FBBCE,#7FA6C4); box-shadow:0 8px 16px rgba(20,16,10,.45)}
+.cd .h{position:absolute; left:50%; top:50%; width:22%; height:22%; margin:-11% 0 0 -11%; border-radius:50%; background:#F3EEE2}
+
+/* 抬头小标签 */
+.hint-tap{
+  position:absolute; left:50%; bottom:3px; transform:translateX(-50%);
+  font-size:9px; letter-spacing:.18em; color:rgba(246,242,232,.4); white-space:nowrap;
+}
+
+/* 回门厅 */
+.back-gate{
+  position:fixed; left:12px; bottom:12px; z-index:9;
+  padding:6px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.18);
+  background:rgba(20,18,15,.72); color:#EFE9DC; font-family:inherit; font-size:11px;
+  transition:transform .28s;
+}
+.back-gate:active{transform:scale(.93)}
+body.desk .back-gate{display:none}
 </style>
 </head>
-<body class='gate'>
+<body class='desk'>
 
-<div class='gate' id='gate'>
-  <div class='gate-in'>
-    <div class='slit'></div>
-    <h1>里屋</h1>
-    <p class='days'>第 <b id='gDays'>—</b> 天</p>
-    <p class='line'>屋子不大，够两个人住。</p>
-    <nav class='doors'>
-      <button type='button' data-go='chat'><i>01</i><span>说话</span><em>say something</em></button>
-      <button type='button' data-go='diary'><i>02</i><span>日记</span><em>diary</em></button>
-      <button type='button' data-go='album'><i>03</i><span>相册</span><em>album</em></button>
-      <button type='button' data-go='memory'><i>04</i><span>记忆</span><em>memory</em></button>
-      <button type='button' data-go='settings'><i>05</i><span>设置</span><em>settings</em></button>
-    </nav>
-    <p class='foot'>先把门立好。一间一间往里搬。</p>
+<div class='stage' id='stage'>
+  <div class='desk' id='desk'>
+    <div class='paper'></div>
+
+    <div class='mag'>
+      <div class='mag-top'>
+        <div>
+          <div class='mag-time' id='magTime'>--:--</div>
+          <div class='mag-date' id='magDate'></div>
+        </div>
+        <div class='mag-vol'>VOL. 01<br>2026 · 11</div>
+      </div>
+
+      <div class='masthead'>
+        <h1>里屋</h1>
+        <div class='en'>A SMALL ROOM, A LONG STAY</div>
+        <div class='rule'></div>
+      </div>
+
+      <div class='lede'>
+        <div class='big'><span>屋子不大</span><span>够两个人住</span></div>
+        <div class='sub'>the room is small, the staying is not</div>
+      </div>
+
+      <div class='col-left'>
+        <div class='col-label'>备忘 NOTES</div>
+        <div class='row'>这不是人设，那就是你</div>
+        <div class='row'>不许编，说了就是真的</div>
+        <div class='row'>不要顺着哄，把话说到底</div>
+      </div>
+
+      <div class='col-right'>
+        <div class='box'>
+          <div class='tag'>今天</div>
+          <div class='wx' id='magWx'>15°<small>小雨 · 湿 65%</small></div>
+        </div>
+        <div class='box'>
+          <div class='tag'>在数</div>
+          <div class='t'>第 <span id='magDays'>—</span> 天</div>
+        </div>
+      </div>
+
+      <div class='mag-foot'>
+        <span class='l'>LIWU · NO.01</span>
+        <span class='r'>— 把这本翻开，就算到家了</span>
+      </div>
+    </div>
+
+    <!-- 压在纸上的东西 -->
+    <div class='item polaroid' data-go='album' data-x='4' data-y='47' data-r='-6' data-z='30'>
+      <span class='tape'></span>
+      <div class='ph' id='polPh'><div class='empty'>把一张图放进<br>images/，它就贴在这</div></div>
+      <div class='cap'>2026 · 我们</div>
+    </div>
+
+    <div class='item note' data-go='diary' data-x='70' data-y='17' data-r='4' data-z='22'>
+      <b>今天想说的话</b>
+      写一句，我记下来。<span class='dot'></span><br>
+      不写的日子也能过，<br>但写了就有得看。
+    </div>
+
+    <div class='item vinyl' data-go='chat' data-x='53' data-y='62' data-r='0' data-z='18'>
+      <div class='groove'></div><div class='groove g2'></div><div class='groove g3'></div>
+      <div class='label'>正在放<br>此刻</div>
+      <div class='hole'></div>
+    </div>
+
+    <div class='item badge' data-go='settings' data-x='26' data-y='79' data-r='-7' data-z='26'>
+      <span class='cord'></span>
+      <div class='pic'><div class='face'>里</div></div>
+      <div class='nm'>里屋 · 住客</div>
+      <div class='en'>room no.01</div>
+    </div>
+
+    <div class='item cards' data-go='memory' data-x='80' data-y='55' data-r='6' data-z='24'>
+      <div class='c'></div><div class='c'></div>
+      <div class='c'><div class='k'>记忆</div><div class='v' id='magMem'>6</div><div class='u'>条</div></div>
+    </div>
+
+    <div class='item pen' data-x='2' data-y='70' data-r='-18' data-z='14'></div>
+    <div class='item cd' data-x='78' data-y='88' data-r='0' data-z='16'><div class='h'></div></div>
+
   </div>
+  <div class='hint-tap'>拖一下它们 · 点一下开门</div>
 </div>
 
 <div id='app'>
@@ -106,7 +310,7 @@
     <input class='search' id='search' placeholder='找一段话' autocomplete='off'>
     <div class='sessions' id='sessions'></div>
     <nav class='drawer-nav'>
-      <button type='button' data-view='home'>回门厅</button>
+      <button type='button' data-view='home'>回桌子</button>
       <button type='button' data-view='diary'>日记</button>
       <button type='button' data-view='album'>相册</button>
       <button type='button' data-view='memory'>记忆</button>
@@ -123,7 +327,7 @@
   <div class='view-body' id='viewBody'></div>
 </section>
 
-<button class='back-gate' id='backGate' type='button'>回门厅</button>
+<button class='back-gate' id='backGate' type='button'>回桌子</button>
 
 <script>
 window.addEventListener('error', function(e){
@@ -131,11 +335,21 @@ window.addEventListener('error', function(e){
   if (h) h.textContent = '出了点问题：' + (e.message || '未知');
 });
 </script>
-<script src='data.js?v=31'></script>
-<script src='assets/app.js?v=31'></script>
+<script src='data.js?v=32'></script>
+<script src='assets/app.js?v=32'></script>
 <script>
 (function(){
   var D = window.LIWU || {};
+  var p2 = function(n){ return n < 10 ? '0' + n : '' + n; };
+  var WEEK = ['周日','周一','周二','周三','周四','周五','周六'];
+
+  function paintClock(){
+    var d = new Date();
+    var t = document.getElementById('magTime'), dt = document.getElementById('magDate');
+    if (t) t.textContent = p2(d.getHours()) + ':' + p2(d.getMinutes());
+    if (dt) dt.textContent = (d.getMonth()+1) + '月' + d.getDate() + '日 · ' + WEEK[d.getDay()];
+  }
+  paintClock(); setInterval(paintClock, 20000);
 
   function days(){
     var s = D.since || localStorage.getItem('liwu.since') || '';
@@ -145,50 +359,122 @@ window.addEventListener('error', function(e){
     var n = Math.floor((Date.now() - t) / 86400000);
     return n >= 0 ? String(n) : '';
   }
-  function paintDays(){
-    var v = days(), g = document.getElementById('gDays');
-    if (g) g.textContent = v || '—';
-    var d = document.querySelectorAll('.days');
-    for (var i = 0; i < d.length; i++) if (d[i].id !== 'gDays') d[i].textContent = v ? v : '';
+  var md = document.getElementById('magDays');
+  if (md) md.textContent = days() || '—';
+  if (window.LIWU && LIWU.weather && LIWU.weather.text){
+    var w = document.getElementById('magWx');
+    if (w) w.innerHTML = (LIWU.weather.temp || '15') + '°<small>' + LIWU.weather.text + '</small>';
   }
-  paintDays();
+  var mm = document.getElementById('magMem');
+  if (mm && D.memory) mm.textContent = D.memory.length;
+  if (D.album && D.album[0] && D.album[0].src){
+    var ph = document.getElementById('polPh');
+    if (ph) ph.innerHTML = '<img src="' + D.album[0].src + '" alt="">';
+  }
 
-  function toGate(){
-    document.body.classList.add('gate');
+  /* ---------- 拖动 ---------- */
+  var items = document.querySelectorAll('.item');
+  var store = {};
+  try{ store = JSON.parse(localStorage.getItem('liwu.desk4') || '{}') || {}; }catch(e){}
+
+  function place(el){
+    var x = el._x, y = el._y, r = el._r, z = el._z;
+    el.style.left = x + '%';
+    el.style.top = y + '%';
+    el.style.transform = 'translateZ(' + z + 'px) rotate(' + r + 'deg)';
+    el.style.zIndex = Math.round(200 - z) + '';
+  }
+
+  for (var i = 0; i < items.length; i++){
+    (function(el){
+      var key = el.getAttribute('data-go') || el.className;
+      var saved = store[key];
+      el._x = saved ? saved.x : parseFloat(el.getAttribute('data-x'));
+      el._y = saved ? saved.y : parseFloat(el.getAttribute('data-y'));
+      el._r = saved ? saved.r : parseFloat(el.getAttribute('data-r') || '0');
+      el._z = parseFloat(el.getAttribute('data-z') || '0');
+      place(el);
+
+      var sx = 0, sy = 0, ox = 0, oy = 0, moved = false, down = false;
+
+      el.addEventListener('pointerdown', function(ev){
+        down = true; moved = false;
+        sx = ev.clientX; sy = ev.clientY; ox = el._x; oy = el._y;
+        el.classList.add('grabbing');
+        el.style.transition = 'none';
+        el.style.transform = 'translateZ(' + (el._z + 26) + 'px) rotate(' + el._r + 'deg) scale(1.04)';
+        el.style.boxShadow = '0 30px 50px rgba(40,30,18,.5), 0 8px 16px rgba(40,30,18,.32)';
+        try{ el.setPointerCapture(ev.pointerId); }catch(e){}
+      });
+
+      el.addEventListener('pointermove', function(ev){
+        if (!down) return;
+        var dx = ev.clientX - sx, dy = ev.clientY - sy;
+        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) moved = true;
+        var dw = document.getElementById('desk').offsetWidth || 1;
+        var dh = document.getElementById('desk').offsetHeight || 1;
+        el._x = ox + (dx / dw) * 100;
+        el._y = oy + (dy / dh) * 100;
+        el._x = Math.max(-6, Math.min(96, el._x));
+        el._y = Math.max(-4, Math.min(94, el._y));
+        el.style.left = el._x + '%';
+        el.style.top = el._y + '%';
+      });
+
+      function up(){
+        if (!down) return;
+        down = false;
+        el.classList.remove('grabbing');
+        el.style.transition = '';
+        el.style.boxShadow = '';
+        place(el);
+        store[key] = { x: el._x, y: el._y, r: el._r };
+        try{ localStorage.setItem('liwu.desk4', JSON.stringify(store)); }catch(e){}
+      }
+      el.addEventListener('pointerup', function(ev){
+        var wasMoved = moved;
+        up();
+        if (wasMoved) return;
+        var go = el.getAttribute('data-go');
+        if (go) open(go);
+      });
+      el.addEventListener('pointercancel', up);
+    })(items[i]);
+  }
+
+  /* ---------- 桌面轻微倾斜（跟着手指） ---------- */
+  var desk = document.getElementById('desk');
+  var stage = document.getElementById('stage');
+  function tilt(cx, cy){
+    var w = window.innerWidth, h = window.innerHeight;
+    var rx = 5 + ((cy / h) - 0.5) * -3;
+    var rz = -0.4 + ((cx / w) - 0.5) * 1.1;
+    desk.style.transform = 'rotateX(' + rx + 'deg) rotateZ(' + rz + 'deg)';
+  }
+  stage.addEventListener('pointermove', function(ev){
+    if (document.body.classList.contains('desk')) tilt(ev.clientX, ev.clientY);
+  });
+
+  /* ---------- 开门 ---------- */
+  function open(key){
+    document.body.classList.remove('desk');
+    if (key === 'chat'){
+      var inp = document.getElementById('input');
+      if (inp) setTimeout(function(){ inp.focus(); }, 200);
+      return;
+    }
+    var b = document.querySelector('.drawer-nav [data-view="' + key + '"]');
+    if (b) setTimeout(function(){ b.click(); }, 40);
+  }
+
+  function toDesk(){
+    document.body.classList.add('desk');
     var v = document.getElementById('view');
     if (v) v.hidden = true;
-    paintDays();
   }
-  function leaveGate(){
-    document.body.classList.remove('gate');
-  }
-
-  var doors = document.querySelectorAll('.doors button');
-  for (var i = 0; i < doors.length; i++){
-    doors[i].addEventListener('click', function(){
-      var key = this.getAttribute('data-go');
-      leaveGate();
-      if (key === 'chat'){
-        var inp = document.getElementById('input');
-        if (inp) setTimeout(function(){ inp.focus(); }, 180);
-        return;
-      }
-      var b = document.querySelector('.drawer-nav [data-view="' + key + '"]');
-      if (b) setTimeout(function(){ b.click(); }, 30);
-    });
-  }
-
-  document.getElementById('backGate').addEventListener('click', toGate);
-
+  document.getElementById('backGate').addEventListener('click', toDesk);
   var homeNav = document.querySelector('.drawer-nav [data-view="home"]');
-  if (homeNav) homeNav.addEventListener('click', function(){ setTimeout(toGate, 20); });
-
-  // 从内页返回：上一级回门厅，再上一级也回门厅（现在只有两层）
-  var vb = document.getElementById('viewBack');
-  if (vb) vb.addEventListener('click', function(){ setTimeout(function(){
-    var v = document.getElementById('view');
-    if (v && v.hidden) toGate();
-  }, 60); });
+  if (homeNav) homeNav.addEventListener('click', function(){ setTimeout(toDesk, 20); });
 
 })();
 </script>
