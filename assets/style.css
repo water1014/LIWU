@@ -1388,12 +1388,12 @@ body[data-theme='night']{
 .home-stat span{color:var(--home-muted)}
 .home-anniversary,.home-surface,.home-chat-link{
   color:var(--home-ink);
-  border-color:var(--home-edge);
+  border-color:color-mix(in srgb,var(--home-edge) var(--glass-edge),transparent);
   background:color-mix(in srgb,var(--home-panel) var(--glass-opacity),transparent);
   -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(135%);
   backdrop-filter:blur(var(--glass-blur)) saturate(135%);
   border-radius:var(--glass-radius);
-  box-shadow:0 14px 36px color-mix(in srgb,var(--home-shadow) calc(var(--glass-shadow)*100%),transparent);
+  box-shadow:0 14px 36px color-mix(in srgb,var(--home-shadow) var(--glass-shadow),transparent);
 }
 .home-anniversary{background:var(--home-panel)}
 .home-surface{background:color-mix(in srgb,var(--home-panel) var(--glass-opacity),transparent)}
@@ -1401,7 +1401,7 @@ body[data-theme='night']{
 .home-round{border-color:var(--home-edge);background:var(--home-panel-strong);color:var(--home-ink)}
 .home-music-foot{border-top-color:var(--home-edge)}
 .home-music-foot button,.home-photo-link{color:var(--home-ink)}
-.home-photo-window{background:var(--home-panel-strong);border-color:var(--home-edge)}
+.home-photo-window{background:var(--home-panel-strong);border-color:color-mix(in srgb,var(--home-edge) var(--glass-edge),transparent)}
 .home-photo-placeholder,.home-photo-placeholder small{color:var(--home-muted)}
 .home-chat-link small,.home-chat-link em,.home-chat-link>b{color:var(--home-muted)}
 .home-section-title,.home-agenda,.home-memory-card,.home-diary-strip{color:var(--home-ink)}
