@@ -78,6 +78,26 @@
   }, LS.get(K_CFG, {}));
   if (!cfg.sys) cfg.sys = DEFAULT_SYS;
 
+  var GLASS_DEFAULTS = {
+    paper: { opacity: 48, blur: 22, edge: 42, shadow: 28, radius: 18 },
+    night: { opacity: 42, blur: 22, edge: 30, shadow: 34, radius: 18 }
+  };
+  cfg.glass = cfg.glass || {};
+  ['paper', 'night'].forEach(function(theme){
+    cfg.glass[theme] = Object.assign({}, GLASS_DEFAULTS[theme], cfg.glass[theme] || {});
+  });
+
+  function glassFor(theme){ return cfg.glass[theme || (cfg.theme === 'night' ? 'night' : 'paper')] || GLASS_DEFAULTS.paper; }
+  function applyGlass(values){
+    var g = values || glassFor();
+    var root = document.documentElement;
+    root.style.setProperty('--glass-opacity', Math.max(10, Math.min(85, Number(g.opacity) || 48)) + '%');
+    root.style.setProperty('--glass-blur', Math.max(0, Math.min(36, Number(g.blur) || 0)) + 'px');
+    root.style.setProperty('--glass-edge', Math.max(0, Math.min(100, Number(g.edge) || 0)) + '%');
+    root.style.setProperty('--glass-shadow', Math.max(0, Math.min(100, Number(g.shadow) || 0)) / 100);
+    root.style.setProperty('--glass-radius', Math.max(0, Math.min(32, Number(g.radius) || 0)) + 'px');
+  }
+
   function saveCfg(){ LS.set(K_CFG, cfg); }
 
   /* ================= 存档 ================= */
@@ -774,6 +794,16 @@
         '<h3>外观</h3>' +
         '<div class="switch"><span>夜间</span><div class="track ' + (cfg.theme === 'night' ? 'on' : '') + '" id="cTheme"></div></div>' +
       '</div>' +
+      '<div class="group material-group">' +
+        '<h3>玻璃材质 · ' + (cfg.theme === 'night' ? '夜间' : '浅色') + '</h3>' +
+        '<div class="material-preview" id="glassPreview"><span>LIWU</span><strong>磨砂玻璃</strong><small>实时材质预览</small></div>' +
+        '<label class="field material-field"><span>透光度 <output id="gOpacityOut"></output></span><input id="gOpacity" type="range" min="10" max="85" step="1" value="' + glassFor().opacity + '"></label>' +
+        '<label class="field material-field"><span>磨砂强度 <output id="gBlurOut"></output></span><input id="gBlur" type="range" min="0" max="36" step="1" value="' + glassFor().blur + '"></label>' +
+        '<label class="field material-field"><span>边缘高光 <output id="gEdgeOut"></output></span><input id="gEdge" type="range" min="0" max="100" step="1" value="' + glassFor().edge + '"></label>' +
+        '<label class="field material-field"><span>悬浮阴影 <output id="gShadowOut"></output></span><input id="gShadow" type="range" min="0" max="100" step="1" value="' + glassFor().shadow + '"></label>' +
+        '<label class="field material-field"><span>圆角 <output id="gRadiusOut"></output></span><input id="gRadius" type="range" min="0" max="32" step="1" value="' + glassFor().radius + '"></label>' +
+        '<div class="row"><button class="ghost" id="gReset" type="button">恢复默认</button><span class="tip">浅色和夜间分别记住。</span></div>' +
+      '</div>' +
       '<div class="group">' +
         '<h3>数据</h3>' +
         '<label class="field"><span>起算日</span><input id="cSince" type="date" value="' + esc(sinceValue()) + '"><em class="sub">屋子里所有天数都算这一个日子。</em></label>' +
@@ -802,6 +832,23 @@
       }
       if (ev.target.id === 'cStream' || ev.target.id === 'cTheme'){
         ev.target.classList.toggle('on');
+        if (ev.target.id === 'cTheme'){
+          var nextTheme = ev.target.classList.contains('on') ? 'night' : 'paper';
+          var nextGlass = glassFor(nextTheme);
+          ['Opacity','Blur','Edge','Shadow','Radius'].forEach(function(key){
+            var id = 'g' + key, el = $('#' + id);
+            if (el) el.value = nextGlass[key.toLowerCase()];
+          });
+          updateGlassPreview();
+        }
+      }
+      if (ev.target.id === 'gReset'){
+        var defaults = GLASS_DEFAULTS[$('#cTheme').classList.contains('on') ? 'night' : 'paper'];
+        ['Opacity','Blur','Edge','Shadow','Radius'].forEach(function(key){
+          var el = $('#g' + key);
+          if (el) el.value = defaults[key.toLowerCase()];
+        });
+        updateGlassPreview();
       }
       if (ev.target.id === 'cSave'){
         cfg.base = $('#cBase').value.trim();
@@ -813,6 +860,8 @@
         cfg.ctx = parseInt($('#cCtx').value, 10) || 24;
         cfg.stream = $('#cStream').classList.contains('on');
         cfg.theme = $('#cTheme').classList.contains('on') ? 'night' : 'paper';
+        cfg.glass = cfg.glass || {};
+        cfg.glass[cfg.theme] = readGlassControls();
         LS.set(K_SINCE, $('#cSince').value || '');
         saveCfg();
         applyTheme();
@@ -882,6 +931,32 @@
       }
     };
 
+    function readGlassControls(){
+      return {
+        opacity: parseInt($('#gOpacity').value, 10),
+        blur: parseInt($('#gBlur').value, 10),
+        edge: parseInt($('#gEdge').value, 10),
+        shadow: parseInt($('#gShadow').value, 10),
+        radius: parseInt($('#gRadius').value, 10)
+      };
+    }
+    function updateGlassPreview(){
+      var g = readGlassControls();
+      applyGlass(g);
+      var labels = { opacity:'%', blur:'px', edge:'%', shadow:'%', radius:'px' };
+      Object.keys(g).forEach(function(key){
+        var out = $('#g' + key.charAt(0).toUpperCase() + key.slice(1) + 'Out');
+        if (out) out.textContent = g[key] + labels[key];
+      });
+      var preview = $('#glassPreview');
+      if (preview) preview.style.setProperty('--preview-blur', g.blur + 'px');
+    }
+    ['gOpacity','gBlur','gEdge','gShadow','gRadius'].forEach(function(id){
+      var el = $('#' + id);
+      if (el) el.addEventListener('input', updateGlassPreview);
+    });
+    updateGlassPreview();
+
     body.oninput = function(ev){
       if (ev.target.id === 'cTemp'){
         var lab = $('#cTempLab');
@@ -892,6 +967,7 @@
 
   function applyTheme(){
     document.body.setAttribute('data-theme', cfg.theme === 'night' ? 'night' : 'paper');
+    applyGlass();
     var m = document.querySelector('meta[name=theme-color]');
     if (m) m.setAttribute('content', cfg.theme === 'night' ? '#111419' : '#F7F8FA');
   }
