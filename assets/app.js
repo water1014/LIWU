@@ -893,7 +893,7 @@
   function applyTheme(){
     document.body.setAttribute('data-theme', cfg.theme === 'night' ? 'night' : 'paper');
     var m = document.querySelector('meta[name=theme-color]');
-    if (m) m.setAttribute('content', cfg.theme === 'night' ? '#16161A' : '#F2F6FD');
+    if (m) m.setAttribute('content', cfg.theme === 'night' ? '#111419' : '#F7F8FA');
   }
 
   /* ================= 启动 ================= */
