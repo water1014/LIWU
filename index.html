@@ -82,18 +82,26 @@
 
 <script>
 (function(){
+  var boot = document.getElementById('boot');
+
   var slow = setTimeout(function(){
-    var b = document.getElementById('boot');
-    if (b && !b.hidden) b.textContent = '网有点慢，3D 还在下载。下面那排先用着。';
+    if (boot && !boot.hidden) boot.textContent = '网有点慢，3D 还在下载。下面那排先用着。';
   }, 7000);
 
   window.addEventListener('error', function(e){
-    var b = document.getElementById('boot');
-    if (b && !b.hidden){
+    if (boot && !boot.hidden){
       clearTimeout(slow);
-      b.textContent = '屋子里出了点问题：' + (e.message || '未知错误') + ' —— 告诉我就行。';
+      boot.textContent = '屋子里出了点问题：' + (e.message || '未知错误') + ' —— 告诉我就行。';
     }
   });
+
+  // 3D 一就绪，就让面板那边把天数牌挂上去
+  var timer = setInterval(function(){
+    if (window.LIWU3D && window.LIWU3D.setDays){
+      clearInterval(timer);
+      window.dispatchEvent(new Event('resize'));
+    }
+  }, 400);
 })();
 </script>
 
