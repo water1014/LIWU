@@ -307,11 +307,7 @@ scene.add(deskEdge);
 desk.receiveShadow = true; desk.castShadow = true;
 scene.add(desk);
 
-const legGeo = new THREE.BoxGeometry(0.08, 0.78, 0.08);
-[[-2.8, 0.39, 0.2], [-0.5, 0.39, 0.2], [-2.8, 0.39, -0.7], [-0.5, 0.39, -0.7]].forEach(p => {
-  const leg = new THREE.Mesh(legGeo, mats.woodDark);
-  leg.position.set(...p); leg.castShadow = true; scene.add(leg);
-});
+/* 桌面作为独立展示平面，不显示桌腿，保持干净构图 */
 
 /* ---- 交互物品 ---- */
 const interactives = [];
@@ -443,9 +439,9 @@ const rainGeo = new THREE.BufferGeometry();
 const rainPos = new Float32Array(rainCount * 3);
 const rainSpeed = new Float32Array(rainCount);
 for (let i = 0; i < rainCount; i++) {
-  rainPos[i * 3] = -3.35 + Math.random() * 1.7;
-  rainPos[i * 3 + 1] = 0.2 + Math.random() * 2.8;
-  rainPos[i * 3 + 2] = -1.1 + Math.random() * 1.7;
+  rainPos[i * 3] = -2.75 + Math.random() * 2.2;
+  rainPos[i * 3 + 1] = 0.95 + Math.random() * 1.5;
+  rainPos[i * 3 + 2] = -1.08;
   rainSpeed[i] = 0.04 + Math.random() * 0.04;
 }
 rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3));
@@ -615,9 +611,9 @@ function animate() {
   for (let i = 0; i < rainCount; i++) {
     positions[i * 3 + 1] -= rainSpeed[i];
     if (positions[i * 3 + 1] < 0) {
-      positions[i * 3 + 1] = 2.8;
-      positions[i * 3] = -3.35 + Math.random() * 1.7;
-      positions[i * 3 + 2] = -1.1 + Math.random() * 1.7;
+      positions[i * 3 + 1] = 2.45;
+      positions[i * 3] = -2.75 + Math.random() * 2.2;
+      positions[i * 3 + 2] = -1.08;
     }
   }
   rainSystem.geometry.attributes.position.needsUpdate = true;
