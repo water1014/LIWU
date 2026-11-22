@@ -20,12 +20,73 @@ main{width:min(100%,1080px);margin:0 auto;padding:30px clamp(22px,5vw,68px) 42px
 @media(max-width:780px){.frame{display:block}.sidebar{position:fixed;left:0;top:0;width:min(292px,84vw);height:100dvh;z-index:12;transform:translateX(-105%);transition:transform .25s ease;padding-top:calc(env(safe-area-inset-top) + 24px);background:rgba(29,31,32,.83)}.sidebar.open{transform:translateX(0)}.scrim.show{display:block;position:fixed;inset:0;z-index:11;background:rgba(0,0,0,.3);backdrop-filter:blur(3px)}main{padding:17px 17px calc(24px + env(safe-area-inset-bottom))}.mobile-menu{display:grid}.wordmark{display:none}.topbar{min-height:42px}.hero{padding:28px 0 15px}.portrait{width:88px;height:88px}.hero h1{font-size:28px}.signature{font-size:12px;margin:12px 0 17px}.stats{gap:43px}.stat strong{font-size:32px}.feature-pair{gap:9px}.music{padding:15px;min-height:206px}.photo-card{padding:10px;min-height:206px}.photo-window{height:156px}.song{font-size:20px}.chat-link{padding:17px 20px}.chat-link h2{font-size:30px}.lower{gap:14px;margin-top:18px}}
 @media(max-width:390px){.feature-pair{grid-template-columns:1fr}.music,.photo-card{min-height:188px}.photo-window{height:140px}.lower{grid-template-columns:1fr}.hero{padding-top:22px}.portrait{width:80px;height:80px}.stats{gap:34px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
+
+/* 第二轮：重做首页内容编排，避免所有内容沿中轴纵向堆叠 */
+.brand{font-family:var(--serif);font-size:29px;font-weight:400;letter-spacing:.16em}
+.brand-sub{font-family:var(--serif);letter-spacing:.04em}
+.nav-label,.side-bottom,.surface-head,.eyebrow,.stat span,.track-time,.tiny-en{font-family:var(--serif);letter-spacing:.08em}
+main{width:min(100%,1160px);padding:28px clamp(26px,4.2vw,58px) 48px}
+.home-grid{display:grid;grid-template-columns:minmax(0,1.04fr) minmax(330px,.96fr);grid-template-rows:auto auto;column-gap:clamp(26px,4vw,54px);align-items:center;margin-top:12px}
+.hero{grid-column:1;grid-row:1;text-align:left;padding:28px 0 8px;display:flex;flex-direction:column;align-items:flex-start}
+.hero .eyebrow{font-size:11px;color:rgba(255,255,255,.72)}
+.portraits{justify-content:flex-start;margin:19px 0 17px 4px}
+.portrait{width:88px;height:88px}
+.portrait + .heart{font-size:22px;margin:0 13px}
+.hero h1{font-size:clamp(27px,3vw,38px);letter-spacing:.08em}
+.hero .translation{display:none}
+.signature{margin:10px 0 20px;font-size:13px}
+.stats{justify-content:flex-start;gap:42px}
+.stat strong{font-size:34px}
+.anniversary{grid-column:1;grid-row:2;justify-content:flex-start;margin:12px 0 28px}
+.date-chip{padding:10px 17px;font-size:11px}
+.feature-pair{grid-column:2;grid-row:1 / span 2;display:flex;flex-direction:column;gap:13px;width:100%;max-width:none;margin:0}
+.music,.photo-card{min-height:0}
+.music{height:205px;padding:19px 21px}
+.photo-card{height:205px;padding:12px}
+.photo-window{height:150px}
+.chat-link{max-width:none;margin:12px 0 0;padding:19px 25px}
+.lower{max-width:none;grid-template-columns:1.1fr .9fr;gap:clamp(24px,4vw,54px);margin:26px 0 0}
+.section-title{font-size:18px}
+.tiny-en{display:none}
+.agenda-row{padding:10px 0}
+.memory blockquote{font-size:13px}
+@media(max-width:780px){
+ main{padding:17px 18px calc(26px + env(safe-area-inset-bottom))}
+ .home-grid{display:flex;flex-direction:column;gap:0;margin-top:4px}
+ .hero{width:100%;align-items:center;text-align:center;padding:24px 0 8px}
+ .hero .eyebrow{font-size:10px}
+ .portraits{justify-content:center;margin:13px 0 13px}
+ .portrait{width:82px;height:82px}
+ .hero h1{font-size:27px}
+ .signature{margin:9px 0 15px}
+ .stats{justify-content:center;gap:42px}
+ .stat strong{font-size:31px}
+ .anniversary{justify-content:center;margin:11px auto 17px}
+ .feature-pair{width:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+ .music{height:190px;padding:14px}
+ .photo-card{height:190px;padding:10px}
+ .photo-window{height:139px}
+ .song{font-size:18px}
+ .lyric{font-size:11px;margin:9px 0}
+ .player-controls{gap:17px;margin-top:8px}
+ .chat-link{margin-top:12px;padding:17px 19px}
+ .lower{margin-top:20px;gap:17px}
+}
+@media(max-width:390px){
+ .feature-pair{grid-template-columns:1fr}
+ .music{height:176px}
+ .photo-card{height:188px}
+ .photo-window{height:138px}
+ .lower{grid-template-columns:1fr;gap:18px}
+ .hero{padding-top:20px}
+}
+
 </style></head>
 <body>
 <div class="scene" id="scene"><img id="wallpaperImg" alt=""></div><div class="scrim" id="scrim"></div>
 <div class="frame">
 <aside class="sidebar" id="sidebar">
-  <div class="brand">里屋</div><div class="brand-sub">LIWU · 两个人的生活空间</div>
+  <div class="brand">里屋</div><div class="brand-sub">两个人的生活空间</div>
   <div class="side-rule"></div><div class="side-couple"><div class="side-pair"><span>我</span><span>祁</span></div><div><b>你与宋祁</b><small>两个人的生活空间</small></div></div>
   <div class="nav-scroll">
     <div class="nav-group"><div class="nav-label">01 · 相伴</div><button class="nav-item active" data-go="聊天"><span class="num">01</span>聊天</button><button class="nav-item" data-go="profile"><span class="num">02</span>伴侣档案</button><button class="nav-item" data-go="notice"><span class="num">03</span>主动消息</button></div>
@@ -39,10 +100,10 @@ main{width:min(100%,1080px);margin:0 auto;padding:30px clamp(22px,5vw,68px) 42px
 </aside>
 <main>
   <div class="topbar"><button class="round mobile-menu" id="menu" aria-label="打开侧栏">☰</button><div class="wordmark">里屋</div><div class="top-actions"><button class="round" id="message" aria-label="消息">✉</button></div></div>
-  <section class="hero">
+  <div class="home-grid"><section class="hero">
     <div class="eyebrow">只属于我们的生活空间</div>
     <div class="portraits"><div class="portrait"><span>我</span></div><span class="heart">♡</span><div class="portrait"><span>祁</span></div></div>
-    <h1>你与宋祁</h1><div class="translation">你和宋祁</div>
+    <h1>你与宋祁</h1>
     <p class="signature">把日子过成我们自己的故事。</p>
     <div class="stats"><div class="stat"><strong>219</strong><span>相伴天数</span></div><div class="stat"><strong>02</strong><span>专属角色</span></div></div>
   </section>
@@ -51,8 +112,8 @@ main{width:min(100%,1080px);margin:0 auto;padding:30px clamp(22px,5vw,68px) 42px
     <article class="surface music"><div class="surface-head"><span>正在播放</span><button class="heart-btn" aria-label="喜欢" id="like">♡</button></div><div class="song">我爱你</div><div class="artist">卢广仲</div><div class="lyric">我爱你你知不知道</div><div class="trackline"></div><div class="track-time"><span>0:00</span><span>0:00</span></div><div class="player-controls"><button aria-label="上一首">Ⅱ◀</button><button class="play" id="play" aria-label="播放或暂停">Ⅱ</button><button aria-label="下一首">▶</button></div></article>
     <article class="surface photo-card"><div class="photo-head"><span class="surface-head">我们的照片</span><button class="heart-btn" id="photoPick" aria-label="选择照片">＋</button><input type="file" accept="image/*" id="photoFile" hidden></div><div class="photo-window" id="photoWindow"><img id="photoImg" alt="自选照片"><div class="photo-placeholder"><strong>留一张照片在这里</strong><small>选择你们自己的照片</small></div></div></article>
   </section>
-  <a href="#chat" class="surface chat-link" id="chat"><div><div class="eyebrow">我们的日常</div><h2>聊天</h2><p>聊天 · 去看看我们正在聊什么</p></div><span class="chat-arrow">↗</span></a>
-  <section class="lower"><article class="agenda"><h3 class="section-title">今天的安排 <span class="tiny-en">今日安排</span></h3><div class="agenda-row"><time>09:30</time><span>留一点时间给自己</span></div><div class="agenda-row"><time>14:00</time><span>完成手边的小事</span></div><div class="agenda-row"><time>20:30</time><span>写下今天的心情</span></div></article><article class="memory"><h3 class="section-title">一段共同记忆 <span class="tiny-en">共同记忆</span></h3><blockquote>“平常的日子，也值得认真收藏。”</blockquote><small>从记忆库继续翻阅　↗</small></article></section>
+  </div><a href="#chat" class="surface chat-link" id="chat"><div><div class="eyebrow">我们的日常</div><h2>聊天</h2><p>聊天 · 去看看我们正在聊什么</p></div><span class="chat-arrow">↗</span></a>
+  <section class="lower"><article class="agenda"><h3 class="section-title">今天的安排</h3><div class="agenda-row"><time>09:30</time><span>留一点时间给自己</span></div><div class="agenda-row"><time>14:00</time><span>完成手边的小事</span></div><div class="agenda-row"><time>20:30</time><span>写下今天的心情</span></div></article><article class="memory"><h3 class="section-title">一段共同记忆</h3><blockquote>“平常的日子，也值得认真收藏。”</blockquote><small>从记忆库继续翻阅　↗</small></article></section>
 </main></div><div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script>
 const $=s=>document.querySelector(s),toast=$('#toast');let timer;function say(s){toast.textContent=s;toast.classList.add('show');clearTimeout(timer);timer=setTimeout(()=>toast.classList.remove('show'),1800)}
