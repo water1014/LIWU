@@ -1,7 +1,7 @@
-/* 里屋 · 靠窗的书桌（自己搭的第二版）
-   新增：书柜、地毯、墙上一张画、窗台杯子、下雨、相框里的照片、便签上的字、
-         以及桌上几样瞎想的：沙漏、玻璃罐（装折起来的纸条）、一只趴着的小猫。
-   没有后处理，所以不虚。天色跟着真实时间。 */
+/* 里屋 · 一张靠窗的书桌（只拍桌面）
+   不搭房间：没有墙、没有地板、没有书柜。
+   镜头就对着桌面，后面是窗，窗外是天和海，下雨。
+   桌上东西都能点，没有后处理，所以不虚。 */
 
 (async function(){
   'use strict';
@@ -106,7 +106,6 @@
     }catch(e){}
     if (THREE) syncSky();
   }
-  applyMode(night);
 
   var CDNS = [
     'https://unpkg.com/three@0.160.0/build/three.module.js',
@@ -125,6 +124,8 @@
     return;
   }
 
+  applyMode(night);
+
   var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(window.innerWidth, window.innerHeight, false);
@@ -133,7 +134,7 @@
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   var scene = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.05, 60);
+  var camera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.05, 40);
 
   function M(c, r, m){
     return new THREE.MeshStandardMaterial({ color: c, roughness: r == null ? 0.92 : r, metalness: m || 0 });
@@ -151,14 +152,14 @@
   /* ---------- 天色 ---------- */
 
   var KF = [
-    { h: 0,  skyA: 0x0A1220, skyB: 0x1C2740, sea: 0x15233A, sun: 0x35507A, sunI: 0.28, hemi: 0x3D4E68, hemiI: 0.34, wall: 0x2A2A32, light: 0.35 },
-    { h: 5,  skyA: 0x25314A, skyB: 0x6E6A78, sea: 0x2C3A4E, sun: 0xB98A6A, sunI: 0.55, hemi: 0x6A6A78, hemiI: 0.5,  wall: 0x494850, light: 0.5 },
-    { h: 7,  skyA: 0x8FA9C2, skyB: 0xE6D9C6, sea: 0x7E99A8, sun: 0xFFD6A8, sunI: 1.5,  hemi: 0xD9D3C6, hemiI: 0.75, wall: 0xE6DFD2, light: 0.6 },
-    { h: 12, skyA: 0xA8C6DB, skyB: 0xF2EADB, sea: 0x9FBCC4, sun: 0xFFF3DC, sunI: 2.3,  hemi: 0xFFF1DC, hemiI: 0.9,  wall: 0xEDE6D8, light: 0 },
-    { h: 17, skyA: 0xD9B68C, skyB: 0xF6DFBE, sea: 0xB6A88E, sun: 0xFFC98C, sunI: 1.9,  hemi: 0xF2DCC0, hemiI: 0.8,  wall: 0xE8DCC6, light: 0.3 },
-    { h: 19, skyA: 0x5A4A5C, skyB: 0xC08A6E, sea: 0x4A4652, sun: 0xE0956A, sunI: 0.8,  hemi: 0x7A6A6A, hemiI: 0.55, wall: 0x6A5E5A, light: 1.1 },
-    { h: 22, skyA: 0x101828, skyB: 0x24304A, sea: 0x1A2740, sun: 0x3A5478, sunI: 0.32, hemi: 0x3D4E68, hemiI: 0.36, wall: 0x2C2C34, light: 1.4 },
-    { h: 24, skyA: 0x0A1220, skyB: 0x1C2740, sea: 0x15233A, sun: 0x35507A, sunI: 0.28, hemi: 0x3D4E68, hemiI: 0.34, wall: 0x2A2A32, light: 0.35 }
+    { h: 0,  skyA: 0x0A1220, skyB: 0x1C2740, sea: 0x15233A, sun: 0x35507A, sunI: 0.30, hemi: 0x3D4E68, hemiI: 0.36, desk: 0x3A2E22, light: 0.4 },
+    { h: 5,  skyA: 0x25314A, skyB: 0x6E6A78, sea: 0x2C3A4E, sun: 0xB98A6A, sunI: 0.6,  hemi: 0x6A6A78, hemiI: 0.5,  desk: 0x4A3828, light: 0.5 },
+    { h: 7,  skyA: 0x8FA9C2, skyB: 0xE6D9C6, sea: 0x7E99A8, sun: 0xFFD6A8, sunI: 1.6,  hemi: 0xD9D3C6, hemiI: 0.8,  desk: 0x9A7550, light: 0.6 },
+    { h: 12, skyA: 0xA8C6DB, skyB: 0xF2EADB, sea: 0x9FBCC4, sun: 0xFFF3DC, sunI: 2.4,  hemi: 0xFFF1DC, hemiI: 0.95, desk: 0xB08A5E, light: 0 },
+    { h: 17, skyA: 0xD9B68C, skyB: 0xF6DFBE, sea: 0xB6A88E, sun: 0xFFC98C, sunI: 2.0,  hemi: 0xF2DCC0, hemiI: 0.85, desk: 0xAC8760, light: 0.3 },
+    { h: 19, skyA: 0x5A4A5C, skyB: 0xC08A6E, sea: 0x4A4652, sun: 0xE0956A, sunI: 0.85, hemi: 0x7A6A6A, hemiI: 0.55, desk: 0x6A5038, light: 1.2 },
+    { h: 22, skyA: 0x101828, skyB: 0x24304A, sea: 0x1A2740, sun: 0x3A5478, sunI: 0.34, hemi: 0x3D4E68, hemiI: 0.38, desk: 0x3C3024, light: 1.5 },
+    { h: 24, skyA: 0x0A1220, skyB: 0x1C2740, sea: 0x15233A, sun: 0x35507A, sunI: 0.30, hemi: 0x3D4E68, hemiI: 0.36, desk: 0x3A2E22, light: 0.4 }
   ];
 
   function lerpCol(out, h1, h2, t){
@@ -175,7 +176,7 @@
     var a = KF[i], b = KF[i + 1];
     var t = (h - a.h) / Math.max(0.0001, b.h - a.h);
     var o = {};
-    ['skyA', 'skyB', 'sea', 'sun', 'hemi', 'wall'].forEach(function(k){
+    ['skyA', 'skyB', 'sea', 'sun', 'hemi', 'desk'].forEach(function(k){
       o[k] = lerpCol(new THREE.Color(), a[k], b[k], t);
     });
     o.sunI = a.sunI + (b.sunI - a.sunI) * t;
@@ -186,67 +187,44 @@
 
   /* ---------- 灯 ---------- */
 
-  var hemi = new THREE.HemisphereLight(0xFFF1DC, 0x8A7F70, 0.9);
+  var hemi = new THREE.HemisphereLight(0xFFF1DC, 0x6A5E50, 0.9);
   scene.add(hemi);
 
   var sun = new THREE.DirectionalLight(0xFFF3DC, 2.2);
-  sun.position.set(0.4, 3.4, -4.2);
+  sun.position.set(0.5, 2.2, -2.6);
   sun.castShadow = true;
   sun.shadow.mapSize.width = 1024;
   sun.shadow.mapSize.height = 1024;
-  sun.shadow.camera.left = -2.8;
-  sun.shadow.camera.right = 2.8;
-  sun.shadow.camera.top = 3.0;
-  sun.shadow.camera.bottom = -1.0;
-  sun.shadow.camera.near = 0.5;
-  sun.shadow.camera.far = 14;
-  sun.shadow.bias = -0.0012;
+  sun.shadow.camera.left = -1.3;
+  sun.shadow.camera.right = 1.3;
+  sun.shadow.camera.top = 1.3;
+  sun.shadow.camera.bottom = -1.3;
+  sun.shadow.camera.near = 0.2;
+  sun.shadow.camera.far = 8;
+  sun.shadow.bias = -0.001;
   scene.add(sun);
 
-  var lampLight = new THREE.PointLight(0xFFC489, 0, 2.6, 2);
-  lampLight.position.set(-0.72, 1.12, -1.0);
+  var lampLight = new THREE.PointLight(0xFFC489, 0, 1.9, 2);
+  lampLight.position.set(-0.5, 0.36, 0.22);
   scene.add(lampLight);
 
-  /* ---------- 房间 ---------- */
+  /* ---------- 桌面（就是全部了） ---------- */
 
-  var RW = 3.8, RD = 3.2, RH = 2.5;
-  var WALLZ = -RD / 2 + 0.1;
+  var DW = 1.62, DD = 1.18;
+  var deskMat = M(0xB08A5E, 0.88);
+  var deskTop = new THREE.Mesh(new THREE.BoxGeometry(DW, 0.05, DD), deskMat);
+  deskTop.position.set(0, -0.025, 0);
+  deskTop.receiveShadow = true;
+  deskTop.castShadow = true;
+  scene.add(deskTop);
 
-  var floorMat = M(0xC6B096, 0.95);
-  var floor = new THREE.Mesh(new THREE.PlaneGeometry(RW, RD), floorMat);
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.set(0, 0, 0.2);
-  floor.receiveShadow = true;
-  scene.add(floor);
+  // 桌沿一块稍暗的木板，让边缘不像切出来的
+  var edgeMat = M(0x8A6A46, 0.9);
+  var edge = new THREE.Mesh(new THREE.BoxGeometry(DW + 0.06, 0.035, 0.06), edgeMat);
+  edge.position.set(0, -0.045, DD / 2 + 0.02);
+  scene.add(edge);
 
-  var wallMat = M(0xEDE6D8, 0.98);
-  var backWall = new THREE.Mesh(new THREE.PlaneGeometry(RW, RH), wallMat);
-  backWall.position.set(0, RH / 2, WALLZ);
-  backWall.receiveShadow = true;
-  scene.add(backWall);
-
-  var sideMat = M(0xE7DFD0, 0.98);
-  var leftWall = new THREE.Mesh(new THREE.PlaneGeometry(RD, RH), sideMat);
-  leftWall.rotation.y = Math.PI / 2;
-  leftWall.position.set(-RW / 2, RH / 2, 0.2);
-  leftWall.receiveShadow = true;
-  scene.add(leftWall);
-
-  var rightWall = new THREE.Mesh(new THREE.PlaneGeometry(RD, RH), sideMat);
-  rightWall.rotation.y = -Math.PI / 2;
-  rightWall.position.set(RW / 2, RH / 2, 0.2);
-  rightWall.receiveShadow = true;
-  scene.add(rightWall);
-
-  // 地毯
-  var rugMat = M(0xA89880, 1);
-  var rug = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.5), rugMat);
-  rug.rotation.x = -Math.PI / 2;
-  rug.position.set(0, 0.004, 0.55);
-  rug.receiveShadow = true;
-  scene.add(rug);
-
-  /* ---------- 窗外的天 ---------- */
+  /* ---------- 窗外：天、海、沙滩、山、云 ---------- */
 
   var skyCv = document.createElement('canvas');
   skyCv.width = 16; skyCv.height = 256;
@@ -263,45 +241,47 @@
     skyTex.needsUpdate = true;
   }
 
+  var SKYZ = -2.05;
+
   var skyMat = new THREE.MeshBasicMaterial({ map: skyTex });
-  var sky = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 2.8), skyMat);
-  sky.position.set(0, 1.45, WALLZ - 0.95);
+  var sky = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 2.6), skyMat);
+  sky.position.set(0, 1.0, SKYZ);
   scene.add(sky);
 
   var seaMat = new THREE.MeshBasicMaterial({ color: 0x9FBCC4 });
-  var sea = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 1.05), seaMat);
-  sea.position.set(0, 0.55, WALLZ - 0.9);
+  var sea = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 0.9), seaMat);
+  sea.position.set(0, 0.42, SKYZ + 0.01);
   scene.add(sea);
 
   var sandMat = new THREE.MeshBasicMaterial({ color: 0xDFD2B8 });
-  var sand = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 0.45), sandMat);
-  sand.position.set(0, 0.02, WALLZ - 0.88);
+  var sand = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 0.35), sandMat);
+  sand.position.set(0, 0.0, SKYZ + 0.02);
   scene.add(sand);
 
   var hillMat = new THREE.MeshBasicMaterial({ color: 0x9AA0A0 });
-  var hill = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 0.16), hillMat);
-  hill.position.set(0, 1.02, WALLZ - 0.92);
+  var hill = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 0.13), hillMat);
+  hill.position.set(0, 0.82, SKYZ + 0.015);
   scene.add(hill);
 
   var cloudMat = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, transparent: true, opacity: 0.5 });
   var clouds = [];
   for (var c2 = 0; c2 < 4; c2++){
     var cl = new THREE.Mesh(new THREE.CircleGeometry(0.2, 14), cloudMat);
-    cl.position.set(-1.7 + c2 * 1.15, 2.12 - (c2 % 2) * 0.15, WALLZ - 0.98);
-    cl.scale.set(2.4, 0.7, 1);
+    cl.position.set(-1.6 + c2 * 1.05, 1.55 - (c2 % 2) * 0.12, SKYZ + 0.02);
+    cl.scale.set(2.2, 0.65, 1);
     scene.add(cl);
     clouds.push(cl);
   }
 
-  /* ---------- 雨（窗外） ---------- */
+  /* ---------- 雨 ---------- */
 
-  var rainMat = new THREE.MeshBasicMaterial({ color: 0xC8D8E4, transparent: true, opacity: 0.42 });
+  var rainMat = new THREE.MeshBasicMaterial({ color: 0xC8D8E4, transparent: true, opacity: 0.4 });
   var rainGroup = new THREE.Group();
   var drops = [];
-  for (var ri = 0; ri < 46; ri++){
-    var dp = new THREE.Mesh(new THREE.PlaneGeometry(0.006, 0.14), rainMat);
-    dp.position.set(-1.8 + Math.random() * 3.6, 0.4 + Math.random() * 1.9, WALLZ - 0.6 - Math.random() * 0.3);
-    dp.rotation.z = 0.12;
+  for (var ri = 0; ri < 44; ri++){
+    var dp = new THREE.Mesh(new THREE.PlaneGeometry(0.006, 0.13), rainMat);
+    dp.position.set(-1.6 + Math.random() * 3.2, 0.3 + Math.random() * 1.7, SKYZ + 0.1 + Math.random() * 0.25);
+    dp.rotation.z = 0.11;
     rainGroup.add(dp);
     drops.push(dp);
   }
@@ -309,127 +289,58 @@
 
   /* ---------- 窗 ---------- */
 
-  var WY = 1.45, WW = 1.7, WH = 1.15;
+  var WZ = -0.60;
+  var WY = 0.78, WW = 1.26, WH = 0.92;
   var frameMat = M(0xF7F3EA, 0.9);
-  var fz = WALLZ + 0.012;
 
   function bar(w, h, x, y, z){
-    var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.05), frameMat);
+    var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.045), frameMat);
     m.position.set(x, y, z);
     m.castShadow = true;
     scene.add(m);
   }
-  bar(WW + 0.16, 0.08, 0, WY + WH / 2, fz);
-  bar(WW + 0.16, 0.08, 0, WY - WH / 2, fz);
-  bar(0.08, WH, -WW / 2, WY, fz);
-  bar(0.08, WH, WW / 2, WY, fz);
-  bar(0.05, WH, 0, WY, fz);
+  bar(WW + 0.12, 0.06, 0, WY + WH / 2, WZ);
+  bar(WW + 0.12, 0.06, 0, WY - WH / 2, WZ);
+  bar(0.06, WH, -WW / 2, WY, WZ);
+  bar(0.06, WH, WW / 2, WY, WZ);
+  bar(0.035, WH, 0, WY, WZ);
 
-  var sill = new THREE.Mesh(new THREE.BoxGeometry(WW + 0.3, 0.06, 0.22), M(0xF2EDE2, 0.9));
-  sill.position.set(0, WY - WH / 2 - 0.04, fz + 0.1);
+  var sill = new THREE.Mesh(new THREE.BoxGeometry(WW + 0.22, 0.05, 0.18), M(0xF2EDE2, 0.9));
+  sill.position.set(0, WY - WH / 2 - 0.03, WZ + 0.08);
   sill.castShadow = true;
   sill.receiveShadow = true;
   scene.add(sill);
 
   // 窗台：一盆小绿植 + 一只杯子
-  var pot = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.04, 0.072, 14), M(0xB9A183, 0.9));
-  pot.position.set(0.62, WY - WH / 2 + 0.0, fz + 0.1);
+  var pot = new THREE.Mesh(new THREE.CylinderGeometry(0.048, 0.037, 0.066, 14), M(0xB9A183, 0.9));
+  pot.position.set(0.46, WY - WH / 2 + 0.02, WZ + 0.08);
   pot.castShadow = true;
   scene.add(pot);
-  var leaf = new THREE.Mesh(new THREE.SphereGeometry(0.062, 12, 10), M(0x6F7F5A, 0.95));
-  leaf.position.set(0.62, WY - WH / 2 + 0.098, fz + 0.1);
-  leaf.scale.set(1, 1.3, 1);
+  var leaf = new THREE.Mesh(new THREE.SphereGeometry(0.056, 12, 10), M(0x6F7F5A, 0.95));
+  leaf.position.set(0.46, WY - WH / 2 + 0.11, WZ + 0.08);
+  leaf.scale.set(1, 1.25, 1);
   leaf.castShadow = true;
   scene.add(leaf);
 
-  var cup = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.036, 0.085, 16), M(0xF4F0E6, 0.6));
-  cup.position.set(-0.55, WY - WH / 2 + 0.045, fz + 0.1);
+  var cup = new THREE.Mesh(new THREE.CylinderGeometry(0.038, 0.032, 0.078, 16), M(0xF4F0E6, 0.6));
+  cup.position.set(-0.42, WY - WH / 2 + 0.055, WZ + 0.08);
   cup.castShadow = true;
   scene.add(cup);
-  var cupH = new THREE.Mesh(new THREE.TorusGeometry(0.028, 0.007, 8, 14), M(0xF4F0E6, 0.6));
-  cupH.position.set(-0.508, WY - WH / 2 + 0.05, fz + 0.1);
+  var cupH = new THREE.Mesh(new THREE.TorusGeometry(0.025, 0.006, 8, 14), M(0xF4F0E6, 0.6));
+  cupH.position.set(-0.385, WY - WH / 2 + 0.06, WZ + 0.08);
   cupH.rotation.y = Math.PI / 2;
   scene.add(cupH);
 
-  // 窗帘
+  // 窗帘（挂在窗两侧）
   var curtainMat = M(0xF1E7D6, 0.98);
-  var curL = new THREE.Mesh(new THREE.PlaneGeometry(0.42, WH + 0.3), curtainMat);
-  curL.position.set(-WW / 2 - 0.12, WY + 0.02, fz + 0.14);
+  var curL = new THREE.Mesh(new THREE.PlaneGeometry(0.36, WH + 0.26), curtainMat);
+  curL.position.set(-WW / 2 - 0.1, WY + 0.02, WZ + 0.11);
   curL.castShadow = true;
   scene.add(curL);
-  var curR = new THREE.Mesh(new THREE.PlaneGeometry(0.42, WH + 0.3), curtainMat);
-  curR.position.set(WW / 2 + 0.12, WY + 0.02, fz + 0.14);
+  var curR = new THREE.Mesh(new THREE.PlaneGeometry(0.36, WH + 0.26), curtainMat);
+  curR.position.set(WW / 2 + 0.1, WY + 0.02, WZ + 0.11);
   curR.castShadow = true;
   scene.add(curR);
-
-  /* ---------- 墙上一张画 ---------- */
-
-  var artTex = canvasTex(256, 192, function(g, w, h){
-    g.fillStyle = '#F6F1E4'; g.fillRect(0, 0, w, h);
-    g.fillStyle = '#9FB6C0'; g.fillRect(0, h * 0.55, w, h * 0.45);
-    g.fillStyle = '#D9C7A8'; g.fillRect(0, h * 0.82, w, h * 0.18);
-    g.fillStyle = '#E8B87C';
-    g.beginPath(); g.arc(w * 0.72, h * 0.42, 22, 0, Math.PI * 2); g.fill();
-    g.strokeStyle = 'rgba(60,50,40,.35)'; g.lineWidth = 2;
-    g.strokeRect(1, 1, w - 2, h - 2);
-  });
-  var art = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.32), new THREE.MeshStandardMaterial({ map: artTex.t, roughness: 0.95 }));
-  art.position.set(-1.24, 1.72, WALLZ + 0.02);
-  scene.add(art);
-  var artFrame = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.36, 0.02), M(0x6B4E36, 0.85));
-  artFrame.position.set(-1.24, 1.72, WALLZ + 0.005);
-  artFrame.castShadow = true;
-  scene.add(artFrame);
-
-  /* ---------- 书柜（靠右墙） ---------- */
-
-  var shelfMat = M(0xA9814F, 0.9);
-  var shelf = new THREE.Group();
-  var shW = 0.28, shH = 1.15, shD = 0.95;
-  var shX = RW / 2 - 0.2, shZ = WALLZ + 1.0;
-
-  function shBox(w, h, d, x, y, z){
-    var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), shelfMat);
-    m.position.set(x, y, z);
-    m.castShadow = true; m.receiveShadow = true;
-    shelf.add(m);
-  }
-  shBox(shW, shH, 0.04, shX, shH / 2, shZ - shD / 2);
-  shBox(shW, shH, 0.04, shX, shH / 2, shZ + shD / 2);
-  shBox(0.03, shH, shD, shX + shW / 2, shH / 2, shZ);
-  [0.04, 0.42, 0.8, shH - 0.02].forEach(function(y){
-    shBox(shW, 0.03, shD, shX, y, shZ);
-  });
-
-  var bcols2 = [0x8A3B2C, 0x4B5A6B, 0x6E7A5A, 0xA9814F, 0x7A6A5A];
-  for (var si = 0; si < 12; si++){
-    var bh2 = 0.16 + Math.random() * 0.08;
-    var b2 = new THREE.Mesh(new THREE.BoxGeometry(0.19, bh2, 0.035 + Math.random() * 0.02), M(bcols2[si % bcols2.length], 0.9));
-    var layer2 = Math.floor(si / 4);
-    var by2 = [0.04, 0.42, 0.8][Math.min(layer2, 2)] + bh2 / 2 + 0.02;
-    b2.position.set(shX, by2, shZ - 0.38 + (si % 4) * 0.24);
-    b2.castShadow = true;
-    shelf.add(b2);
-  }
-  scene.add(shelf);
-
-  /* ---------- 书桌 ---------- */
-
-  var DW = 1.8, DD = 0.78, DH = 0.74;
-  var dz = WALLZ + 0.5;
-
-  var deskTop = new THREE.Mesh(new THREE.BoxGeometry(DW, 0.06, DD), M(0xB08A5E, 0.85));
-  deskTop.position.set(0, DH, dz);
-  deskTop.castShadow = true;
-  deskTop.receiveShadow = true;
-  scene.add(deskTop);
-
-  [[-1, -1], [-1, 1], [1, -1], [1, 1]].forEach(function(p){
-    var lg = new THREE.Mesh(new THREE.BoxGeometry(0.07, DH, 0.07), M(0x8A6A46, 0.9));
-    lg.position.set(p[0] * (DW / 2 - 0.08), DH / 2, dz + p[1] * (DD / 2 - 0.07));
-    lg.castShadow = true;
-    scene.add(lg);
-  });
 
   /* ---------- 桌上的东西 ---------- */
 
@@ -442,20 +353,20 @@
 
   // 笔记本 → 日记
   var book = new THREE.Group();
-  var bCover = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.016, 0.26), M(0x8A3B2C, 0.85));
-  bCover.position.y = 0.01; bCover.castShadow = true;
+  var bCover = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.015, 0.24), M(0x8A3B2C, 0.85));
+  bCover.position.y = 0.008; bCover.castShadow = true;
   book.add(bCover);
-  var pgL = new THREE.Mesh(new THREE.BoxGeometry(0.155, 0.012, 0.24), M(0xF7F3E8, 0.96));
-  pgL.position.set(-0.082, 0.023, 0); pgL.rotation.z = 0.035; pgL.castShadow = true;
+  var pgL = new THREE.Mesh(new THREE.BoxGeometry(0.145, 0.011, 0.22), M(0xF7F3E8, 0.96));
+  pgL.position.set(-0.077, 0.02, 0); pgL.rotation.z = 0.035; pgL.castShadow = true;
   book.add(pgL);
-  var pgR = new THREE.Mesh(new THREE.BoxGeometry(0.155, 0.012, 0.24), M(0xF7F3E8, 0.96));
-  pgR.position.set(0.082, 0.023, 0); pgR.rotation.z = -0.035; pgR.castShadow = true;
+  var pgR = new THREE.Mesh(new THREE.BoxGeometry(0.145, 0.011, 0.22), M(0xF7F3E8, 0.96));
+  pgR.position.set(0.077, 0.02, 0); pgR.rotation.z = -0.035; pgR.castShadow = true;
   book.add(pgR);
-  book.position.set(-0.5, DH + 0.03, dz + 0.1);
-  book.rotation.y = 0.2;
+  book.position.set(-0.33, 0.02, 0.14);
+  book.rotation.y = 0.18;
   put(book, 'diary');
 
-  // 相框（里面放照片）→ 相册
+  // 相框（里面是相册第一张）→ 相册
   var shotImg = null;
   var photoTex = canvasTex(220, 280, function(g, w, h){
     g.fillStyle = '#E4DCCC'; g.fillRect(0, 0, w, h);
@@ -478,18 +389,18 @@
     photoTex.t.needsUpdate = true;
   }
   var photo = new THREE.Group();
-  var pFrame = new THREE.Mesh(new THREE.BoxGeometry(0.27, 0.33, 0.02), M(0x6B4E36, 0.85));
+  var pFrame = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.30, 0.018), M(0x6B4E36, 0.85));
   pFrame.castShadow = true;
   photo.add(pFrame);
-  var pCard = new THREE.Mesh(new THREE.PlaneGeometry(0.215, 0.275), new THREE.MeshStandardMaterial({ map: photoTex.t, roughness: 0.95 }));
-  pCard.position.z = 0.012;
+  var pCard = new THREE.Mesh(new THREE.PlaneGeometry(0.195, 0.25), new THREE.MeshStandardMaterial({ map: photoTex.t, roughness: 0.95 }));
+  pCard.position.z = 0.011;
   photo.add(pCard);
-  var pLeg = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.17, 0.01), M(0x6B4E36, 0.9));
-  pLeg.position.set(0, -0.07, -0.08);
+  var pLeg = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.15, 0.01), M(0x6B4E36, 0.9));
+  pLeg.position.set(0, -0.065, -0.07);
   pLeg.rotation.x = 0.3;
   photo.add(pLeg);
-  photo.position.set(0.58, DH + 0.18, dz - 0.16);
-  photo.rotation.y = -0.2;
+  photo.position.set(0.34, 0.155, -0.12);
+  photo.rotation.y = -0.22;
   put(photo, 'album');
 
   var firstShot = (D.album && D.album[0] && D.album[0].src) || '';
@@ -501,119 +412,115 @@
 
   // 收音机 → 说话
   var radio = new THREE.Group();
-  var rBody = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.13, 0.15), M(0x7E6A55, 0.75));
-  rBody.position.y = 0.065; rBody.castShadow = true;
+  var rBody = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.11, 0.13), M(0x7E6A55, 0.75));
+  rBody.position.y = 0.055; rBody.castShadow = true;
   radio.add(rBody);
-  var rFace = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.055, 0.012), M(0x4A3C2E, 0.7));
-  rFace.position.set(-0.02, 0.075, 0.078);
+  var rFace = new THREE.Mesh(new THREE.BoxGeometry(0.155, 0.048, 0.01), M(0x4A3C2E, 0.7));
+  rFace.position.set(-0.018, 0.065, 0.068);
   radio.add(rFace);
-  var rKnob = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.018, 12), M(0xC9A66B, 0.5));
+  var rKnob = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.016, 12), M(0xC9A66B, 0.5));
   rKnob.rotation.x = Math.PI / 2;
-  rKnob.position.set(0.09, 0.065, 0.08);
+  rKnob.position.set(0.078, 0.055, 0.07);
   radio.add(rKnob);
-  radio.position.set(0.24, DH + 0.03, dz + 0.2);
-  radio.rotation.y = -0.32;
+  radio.position.set(0.14, 0.02, 0.30);
+  radio.rotation.y = -0.3;
   put(radio, 'chat');
 
   // 一叠书 → 记忆
   var stack = new THREE.Group();
   var bcols = [0x6E7A5A, 0x8A3B2C, 0x4B5A6B];
   for (var bi = 0; bi < 3; bi++){
-    var bk = new THREE.Mesh(new THREE.BoxGeometry(0.25 - bi * 0.018, 0.034, 0.18 - bi * 0.012), M(bcols[bi], 0.9));
-    bk.position.y = 0.017 + bi * 0.036;
+    var bk = new THREE.Mesh(new THREE.BoxGeometry(0.23 - bi * 0.016, 0.03, 0.17 - bi * 0.011), M(bcols[bi], 0.9));
+    bk.position.y = 0.015 + bi * 0.032;
     bk.rotation.y = 0.07 * (bi + 1);
     bk.castShadow = true;
     stack.add(bk);
   }
-  stack.position.set(-0.74, DH + 0.03, dz - 0.12);
+  stack.position.set(-0.58, 0.02, -0.20);
   put(stack, 'memory');
 
   // 台灯 → 设置
   var lamp = new THREE.Group();
-  var lBase = new THREE.Mesh(new THREE.CylinderGeometry(0.075, 0.085, 0.024, 16), M(0x4A3C2E, 0.7));
-  lBase.position.y = 0.012; lBase.castShadow = true;
+  var lBase = new THREE.Mesh(new THREE.CylinderGeometry(0.068, 0.078, 0.022, 16), M(0x4A3C2E, 0.7));
+  lBase.position.y = 0.011; lBase.castShadow = true;
   lamp.add(lBase);
-  var lStem = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.36, 10), M(0x6B5A45, 0.6));
-  lStem.position.y = 0.2;
+  var lStem = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.32, 10), M(0x6B5A45, 0.6));
+  lStem.position.y = 0.17;
   lamp.add(lStem);
-  var lShade = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.06, 0.11, 18, 1, true), M(0xE8DCC4, 0.85));
-  lShade.position.y = 0.4;
+  var lShade = new THREE.Mesh(new THREE.CylinderGeometry(0.088, 0.052, 0.10, 18, 1, true), M(0xE8DCC4, 0.85));
+  lShade.position.y = 0.35;
   lamp.add(lShade);
-  lamp.position.set(-0.78, DH + 0.03, dz + 0.22);
+  lamp.position.set(-0.55, 0.02, 0.26);
   put(lamp, 'settings');
 
-  /* ---------- 瞎想的几样 ---------- */
+  /* ---------- 瞎想的三样 ---------- */
 
   // 沙漏
   var hour = new THREE.Group();
   var hGlass = M(0xE8EFF2, 0.3, 0.1);
-  var hTop = new THREE.Mesh(new THREE.ConeGeometry(0.045, 0.07, 14), hGlass);
-  hTop.position.y = 0.055;
-  hTop.castShadow = true;
+  var hTop = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.062, 14), hGlass);
+  hTop.position.y = 0.05; hTop.castShadow = true;
   hour.add(hTop);
-  var hBot = new THREE.Mesh(new THREE.ConeGeometry(0.045, 0.07, 14), hGlass);
-  hBot.position.y = -0.015;
-  hBot.rotation.z = Math.PI;
-  hBot.castShadow = true;
+  var hBot = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.062, 14), hGlass);
+  hBot.position.y = -0.014; hBot.rotation.z = Math.PI; hBot.castShadow = true;
   hour.add(hBot);
-  var hSand = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.04, 12), M(0xD8B87A, 0.95));
-  hSand.position.y = -0.028;
+  var hSand = new THREE.Mesh(new THREE.ConeGeometry(0.027, 0.036, 12), M(0xD8B87A, 0.95));
+  hSand.position.y = -0.025;
   hour.add(hSand);
-  var hBase1 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.008, 14), M(0x6B4E36, 0.85));
-  hBase1.position.y = 0.093;
-  hour.add(hBase1);
-  var hBase2 = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.008, 14), M(0x6B4E36, 0.85));
-  hBase2.position.y = -0.053;
-  hour.add(hBase2);
-  hour.position.set(0.04, DH + 0.11, dz + 0.26);
+  var hB1 = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.007, 14), M(0x6B4E36, 0.85));
+  hB1.position.y = 0.084;
+  hour.add(hB1);
+  var hB2 = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.007, 14), M(0x6B4E36, 0.85));
+  hB2.position.y = -0.048;
+  hour.add(hB2);
+  hour.position.set(0.0, 0.11, -0.34);
   scene.add(hour);
 
-  // 玻璃罐，里面塞着折起来的纸条（记忆的另一种装法）
+  // 玻璃罐，里面折着纸条
   var jar = new THREE.Group();
   var jarGlass = new THREE.MeshStandardMaterial({ color: 0xEAF1F0, roughness: 0.15, metalness: 0.05, transparent: true, opacity: 0.38 });
-  var jarBody = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.065, 0.16, 18, 1, true), jarGlass);
-  jarBody.position.y = 0.08;
+  var jarBody = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.058, 0.14, 18, 1, true), jarGlass);
+  jarBody.position.y = 0.07;
   jar.add(jarBody);
-  var jarBottom = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.006, 18), jarGlass);
+  var jarBottom = new THREE.Mesh(new THREE.CylinderGeometry(0.058, 0.058, 0.006, 18), jarGlass);
   jarBottom.position.y = 0.003;
   jar.add(jarBottom);
-  var jarLid = new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.072, 0.014, 18), M(0x8A6A46, 0.8));
-  jarLid.position.y = 0.163;
-  jarLid.castShadow = true;
+  var jarLid = new THREE.Mesh(new THREE.CylinderGeometry(0.064, 0.064, 0.013, 18), M(0x8A6A46, 0.8));
+  jarLid.position.y = 0.143; jarLid.castShadow = true;
   jar.add(jarLid);
   for (var ni = 0; ni < 5; ni++){
-    var note = new THREE.Mesh(new THREE.BoxGeometry(0.032, 0.026, 0.032), M(ni % 2 ? 0xF6E8B8 : 0xF0E2D2, 0.95));
-    note.position.set(-0.02 + Math.random() * 0.04, 0.02 + ni * 0.024, -0.02 + Math.random() * 0.04);
+    var note = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.024, 0.03), M(ni % 2 ? 0xF6E8B8 : 0xF0E2D2, 0.95));
+    note.position.set(-0.018 + Math.random() * 0.036, 0.018 + ni * 0.021, -0.018 + Math.random() * 0.036);
     note.rotation.set(Math.random(), Math.random(), Math.random());
     jar.add(note);
   }
-  jar.position.set(0.42, DH + 0.03, dz + 0.26);
+  jar.position.set(0.54, 0.02, 0.18);
   scene.add(jar);
 
   // 趴着的小猫
   var cat = new THREE.Group();
   var furM = M(0x8C7B66, 0.98);
-  var catBody = new THREE.Mesh(new THREE.SphereGeometry(0.085, 16, 12), furM);
-  catBody.scale.set(1.7, 0.78, 1.0);
+  var catBody = new THREE.Mesh(new THREE.SphereGeometry(0.078, 16, 12), furM);
+  catBody.scale.set(1.7, 0.75, 1.0);
   catBody.castShadow = true;
   cat.add(catBody);
-  var catHead = new THREE.Mesh(new THREE.SphereGeometry(0.058, 16, 12), furM);
-  catHead.position.set(0.13, 0.03, 0);
+  var catHead = new THREE.Mesh(new THREE.SphereGeometry(0.052, 16, 12), furM);
+  catHead.position.set(0.12, 0.026, 0);
   catHead.castShadow = true;
   cat.add(catHead);
-  var earL = new THREE.Mesh(new THREE.ConeGeometry(0.018, 0.03, 8), furM);
-  earL.position.set(0.115, 0.082, 0.028);
+  var earL = new THREE.Mesh(new THREE.ConeGeometry(0.016, 0.027, 8), furM);
+  earL.position.set(0.106, 0.072, 0.025);
   cat.add(earL);
-  var earR = new THREE.Mesh(new THREE.ConeGeometry(0.018, 0.03, 8), furM);
-  earR.position.set(0.115, 0.082, -0.028);
+  var earR = new THREE.Mesh(new THREE.ConeGeometry(0.016, 0.027, 8), furM);
+  earR.position.set(0.106, 0.072, -0.025);
   cat.add(earR);
-  var tail = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.008, 0.14, 8), furM);
-  tail.position.set(-0.15, 0.01, 0.05);
+  var tail = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.007, 0.12, 8), furM);
+  tail.position.set(-0.13, 0.008, 0.045);
   tail.rotation.z = Math.PI / 2.2;
   tail.rotation.y = 0.5;
   cat.add(tail);
-  cat.position.set(-0.2, DH + 0.09, dz - 0.2);
-  cat.rotation.y = -0.5;
+  cat.position.set(-0.14, 0.075, 0.44);
+  cat.rotation.y = -0.45;
   scene.add(cat);
 
   /* ---------- 天色同步 ---------- */
@@ -642,25 +549,23 @@
     sun.color.copy(s.sun);
     sun.intensity = s.sunI;
 
-    wallMat.color.copy(s.wall);
-    sideMat.color.copy(s.wall).lerp(new THREE.Color(0x000000), 0.06);
-    floorMat.color.setHex(night ? 0x2A2318 : 0xC6B096);
-    rugMat.color.setHex(night ? 0x2C2620 : 0xA89880);
+    deskMat.color.copy(s.desk);
+    edgeMat.color.copy(s.desk).multiplyScalar(0.8);
     frameMat.color.setHex(night ? 0xD8D2C6 : 0xF7F3EA);
     curtainMat.color.setHex(night ? 0x3A3630 : 0xF1E7D6);
 
     lampLight.intensity = s.light * 1.7;
-    scene.background = s.skyB.clone().lerp(new THREE.Color(0x000000), 0.15);
+    scene.background = s.skyB.clone().lerp(new THREE.Color(0x000000), 0.3);
 
     rainGroup.visible = wet && !night;
 
     render();
   }
 
-  /* ---------- 相机 ---------- */
+  /* ---------- 相机：只对桌面 ---------- */
 
-  var center = new THREE.Vector3(0, 0.98, dz - 0.05);
-  var radius = 3.7, pitch = 0.40;
+  var center = new THREE.Vector3(0, 0.16, 0.02);
+  var radius = 2.45, pitch = 0.63;
   var yawT = 0, yawNow = 0;
   var camPos = new THREE.Vector3();
   var camLook = new THREE.Vector3();
@@ -682,10 +587,10 @@
     if (!w || !h) return;
     var a = w / h;
     camera.aspect = a;
-    camera.fov = a < 0.8 ? 56 : 44;
+    camera.fov = a < 0.8 ? 62 : 48;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
-    radius = a < 0.8 ? 3.8 : 3.0;
+    radius = a < 0.62 ? 2.9 : (a < 0.8 ? 2.55 : 2.1);
     computeCam();
     if (!pushing){ camera.position.copy(camPos); camera.lookAt(camLook); }
     render();
@@ -704,20 +609,20 @@
     if (!t0) t0 = now || 1;
     var t = ((now || 0) - t0) / 1000;
 
-    curL.rotation.z = Math.sin(t * 0.7) * 0.035;
-    curR.rotation.z = -Math.sin(t * 0.7 + 0.6) * 0.035;
+    curL.rotation.z = Math.sin(t * 0.7) * 0.032;
+    curR.rotation.z = -Math.sin(t * 0.7 + 0.6) * 0.032;
 
     for (var i = 0; i < clouds.length; i++){
-      clouds[i].position.x += 0.0016;
-      if (clouds[i].position.x > 2.5) clouds[i].position.x = -2.5;
+      clouds[i].position.x += 0.0014;
+      if (clouds[i].position.x > 2.2) clouds[i].position.x = -2.2;
     }
 
     if (rainGroup.visible){
       for (var j = 0; j < drops.length; j++){
-        drops[j].position.y -= 1.5 * 0.016;
-        if (drops[j].position.y < 0.1){
-          drops[j].position.y = 2.0;
-          drops[j].position.x = -1.8 + Math.random() * 3.6;
+        drops[j].position.y -= 0.024;
+        if (drops[j].position.y < -0.05){
+          drops[j].position.y = 1.9;
+          drops[j].position.x = -1.6 + Math.random() * 3.2;
         }
       }
     }
@@ -750,7 +655,7 @@
   }
 
   canvas.addEventListener('pointerdown', function(ev){
-    downX = ev.clientX; dragging = true; movedFar = false;
+    downX = ev.clientX; dragging = true;(function(){}); movedFar = false;
     try{ canvas.setPointerCapture(ev.pointerId); }catch(e){}
   });
 
@@ -758,7 +663,7 @@
     if (!dragging) return;
     var dx = ev.clientX - downX;
     if (Math.abs(dx) > 5) movedFar = true;
-    yawT = Math.max(-0.42, Math.min(0.42, yawT - dx * 0.0018));
+    yawT = Math.max(-0.36, Math.min(0.36, yawT - dx * 0.0016));
     downX = ev.clientX;
     render();
   });
@@ -773,7 +678,7 @@
 
     var p = new THREE.Vector3();
     o.getWorldPosition(p);
-    posT.copy(p).add(new THREE.Vector3(0, 0.15, 0.5));
+    posT.copy(p).add(new THREE.Vector3(0, 0.1, 0.42));
     lookT.copy(p);
 
     pushing = true;
