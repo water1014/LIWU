@@ -529,7 +529,11 @@
     $('#homeHero').textContent = D.hero || '把日子过成我们自己的故事。';
     var since = sinceValue();
     $('#homeSinceLabel').textContent = since ? '我们的纪念日　' + since.replace(/-/g, '.') : '我们的纪念日　还没有设置';
-    $('#homeAgenda').innerHTML = '<p>今天的安排，等你们慢慢写进日常。</p>';
+    var agendaItems=plannerItems('schedule').filter(function(x){return x.date===today();}).sort(function(a,b){return (a.time||'').localeCompare(b.time||'');});
+    var calendarItems=plannerItems('calendar').filter(function(x){return x.date===today();});
+    var todoItems=plannerItems('todo').filter(function(x){return !x.done&&(!x.date||x.date===today());});
+    var agendaHtml=agendaItems.slice(0,3).map(function(x){return '<p><time>'+(x.time||'安排')+'</time> '+esc(x.title)+'</p>';}).concat(calendarItems.slice(0,2).map(function(x){return '<p><time>日历</time> '+esc(x.title)+'</p>'; })).concat(todoItems.slice(0,2).map(function(x){return '<p><time>待办</time> '+esc(x.title)+'</p>'; }));
+    $('#homeAgenda').innerHTML = agendaHtml.length ? agendaHtml.join('') : '<p>今天暂时没有安排，给日子留一点空白。</p>';
     var diaries = diaryItems();
     var diary = $('#homeDiary');
     diary.innerHTML = diaries.length ? '<strong>' + esc(diaries[0].title || '今天的日记') + '</strong><p>' + esc((diaries[0].body || '').slice(0,76) || '留下一点今天的记录。') + '</p><time>' + esc(diaries[0].date) + '</time>' : '<p class="home-empty">今天还没有写日记，留一句给未来的我们。</p>';
