@@ -3,59 +3,89 @@
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1'>
-<meta name='theme-color' content='#EFEBE2'>
+<meta name='theme-color' content='#EFE9DC'>
 <meta name='description' content='里屋。一间能说话、能记事、能住人的屋子。'>
 <meta name='apple-mobile-web-app-capable' content='yes'>
 <title>里屋</title>
-<link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23EFEBE2%27/%3E%3Crect x=%2715.2%27 y=%277%27 width=%271.4%27 height=%2718%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
+<link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23EFE9DC%27/%3E%3Crect x=%2715.2%27 y=%277%27 width=%271.4%27 height=%2718%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
 <link rel='preconnect' href='https://fonts.googleapis.com'>
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
-<link rel='preconnect' href='https://unpkg.com' crossorigin>
-<link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Serif+SC:wght@300;400;500&display=swap' rel='stylesheet'>
+<link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@300;400;500&display=swap' rel='stylesheet'>
 <link rel='stylesheet' href='assets/style.css'>
-<style>
-  body.home #app{display:none}
-  body:not(.home) #stage-wrap{display:none}
-
-  #stage-wrap{position:fixed;inset:0;z-index:5;background:#EFEBE2}
-  #stage{width:100%;height:100%;display:block;touch-action:none}
-
-  .stage-hud{
-    position:fixed;left:0;right:0;top:0;z-index:7;pointer-events:none;
-    display:flex;align-items:center;justify-content:space-between;
-    padding:calc(env(safe-area-inset-top,0px) + 14px) 22px 0;
-  }
-  .stage-brand{font-family:var(--serif);font-size:13px;letter-spacing:.44em;color:rgba(33,31,28,.58)}
-  .stage-days{font-family:var(--num);font-style:italic;font-size:12.5px;letter-spacing:.14em;color:rgba(33,31,28,.42)}
-
-  .stage-tip{
-    position:fixed;left:0;right:0;top:50%;z-index:7;transform:translateY(-50%);
-    text-align:center;font-size:11.5px;letter-spacing:.3em;color:rgba(33,31,28,.34);
-    pointer-events:none;transition:opacity .8s;
-  }
-  .stage-dock{
-    position:fixed;left:0;right:0;bottom:0;z-index:7;
-    display:flex;align-items:center;justify-content:center;gap:2px;
-    padding:8px 6px calc(env(safe-area-inset-bottom,0px) + 10px);
-    background:linear-gradient(180deg,rgba(239,235,226,0) 0%,rgba(239,235,226,.8) 45%,rgba(239,235,226,.94) 100%);
-  }
-  .stage-dock button{
-    appearance:none;background:none;border:0;cursor:pointer;
-    padding:7px 9px;font-size:11px;letter-spacing:.16em;color:rgba(33,31,28,.4);
-  }
-  .stage-dock button:hover{color:rgba(33,31,28,.82)}
-</style>
+<link rel='stylesheet' href='assets/desk.css'>
 </head>
 <body data-theme='paper' class='home'>
 
-<div id='stage-wrap'>
-  <canvas id='stage'></canvas>
-  <div class='stage-hud'>
-    <span class='stage-brand'>里屋</span>
-    <span class='stage-days' id='stageDays'></span>
+<div id='desk-wrap'>
+  <div class='desk' id='desk'>
+    <div class='plane' id='plane'>
+
+      <div class='hud'>
+        <button class='hud-btn' id='hudMenu' type='button' aria-label='会话'>≡</button>
+        <div class='clock'>
+          <span class='t' id='hudTime'>--:--</span>
+          <span class='d' id='hudDate'></span>
+        </div>
+        <button class='pill' id='hudMode' type='button'>预览：白天</button>
+      </div>
+
+      <div class='items'>
+
+        <section class='paper'>
+          <div class='paper-head'>
+            <h1>里屋早报</h1>
+            <span>THE LIWU MORNING POST</span>
+          </div>
+          <div class='paper-body'>
+            <div class='memo' data-open='memory'>
+              <h4>备忘 <em>NOTES</em></h4>
+              <ul id='memoList'></ul>
+            </div>
+            <div class='feature' data-open='album'>
+              <h4>今天 <em>TODAY</em></h4>
+              <div class='shot' id='featureShot'><span>把照片放进来<br>它就贴在这儿</span></div>
+              <p class='cap' id='featureCap'>还没有照片</p>
+            </div>
+          </div>
+          <div class='paper-foot'>
+            <span class='temp' id='hudTemp'>16°</span>
+            <span class='weather' id='hudWeather'>小雨</span>
+            <span class='sep'></span>
+            <span class='days' id='deskDays'>第 — 天</span>
+          </div>
+        </section>
+
+        <div class='item polaroid' data-open='album'>
+          <div class='tape'></div>
+          <div class='ph' id='ph1'></div>
+          <span class='hand'>our room</span>
+        </div>
+
+        <div class='item note' data-open='diary'>
+          <span class='note-head'>今天想说的话</span>
+          <span class='note-rule'></span>
+          <span class='note-rule'></span>
+          <span class='note-rule'></span>
+          <span class='note-foot'>写一句 →</span>
+        </div>
+
+        <div class='item vinyl-wrap' data-open='chat'>
+          <div class='deck'></div>
+          <div class='vinyl'><span class='label'></span></div>
+          <span class='arm'></span>
+          <span class='vinyl-cap'>点它，说话</span>
+        </div>
+
+        <div class='item tag' data-open='settings'>
+          <span class='clip'></span>
+          <span class='tag-face'>里屋<em>LIWU</em></span>
+        </div>
+
+      </div>
+    </div>
   </div>
-  <div class='stage-tip' id='stageTip'>正在开门……</div>
-  <div class='stage-dock' id='stageDock'></div>
+
+  <div class='desk-dock' id='deskDock'></div>
 </div>
 
 <div id='app'>
@@ -100,7 +130,7 @@
     <div class='sessions' id='sessions'></div>
 
     <nav class='drawer-nav'>
-      <button type='button' data-view='home'>回屋子</button>
+      <button type='button' data-view='home'>回桌子</button>
       <button type='button' data-view='diary'>日记</button>
       <button type='button' data-view='album'>相册</button>
       <button type='button' data-view='memory'>记忆</button>
@@ -122,13 +152,11 @@
 window.addEventListener('error', function(e){
   var h = document.getElementById('hint');
   if (h) h.textContent = '出了点问题：' + (e.message || '未知') + (e.lineno ? '（第 ' + e.lineno + ' 行）' : '');
-  var t = document.getElementById('stageTip');
-  if (t) t.textContent = '出了点问题：' + (e.message || '未知');
 });
 </script>
 
 <script src='data.js'></script>
 <script src='assets/app.js'></script>
-<script type='module' src='assets/home3d.js'></script>
+<script src='assets/desk.js'></script>
 </body>
 </html>
