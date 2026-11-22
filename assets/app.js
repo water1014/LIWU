@@ -308,14 +308,50 @@
     return b + '/chat/completions';
   }
 
+  function enabledMcpToolSpecs(){
+    var servers=manageList('liwu.mcp.servers').filter(function(s){return s.enabled&&Array.isArray(s.tools)&&s.tools.length;});
+    var out=[];
+    servers.forEach(function(server){
+      server.tools.forEach(function(tool,index){
+        var safe='mcp_'+String(server.id).replace(/[^a-zA-Z0-9_]/g,'').slice(0,10)+'_'+String(tool.name).replace(/[^a-zA-Z0-9_]/g,'_');
+        out.push({type:'function',function:{name:safe,description:('MCP '+server.name+': '+(tool.description||tool.name)).slice(0,900),parameters:tool.inputSchema||{type:'object',properties:{}}},serverId:server.id,toolIndex:index});
+      });
+    });
+    return out;
+  }
+  function mcpResponsePayload(text){
+    try{return JSON.parse(text);}catch(_){
+      var line=String(text||'').split(/\r?\n/).filter(function(x){return x.indexOf('data:')===0;}).pop();
+      if(line)return JSON.parse(line.slice(5).trim());
+      return {raw:text};
+    }
+  }
+  async function executeMcpToolByName(name,args){
+    var specs=enabledMcpToolSpecs(),spec=specs.find(function(x){return x.function.name===name;});
+    if(!spec)return 'MCP tool unavailable: '+name;
+    var server=manageList('liwu.mcp.servers').find(function(x){return x.id===spec.serverId;}),tool=server&&server.tools&&server.tools[spec.toolIndex];
+    if(!server||!tool)return 'MCP server or tool no longer exists.';
+    var headers={'Content-Type':'application/json','Accept':'application/json, text/event-stream','MCP-Protocol-Version':server.protocolVersion||'2025-03-26'};
+    if(server.token)headers.Authorization='Bearer '+server.token;
+    if(server.sessionId)headers['Mcp-Session-Id']=server.sessionId;
+    try{
+      var res=await fetch(server.url,{method:'POST',headers:headers,signal:ctrl&&ctrl.signal,body:JSON.stringify({jsonrpc:'2.0',id:Date.now(),method:'tools/call',params:{name:tool.name,arguments:args||{}}})});
+      var raw=await res.text(),payload=mcpResponsePayload(raw);
+      if(!res.ok)throw new Error('HTTP '+res.status+' '+raw.slice(0,180));
+      if(payload.error)throw new Error(payload.error.message||'MCP tool error');
+      return JSON.stringify(payload.result||payload);
+    }catch(e){return 'MCP tool call failed: '+String(e.message||e);}
+  }
+
   function buildBody(s, stream){
     var hist = s.messages.filter(function(m){ return m.role === 'user' || m.role === 'assistant'; });
+    if(hist.length&&hist[hist.length-1].role==='assistant'&&!hist[hist.length-1].content)hist=hist.slice(0,-1);
     hist = hist.slice(-Math.max(2, cfg.ctx));
     var sys = cfg.sys + profilePrompt() + activeWorldbookContext(hist);
-    var arr = [{ role: 'system', content: sys }].concat(hist.map(function(m){
-      return { role: m.role, content: m.content };
-    }));
+    var arr = [{ role: 'system', content: sys }].concat(hist.map(function(m){ return { role: m.role, content: m.content }; }));
     var body = { model: cfg.model, messages: arr, stream: !!stream };
+    var tools=enabledMcpToolSpecs();
+    if(tools.length){body.tools=tools.map(function(x){return x.type==='function'?x:{type:'function',function:x.function};});body.tool_choice='auto';body.stream=false;}
     if (typeof cfg.temp === 'number') body.temperature = cfg.temp;
     return body;
   }
@@ -376,11 +412,14 @@
     }, 45000);
 
     try{
+      var mcpAvailable=enabledMcpToolSpecs().length>0;
+      var requestStream=!!cfg.stream&&!mcpAvailable;
+      var requestBody=buildBody(s,requestStream);
       var res = await fetch(endpoint(cfg.base), {
         method: 'POST',
         signal: ctrl.signal,
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key },
-        body: JSON.stringify(buildBody(s, cfg.stream))
+        body: JSON.stringify(requestBody)
       });
       clearTimeout(timeoutTimer);
 
@@ -417,12 +456,26 @@
         paintLive();
       }
 
-      if (!cfg.stream || !res.body || !res.body.getReader){
+      if (!requestStream || !res.body || !res.body.getReader){
         var j = await res.json();
         var one = j.choices && j.choices[0] && j.choices[0].message;
-        if (one){
+        var toolRound=0;
+        while(one&&Array.isArray(one.tool_calls)&&one.tool_calls.length&&toolRound<3){
+          requestBody.messages.push({role:'assistant',content:one.content||null,tool_calls:one.tool_calls});
+          for(var tc=0;tc<one.tool_calls.length;tc++){
+            var call=one.tool_calls[tc],fn=call.function||{},args={};
+            try{args=fn.arguments?JSON.parse(fn.arguments):{};}catch(_){args={};}
+            var result=await executeMcpToolByName(fn.name,args);
+            requestBody.messages.push({role:'tool',tool_call_id:call.id,content:String(result).slice(0,6000)});
+          }
+          toolRound++;
+          res=await fetch(endpoint(cfg.base),{method:'POST',signal:ctrl.signal,headers:{'Content-Type':'application/json','Authorization':'Bearer '+cfg.key},body:JSON.stringify(requestBody)});
+          if(!res.ok)throw new Error(res.status+' · '+(await res.text()).slice(0,200));
+          j=await res.json();one=j.choices&&j.choices[0]&&j.choices[0].message;
+        }
+        if(one){
           if (one.reasoning_content) putThink(one.reasoning_content);
-          putText(one.content || '');
+          putText(one.content || (one.tool_calls?'工具调用次数达到上限。':''));
         }
       } else {
         var reader = res.body.getReader();
