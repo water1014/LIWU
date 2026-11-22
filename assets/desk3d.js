@@ -1,27 +1,24 @@
 /* 里屋 · 3D 桌面（three.js）
-   一张平放的桌子，报纸、拍立得、便签、唱片机、工牌摆在上面。
-   拖东西：射线打桌面平面，物件跟着交点走；松开就落回去，位置存本机。
-   点一下（没拖）：进对应的那一间。
-   双击抬头时间：全部回原位。
-   报上的字是画在 canvas 纹理上的，内容从 data.js 来。 */
+   一张平放的桌子。桌上摆着一本杂志、一张压在杂志下的旧纸、一张拍立得、一张便签、一台唱片机、一张工牌。
+   拖东西：射线打桌面平面，物件跟着交点走；松开落回去，位置存本机。
+   点一下（没拖）：进对应那一间。双击抬头时间：全部回原位。 */
 
 (async function(){
   'use strict';
 
   var D = window.LIWU || {};
-  var NL = String.fromCharCode(10);
   var K_LAYOUT = 'liwu.desk.layout';
 
   function $(s){ return document.querySelector(s); }
+  function p2(n){ return n < 10 ? '0' + n : '' + n; }
 
   var canvas = document.getElementById('stage');
   var boot = document.getElementById('boot');
-  var modeBtn = document.getElementById('hudMode');
+  var modeBtn = $('#hudMode');
 
-  /* ============ 抬头与底部（先做，不依赖 three） ============ */
+  /* ============ 抬头 / 底部 / 跳转（不依赖 three） ============ */
 
   var WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-  function p2(n){ return n < 10 ? '0' + n : '' + n; }
 
   function paintClock(){
     var d = new Date();
@@ -69,7 +66,7 @@
   function setHome(on){
     if (on){
       document.body.classList.add('home');
-      refreshTexts();
+      redrawAll();
       fit();
     } else {
       document.body.classList.remove('home');
@@ -104,22 +101,22 @@
     if (e.key === 'Escape' && fromHome){ fromHome = false; setTimeout(function(){ setHome(true); }, 20); }
   });
 
-  var ITEMS = [['chat', '说话'], ['diary', '日记'], ['album', '相册'], ['memory', '记忆'], ['settings', '设置']];
+  var NAV = [['chat', '说话'], ['diary', '日记'], ['album', '相册'], ['memory', '记忆'], ['settings', '设置']];
   (function buildDock(){
     var dock = document.getElementById('deskDock');
     if (!dock) return;
-    for (var i = 0; i < ITEMS.length; i++){
+    for (var i = 0; i < NAV.length; i++){
       (function(it){
         var b = document.createElement('button');
         b.type = 'button';
         b.textContent = it[1];
         b.addEventListener('click', function(){ open(it[0]); });
         dock.appendChild(b);
-      })(ITEMS[i]);
+      })(NAV[i]);
     }
   })();
 
-  /* ============ 主题（先读出来，做纹理要用） ============ */
+  /* ============ 日夜 ============ */
 
   var cfgCache = {};
   try{ cfgCache = JSON.parse(localStorage.getItem('liwu.cfg3') || '{}') || {}; }catch(e){}
@@ -139,12 +136,7 @@
   }
   applyMode(mode);
 
-  if (modeBtn) modeBtn.addEventListener('click', function(){
-    applyMode(mode === 'night' ? 'paper' : 'night');
-    restyle();
-  });
-
-  /* ============ 拉 three ============ */
+  /* ============ three ============ */
 
   var CDNS = [
     'https://unpkg.com/three@0.160.0/build/three.module.js',
@@ -165,23 +157,9 @@
     return;
   }
 
-  /* ============ 调色 ============ */
-
-  var P = {
-    deskDay: 0xEFE9DC,
-    deskNight: 0x1A1815,
-    paperDay: 0xFCFAF3,
-    paperNight: 0x24211C,
-    inkDay: '#2A2620',
-    inkNight: '#E7E2D6',
-    subDay: '#8A7E68',
-    subNight: '#7C7466'
-  };
-
-  function ink(){ return mode === 'night' ? P.inkNight : P.inkDay; }
-  function sub(){ return mode === 'night' ? P.subNight : P.subDay; }
-
-  /* ============ 渲染器 ============ */
+  function ink(){ return mode === 'night' ? '#E7E2D6' : '#2A2620'; }
+  function sub(){ return mode === 'night' ? '#7C7466' : '#8A7E68'; }
+  function paperBG(){ return mode === 'night' ? '#24211C' : '#FCFAF3'; }
 
   var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -191,26 +169,24 @@
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   var scene = new THREE.Scene();
-  scene.background = new THREE.Color(mode === 'night' ? P.deskNight : P.deskDay);
+  scene.background = new THREE.Color(mode === 'night' ? 0x14120F : 0xEFE9DC);
 
   var camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 60);
-
-  /* ============ 灯 ============ */
 
   var hemi = new THREE.HemisphereLight(0xFFF6E6, 0x8C8272, 0.95);
   scene.add(hemi);
 
-  var key = new THREE.DirectionalLight(0xFFF1D8, 1.25);
-  key.position.set(-2.4, 6.5, 3.2);
+  var key = new THREE.DirectionalLight(0xFFF1D8, 1.3);
+  key.position.set(-2.6, 6.4, 3.0);
   key.castShadow = true;
   key.shadow.mapSize.width = 1024;
   key.shadow.mapSize.height = 1024;
-  key.shadow.camera.left = -3.2;
-  key.shadow.camera.right = 3.2;
-  key.shadow.camera.top = 3.4;
-  key.shadow.camera.bottom = -3.4;
+  key.shadow.camera.left = -3.4;
+  key.shadow.camera.right = 3.4;
+  key.shadow.camera.top = 3.6;
+  key.shadow.camera.bottom = -3.6;
   key.shadow.camera.near = 0.5;
-  key.shadow.camera.far = 18;
+  key.shadow.camera.far = 20;
   key.shadow.bias = -0.0012;
   scene.add(key);
 
@@ -223,9 +199,8 @@
     g.fillStyle = base;
     g.fillRect(0, 0, 128, 128);
     for (var i = 0; i < 900; i++){
-      var x = Math.random() * 128, y = Math.random() * 128;
       g.fillStyle = 'rgba(' + speck + ',' + (0.02 + Math.random() * 0.05).toFixed(3) + ')';
-      g.fillRect(x, y, 1, 1);
+      g.fillRect(Math.random() * 128, Math.random() * 128, 1, 1);
     }
     var t = new THREE.CanvasTexture(c);
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
@@ -236,30 +211,27 @@
 
   var deskMat = new THREE.MeshStandardMaterial({
     map: paperTexture('#EFE9DC', '120,100,70'),
-    roughness: 0.97,
-    metalness: 0
+    roughness: 0.97, metalness: 0
   });
 
-  var desk = new THREE.Mesh(new THREE.PlaneGeometry(14, 14), deskMat);
+  var desk = new THREE.Mesh(new THREE.PlaneGeometry(16, 16), deskMat);
   desk.rotation.x = -Math.PI / 2;
   desk.receiveShadow = true;
   scene.add(desk);
 
-  /* ============ 画字的东西 ============ */
+  /* ============ 画布工具 ============ */
 
   function makeCanvas(w, h){
     var c = document.createElement('canvas');
     c.width = w; c.height = h;
     return c;
   }
-
   function tex(c){
     var t = new THREE.CanvasTexture(c);
     if ('colorSpace' in t) t.colorSpace = THREE.SRGBColorSpace;
     t.anisotropy = 4;
     return t;
   }
-
   function roundRect(g, x, y, w, h, r){
     g.beginPath();
     g.moveTo(x + r, y);
@@ -272,130 +244,160 @@
 
   var SERIF = 'Noto Serif SC, Songti SC, serif';
   var NUM = 'Cormorant Garamond, Songti SC, Georgia, serif';
+  var RED = '#8A3B2C';
 
-  /* ---- 报纸 ---- */
+  var cover = null, coverTex = null;
+  var shotBig = null, shotSmall = null;
 
-  var paperCanvas = null, paperTex = null;
-  var photoBig = null, photoSmall = null;
+  /* ---- 杂志封面 ---- */
 
-  function drawPaper(){
-    var W = 1024, H = 720;
-    var c = paperCanvas || makeCanvas(W, H);
-    paperCanvas = c;
+  function drawMagazine(){
+    var W = 760, H = 1014;
+    var c = cover || makeCanvas(W, H);
+    cover = c;
     var g = c.getContext('2d');
 
-    g.fillStyle = mode === 'night' ? '#24211C' : '#FCFAF3';
+    g.fillStyle = paperBG();
     g.fillRect(0, 0, W, H);
 
-    g.strokeStyle = mode === 'night' ? 'rgba(231,226,214,.18)' : 'rgba(120,100,70,.26)';
-    g.lineWidth = 1;
-
-    g.textAlign = 'center';
+    // 刊名
     g.fillStyle = ink();
-    g.font = '500 62px ' + SERIF;
-    g.fillText('里屋早报', W / 2, 96);
-
-    g.fillStyle = sub();
-    g.font = '400 15px ' + NUM;
-    g.fillText('T H E   L I W U   M O R N I N G   P O S T', W / 2, 130);
-
-    g.beginPath(); g.moveTo(56, 158); g.lineTo(W - 56, 158); g.stroke();
-
-    // 两栏
-    var colL = 56, colR = 520, colW = 460;
-
     g.textAlign = 'left';
+    g.font = '500 76px ' + SERIF;
+    g.fillText('里屋', 54, 116);
+
+    g.fillStyle = RED;
+    g.fillRect(54, 132, 34, 3);
+
+    // 副标
     g.fillStyle = sub();
-    g.font = '400 17px ' + SERIF;
-    g.fillText('备忘  NOTES', colL, 196);
-    g.fillText('今天  TODAY', colR, 196);
+    g.font = '400 14px ' + NUM;
+    g.fillText('L I W U   —   A   S M A L L   R O O M', 100, 138);
 
+    // 期号
+    g.textAlign = 'right';
+    g.font = 'italic 400 19px ' + NUM;
     g.fillStyle = ink();
-    var memos = (D.memory || []).slice(0, 4);
-    var y = 240;
-    for (var i = 0; i < memos.length; i++){
-      g.fillStyle = sub();
-      g.font = '400 15px ' + SERIF;
-      g.fillText('○', colL, y);
+    g.fillText('VOL. 01', W - 54, 92);
+    g.fillStyle = sub();
+    g.font = '400 13px ' + NUM;
+    g.fillText('2026 · 11', W - 54, 116);
 
-      g.fillStyle = ink();
-      g.font = '400 21px ' + SERIF;
-      g.fillText(String(memos[i].title || '').slice(0, 14), colL + 26, y);
+    // 横线
+    g.strokeStyle = mode === 'night' ? 'rgba(231,226,214,.2)' : 'rgba(120,100,70,.28)';
+    g.lineWidth = 1;
+    g.beginPath(); g.moveTo(54, 166); g.lineTo(W - 54, 166); g.stroke();
 
-      var body = String(memos[i].body || '').slice(0, 20);
-      if (body){
-        g.fillStyle = sub();
-        g.font = '400 14px ' + SERIF;
-        g.fillText(body, colL + 26, y + 26);
-      }
-      y += 92;
-    }
-
-    // 右栏大图
-    var iw = 444, ih = 300, ix = colR, iy = 218;
-    g.fillStyle = mode === 'night' ? '#2A2620' : '#E7DFCE';
+    // 封面大图
+    var ix = 54, iy = 190, iw = W - 108, ih = 520;
+    g.fillStyle = mode === 'night' ? '#2A2620' : '#E4DCCC';
     g.fillRect(ix, iy, iw, ih);
 
-    if (photoBig && photoBig.ok){
-      drawCover(g, photoBig.img, ix, iy, iw, ih);
+    if (shotBig && shotBig.ok){
+      var s = Math.max(iw / shotBig.img.width, ih / shotBig.img.height);
+      g.save();
+      g.beginPath(); g.rect(ix, iy, iw, ih); g.clip();
+      g.drawImage(shotBig.img, ix + (iw - shotBig.img.width * s) / 2, iy + (ih - shotBig.img.height * s) / 2, shotBig.img.width * s, shotBig.img.height * s);
+      g.restore();
     } else {
       g.fillStyle = sub();
-      g.font = '400 18px ' + SERIF;
       g.textAlign = 'center';
-      g.fillText('把照片放进来', ix + iw / 2, iy + ih / 2 - 12);
-      g.fillText('它就贴在这儿', ix + iw / 2, iy + ih / 2 + 18);
+      g.font = '400 19px ' + SERIF;
+      g.fillText('封面还空着', ix + iw / 2, iy + ih / 2 - 8);
+      g.font = '400 14px ' + SERIF;
+      g.fillText('放一张图进去，它就上封面', ix + iw / 2, iy + ih / 2 + 24);
       g.textAlign = 'left';
     }
 
+    // 封面语
+    g.fillStyle = ink();
+    g.font = '400 33px ' + SERIF;
+    g.fillText(D.hero || '屋子不大，够两个人住。', 54, 782);
+
+    var capText = (shotBig && shotBig.ok && D.album && D.album[0])
+      ? (D.album[0].caption || D.album[0].date || '')
+      : '本期封面';
     g.fillStyle = sub();
     g.font = '400 14px ' + SERIF;
-    var capText = (photoBig && photoBig.ok && D.album && D.album[0])
-      ? (D.album[0].caption || D.album[0].date || '')
-      : '还没有照片';
-    g.fillText(capText, ix, iy + ih + 28);
+    g.fillText(capText, 54, 814);
 
-    // 页脚
-    g.beginPath(); g.moveTo(56, 612); g.lineTo(W - 56, 612); g.stroke();
-
-    var w = D.weather || {};
-    g.fillStyle = ink();
-    g.font = 'italic 400 40px ' + NUM;
-    g.fillText(w.temp || '—', 56, 672);
+    // 要目
+    g.beginPath(); g.moveTo(54, 848); g.lineTo(W - 54, 848); g.stroke();
 
     g.fillStyle = sub();
-    g.font = '400 16px ' + SERIF;
-    g.fillText(w.text || '', 148, 668);
+    g.font = '400 13px ' + SERIF;
+    g.fillText('本期要目   IN THIS ISSUE', 54, 880);
 
-    var c2 = dayCount();
+    var memos = (D.memory || []).slice(0, 3);
+    var y = 918;
+    for (var i = 0; i < memos.length; i++){
+      g.fillStyle = ink();
+      g.font = '400 19px ' + SERIF;
+      g.fillText(String(memos[i].title || '').slice(0, 13), 54, y);
+      g.fillStyle = sub();
+      g.textAlign = 'right';
+      g.font = 'italic 400 17px ' + NUM;
+      g.fillText('0' + (i + 1), W - 54, y);
+      g.textAlign = 'left';
+      y += 32;
+    }
+
+    // 页脚
+    var w = D.weather || {};
+    g.beginPath(); g.moveTo(54, 1000); g.lineTo(W - 54, 1000); g.stroke();
+    g.fillStyle = sub();
+    g.font = '400 13px ' + NUM;
+    g.fillText((w.temp || '—') + '   ' + (w.text || ''), 54, 1024);
+    var dc = dayCount();
     g.textAlign = 'right';
-    g.font = 'italic 400 22px ' + NUM;
-    g.fillText(c2 ? ('第 ' + c2 + ' 天') : '第 — 天', W - 56, 668);
+    g.font = 'italic 400 15px ' + NUM;
+    g.fillText(dc ? ('第 ' + dc + ' 天') : '第 — 天', W - 54, 1024);
     g.textAlign = 'left';
 
-    if (paperTex) paperTex.dispose();
-    paperTex = tex(c);
-    if (paperMesh) paperMesh.material.map = paperTex, paperMesh.material.needsUpdate = true;
+    if (coverTex) coverTex.dispose();
+    coverTex = tex(c);
+    if (magMesh) { magMesh.material.map = coverTex; magMesh.material.needsUpdate = true; }
   }
 
-  function drawCover(g, img, x, y, w, h){
-    var s = Math.max(w / img.width, h / img.height);
-    var dw = img.width * s, dh = img.height * s;
-    g.save();
-    g.beginPath();
-    g.rect(x, y, w, h);
-    g.clip();
-    g.drawImage(img, x + (w - dw) / 2, y + (h - dh) / 2, dw, dh);
-    g.restore();
+  /* ---- 压在下头的旧纸（记忆） ---- */
+
+  var underCanvas = null, underTex = null;
+
+  function drawUnder(){
+    var W = 760, H = 1014;
+    var c = underCanvas || makeCanvas(W, H);
+    underCanvas = c;
+    var g = c.getContext('2d');
+
+    g.fillStyle = mode === 'night' ? '#1F1C18' : '#EDE6D7';
+    g.fillRect(0, 0, W, H);
+
+    g.fillStyle = sub();
+    g.font = '400 20px ' + SERIF;
+    g.fillText('记   MEMORY', 54, 120);
+
+    g.strokeStyle = mode === 'night' ? 'rgba(231,226,214,.12)' : 'rgba(120,100,70,.22)';
+    for (var y = 170; y < H - 120; y += 46){
+      g.beginPath(); g.moveTo(54, y); g.lineTo(W - 54, y); g.stroke();
+    }
+
+    g.fillStyle = sub();
+    g.font = '400 15px ' + SERIF;
+    g.fillText('怕忘的事，一句一件。', 54, H - 70);
+
+    if (underTex) underTex.dispose();
+    underTex = tex(c);
+    if (underMesh) { underMesh.material.map = underTex; underMesh.material.needsUpdate = true; }
   }
 
   /* ---- 拍立得 ---- */
 
-  var polaroidCanvas = null, polaroidTex = null;
+  var polCanvas = null, polTex = null;
 
   function drawPolaroid(){
     var W = 512, H = 620;
-    var c = polaroidCanvas || makeCanvas(W, H);
-    polaroidCanvas = c;
+    var c = polCanvas || makeCanvas(W, H);
+    polCanvas = c;
     var g = c.getContext('2d');
 
     g.fillStyle = mode === 'night' ? '#242018' : '#FFFDF7';
@@ -405,8 +407,12 @@
     g.fillStyle = mode === 'night' ? '#2A2620' : '#E7DFCE';
     g.fillRect(px, py, pw, ph);
 
-    if (photoSmall && photoSmall.ok){
-      drawCover(g, photoSmall.img, px, py, pw, ph);
+    if (shotSmall && shotSmall.ok){
+      var s = Math.max(pw / shotSmall.img.width, ph / shotSmall.img.height);
+      g.save();
+      g.beginPath(); g.rect(px, py, pw, ph); g.clip();
+      g.drawImage(shotSmall.img, px + (pw - shotSmall.img.width * s) / 2, py + (ph - shotSmall.img.height * s) / 2, shotSmall.img.width * s, shotSmall.img.height * s);
+      g.restore();
     }
 
     g.fillStyle = sub();
@@ -415,9 +421,9 @@
     g.fillText('our room', W / 2, H - 62);
     g.textAlign = 'left';
 
-    if (polaroidTex) polaroidTex.dispose();
-    polaroidTex = tex(c);
-    if (polaroidMesh) polaroidMesh.material.map = polaroidTex, polaroidMesh.material.needsUpdate = true;
+    if (polTex) polTex.dispose();
+    polTex = tex(c);
+    if (polMesh) { polMesh.material.map = polTex; polMesh.material.needsUpdate = true; }
   }
 
   /* ---- 便签 ---- */
@@ -433,8 +439,8 @@
     g.fillStyle = mode === 'night' ? '#3E3922' : '#F5E8A4';
     g.fillRect(0, 0, W, H);
 
-    g.strokeStyle = mode === 'night' ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.55)';
-    for (var y = 90; y < H - 60; y += 62){
+    g.strokeStyle = mode === 'night' ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.6)';
+    for (var y = 96; y < H - 70; y += 62){
       g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke();
     }
 
@@ -448,7 +454,7 @@
 
     if (noteTex) noteTex.dispose();
     noteTex = tex(c);
-    if (noteMesh) noteMesh.material.map = noteTex, noteMesh.material.needsUpdate = true;
+    if (noteMesh) { noteMesh.material.map = noteTex; noteMesh.material.needsUpdate = true; }
   }
 
   /* ---- 工牌 ---- */
@@ -464,7 +470,7 @@
     g.fillStyle = mode === 'night' ? '#221F1B' : '#FBF8F0';
     g.fillRect(0, 0, W, H);
 
-    g.strokeStyle = mode === 'night' ? 'rgba(231,226,214,.18)' : 'rgba(120,100,70,.3)';
+    g.strokeStyle = mode === 'night' ? 'rgba(231,226,214,.2)' : 'rgba(120,100,70,.32)';
     g.lineWidth = 3;
     roundRect(g, 136, 26, 128, 34, 17);
     g.stroke();
@@ -472,83 +478,78 @@
     g.fillStyle = ink();
     g.textAlign = 'center';
     g.font = '400 58px ' + SERIF;
-    g.fillText('里屋', W / 2, 268);
+    g.fillText('里屋', W / 2, 262);
 
     g.fillStyle = sub();
     g.font = 'italic 400 26px ' + NUM;
-    g.fillText('L I W U', W / 2, 322);
+    g.fillText('L I W U', W / 2, 316);
 
     g.strokeStyle = mode === 'night' ? 'rgba(231,226,214,.22)' : 'rgba(120,100,70,.26)';
     g.lineWidth = 2;
-    g.beginPath(); g.moveTo(120, 366); g.lineTo(W - 120, 366); g.stroke();
+    g.beginPath(); g.moveTo(120, 360); g.lineTo(W - 120, 360); g.stroke();
     g.textAlign = 'left';
 
     if (tagTex) tagTex.dispose();
     tagTex = tex(c);
-    if (tagMesh) tagMesh.material.map = tagTex, tagMesh.material.needsUpdate = true;
+    if (tagMesh) { tagMesh.material.map = tagTex; tagMesh.material.needsUpdate = true; }
   }
 
-  /* ---- 图片预载 ---- */
+  /* ============ 物件 ============ */
 
-  function loadPhoto(src, cb){
-    if (!src) return;
-    var img = new Image();
-    img.onload = function(){ cb({ ok: true, img: img }); };
-    img.onerror = function(){};
-    img.src = src;
+  var magMesh = null, underMesh = null, polMesh = null, noteMesh = null, tagMesh = null;
+  var vinylMesh = null;
+
+  function sheet(w, h, th, texture, tint){
+    var g = new THREE.Group();
+    var body = new THREE.Mesh(
+      new THREE.BoxGeometry(w, th, h),
+      new THREE.MeshStandardMaterial({ color: tint, roughness: 0.95 })
+    );
+    body.castShadow = true;
+    body.receiveShadow = true;
+    g.add(body);
+
+    var face = new THREE.Mesh(
+      new THREE.PlaneGeometry(w, h),
+      new THREE.MeshStandardMaterial({ map: texture, roughness: 0.95 })
+    );
+    face.rotation.x = -Math.PI / 2;
+    face.position.y = th / 2 + 0.001;
+    face.receiveShadow = true;
+    g.add(face);
+
+    g.userData.face = face;
+    return g;
   }
 
-  function loadPhotos(){
-    var list = D.album || [];
-    if (list[0] && list[0].src) loadPhoto(list[0].src, function(o){ photoBig = o; drawPaper(); });
-    var second = list[1] || list[0];
-    if (second && second.src) loadPhoto(second.src, function(o){ photoSmall = o; drawPolaroid(); });
-  }
+  function buildAll(){
+    drawMagazine();
+    magMesh = sheet(1.5, 2.0, 0.012, coverTex, mode === 'night' ? 0x24211C : 0xFCFAF3);
+    magMesh.userData.key = 'album';
+    scene.add(magMesh);
 
-  /* ============ 桌面上的东西 ============ */
+    drawUnder();
+    underMesh = sheet(1.44, 1.94, 0.008, underTex, mode === 'night' ? 0x1F1C18 : 0xEDE6D7);
+    underMesh.userData.key = 'memory';
+    scene.add(underMesh);
 
-  var things = [];
-
-  function buildPaper(){
-    drawPaper();
-    var mat = new THREE.MeshStandardMaterial({ map: paperTex, roughness: 0.95, metalness: 0 });
-    var m = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.012, 1.83), mat);
-    m.castShadow = true;
-    m.receiveShadow = true;
-    m.userData.key = 'memory';
-    return m;
-  }
-
-  var paperMesh = null, polaroidMesh = null, noteMesh = null, tagMesh = null;
-
-  function buildPolaroid(){
     drawPolaroid();
-    var mat = new THREE.MeshStandardMaterial({ map: polaroidTex, roughness: 0.95, metalness: 0 });
-    var m = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.014, 0.75), mat);
-    m.castShadow = true;
-    m.receiveShadow = true;
-    m.userData.key = 'album';
-    return m;
-  }
+    polMesh = sheet(0.62, 0.75, 0.01, polTex, mode === 'night' ? 0x242018 : 0xFFFDF7);
+    polMesh.userData.key = 'album';
+    scene.add(polMesh);
 
-  function buildNote(){
     drawNote();
-    var mat = new THREE.MeshStandardMaterial({ map: noteTex, roughness: 0.98, metalness: 0 });
-    var m = new THREE.Mesh(new THREE.BoxGeometry(0.56, 0.014, 0.66), mat);
-    m.castShadow = true;
-    m.receiveShadow = true;
-    m.userData.key = 'diary';
-    return m;
-  }
+    noteMesh = sheet(0.56, 0.66, 0.014, noteTex, mode === 'night' ? 0x3E3922 : 0xF5E8A4);
+    noteMesh.userData.key = 'diary';
+    scene.add(noteMesh);
 
-  function buildTag(){
     drawTag();
-    var mat = new THREE.MeshStandardMaterial({ map: tagTex, roughness: 0.9, metalness: 0 });
-    var m = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.016, 0.57), mat);
-    m.castShadow = true;
-    m.receiveShadow = true;
-    m.userData.key = 'settings';
-    return m;
+    tagMesh = sheet(0.44, 0.57, 0.016, tagTex, mode === 'night' ? 0x221F1B : 0xFBF8F0);
+    tagMesh.userData.key = 'settings';
+    scene.add(tagMesh);
+
+    vinylMesh = buildVinyl();
+    scene.add(vinylMesh);
   }
 
   function buildVinyl(){
@@ -567,92 +568,92 @@
       new THREE.CylinderGeometry(0.22, 0.22, 0.012, 40),
       new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.45, metalness: 0.1 })
     );
-    disc.position.set(-0.02, 0.056, 0.02);
+    disc.position.set(-0.04, 0.056, 0.02);
     disc.castShadow = true;
     g.add(disc);
 
     var label = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.072, 0.072, 0.014, 28),
+      new THREE.CylinderGeometry(0.072, 0.072, 0.016, 28),
       new THREE.MeshStandardMaterial({ color: 0xB2452F, roughness: 0.8 })
     );
-    label.position.set(-0.02, 0.058, 0.02);
+    label.position.set(-0.04, 0.058, 0.02);
     g.add(label);
 
     var arm = new THREE.Mesh(
       new THREE.BoxGeometry(0.26, 0.012, 0.016),
       new THREE.MeshStandardMaterial({ color: 0xA39A8A, roughness: 0.6, metalness: 0.3 })
     );
-    arm.position.set(0.2, 0.07, -0.16);
+    arm.position.set(0.2, 0.072, -0.16);
     arm.rotation.y = -0.5;
     arm.castShadow = true;
     g.add(arm);
 
     g.userData.key = 'chat';
     g.userData.spin = disc;
+    g.userData.baseBox = base;
     return g;
   }
+
+  buildAll();
 
   /* ============ 摆位 ============ */
 
   var HOME = {
-    paper: { x: 0, z: -0.95, ry: 0.012 },
-    polaroid: { x: -1.15, z: 0.62, ry: -0.062 },
-    note: { x: 1.16, z: 0.5, ry: 0.042 },
-    vinyl: { x: 1.02, z: 1.72, ry: -0.02 },
-    tag: { x: -1.16, z: 1.78, ry: 0.05 }
+    mag: { x: 0, z: 0.02, ry: 0.008 },
+    under: { x: 0.03, z: 0.06, ry: 0.06 },
+    polaroid: { x: -1.26, z: -1.42, ry: -0.07 },
+    note: { x: 1.22, z: -1.45, ry: 0.05 },
+    vinyl: { x: 1.04, z: 1.56, ry: -0.02 },
+    tag: { x: -1.22, z: 1.5, ry: 0.06 }
   };
 
   var layout = {};
   try{ layout = JSON.parse(localStorage.getItem(K_LAYOUT) || '{}') || {}; }catch(e){ layout = {}; }
-
   function saveLayout(){ try{ localStorage.setItem(K_LAYOUT, JSON.stringify(layout)); }catch(e){} }
 
-  paperMesh = buildPaper();
-  polaroidMesh = buildPolaroid();
-  noteMesh = buildNote();
-  tagMesh = buildTag();
-  var vinylMesh = buildVinyl();
+  var things = [];
 
-  var registry = [
-    { key: 'paper', obj: paperMesh, y: 0.008 },
-    { key: 'polaroid', obj: polaroidMesh, y: 0.012 },
-    { key: 'note', obj: noteMesh, y: 0.012 },
-    { key: 'vinyl', obj: vinylMesh, y: 0 },
-    { key: 'tag', obj: tagMesh, y: 0.014 }
-  ];
+  function place(key, obj, y){
+    var home = HOME[key];
+    var pos = layout[key] || { x: home.x, z: home.z };
+    obj.position.set(pos.x, y, pos.z);
+    obj.rotation.y = home.ry;
+    obj.userData.home = home;
+    obj.userData.baseY = y;
+    obj.userData.regKey = key;
+    things.push(obj);
+  }
 
-  registry.forEach(function(r){
-    var home = HOME[r.key];
-    var pos = layout[r.key] || { x: home.x, z: home.z };
-    r.obj.position.set(pos.x, r.y, pos.z);
-    r.obj.rotation.y = home.ry;
-    r.obj.userData.home = home;
-    r.obj.userData.baseY = r.y;
-    r.obj.userData.regKey = r.key;
-    scene.add(r.obj);
-    things.push(r.obj);
-  });
+  place('under', underMesh, 0.004);
+  place('mag', magMesh, 0.012);
+  place('polaroid', polMesh, 0.006);
+  place('note', noteMesh, 0.008);
+  place('vinyl', vinylMesh, 0);
+  place('tag', tagMesh, 0.009);
 
-  /* ============ 灯光/材质跟着日夜变 ============ */
+  /* ============ 重绘 / 换肤色 ============ */
+
+  function redrawAll(){
+    drawMagazine(); drawUnder(); drawPolaroid(); drawNote(); drawTag();
+    render();
+  }
 
   function restyle(){
-    scene.background = new THREE.Color(mode === 'night' ? P.deskNight : P.deskDay);
+    scene.background = new THREE.Color(mode === 'night' ? 0x14120F : 0xEFE9DC);
     deskMat.map.dispose();
-    deskMat.map = paperTexture(mode === 'night' ? '#1A1815' : '#EFE9DC', mode === 'night' ? '231,226,214' : '120,100,70');
+    deskMat.map = paperTexture(mode === 'night' ? '#14120F' : '#EFE9DC', mode === 'night' ? '231,226,214' : '120,100,70');
     deskMat.needsUpdate = true;
-    hemi.intensity = mode === 'night' ? 0.42 : 0.95;
-    key.intensity = mode === 'night' ? 0.5 : 1.25;
+    hemi.intensity = mode === 'night' ? 0.45 : 0.95;
+    key.intensity = mode === 'night' ? 0.55 : 1.3;
     key.color.setHex(mode === 'night' ? 0xBFCBE0 : 0xFFF1D8);
-    vinylMesh.children[0].material.color.setHex(mode === 'night' ? 0x242019 : 0xE4DED1);
-    drawPaper(); drawPolaroid(); drawNote(); drawTag();
-    render();
+    vinylMesh.userData.baseBox.material.color.setHex(mode === 'night' ? 0x242019 : 0xE4DED1);
+    redrawAll();
   }
 
-  function refreshTexts(){
-    drawPaper();
-    drawPolaroid();
-    render();
-  }
+  if (modeBtn) modeBtn.addEventListener('click', function(){
+    applyMode(mode === 'night' ? 'paper' : 'night');
+    restyle();
+  });
 
   /* ============ 相机 ============ */
 
@@ -666,14 +667,14 @@
 
     var vFov = camera.fov * Math.PI / 180;
     var hFov = 2 * Math.atan(Math.tan(vFov / 2) * a);
-    var needW = 3.9;
+    var needW = 3.7;
     var dist = (needW / 2) / Math.tan(hFov / 2);
-    dist = Math.max(dist, 5.2);
+    dist = Math.max(dist, 5.4);
     dist = Math.min(dist, 26);
 
-    var pitch = 58 * Math.PI / 180;
+    var pitch = 57 * Math.PI / 180;
     camera.position.set(0, Math.sin(pitch) * dist, Math.cos(pitch) * dist);
-    camera.lookAt(0, 0, 0.15);
+    camera.lookAt(0, 0, 0.1);
     renderer.setSize(w, h, false);
     render();
   }
@@ -689,12 +690,10 @@
     });
   }
 
-  var spinT = 0;
   function loop(t){
     requestAnimationFrame(loop);
     if (!document.body.classList.contains('home')) return;
-    spinT = t * 0.0006;
-    vinylMesh.userData.spin.rotation.y = spinT;
+    if (vinylMesh) vinylMesh.userData.spin.rotation.y = t * 0.0006;
     renderer.render(scene, camera);
   }
 
@@ -734,11 +733,8 @@
     if (!t) return;
     dragObj = t;
     var p = toDesk(ev.clientX, ev.clientY);
-    if (p){
-      dragOffset.set(t.position.x - p.x, 0, t.position.z - p.z);
-    } else {
-      dragOffset.set(0, 0, 0);
-    }
+    if (p) dragOffset.set(t.position.x - p.x, 0, t.position.z - p.z);
+    else dragOffset.set(0, 0, 0);
     try{ canvas.setPointerCapture(ev.pointerId); }catch(e){}
   });
 
@@ -748,21 +744,20 @@
     var dy = ev.clientY - downY;
     if (!moved && (Math.abs(dx) > 7 || Math.abs(dy) > 7)){
       moved = true;
-      dragObj.position.y = dragObj.userData.baseY + 0.09;
+      dragObj.position.y = dragObj.userData.baseY + 0.1;
     }
     if (!moved) return;
     var p = toDesk(ev.clientX, ev.clientY);
     if (!p) return;
-    dragObj.position.x = Math.max(-1.75, Math.min(1.75, p.x + dragOffset.x));
-    dragObj.position.z = Math.max(-2.25, Math.min(2.25, p.z + dragOffset.z));
+    dragObj.position.x = Math.max(-1.8, Math.min(1.8, p.x + dragOffset.x));
+    dragObj.position.z = Math.max(-2.3, Math.min(2.3, p.z + dragOffset.z));
     render();
   });
 
-  function endDrag(ev){
+  canvas.addEventListener('pointerup', function(){
     if (!dragObj) return;
     var o = dragObj;
     dragObj = null;
-
     if (moved){
       o.position.y = o.userData.baseY;
       layout[o.userData.regKey] = { x: o.position.x, z: o.position.z };
@@ -770,17 +765,9 @@
       render();
       return;
     }
+    open(o.userData.key);
+  });
 
-    var key = o.userData.key;
-    if (key === 'memory'){
-      var p = toDesk(ev.clientX, ev.clientY);
-      if (p && p.x > 0.05) key = 'album';
-      else key = 'memory';
-    }
-    open(key);
-  }
-
-  canvas.addEventListener('pointerup', endDrag);
   canvas.addEventListener('pointercancel', function(){
     if (dragObj){ dragObj.position.y = dragObj.userData.baseY; dragObj = null; render(); }
   });
@@ -795,10 +782,10 @@
       if (now - lastTap < 420){
         layout = {};
         saveLayout();
-        registry.forEach(function(r){
-          var h = r.obj.userData.home;
-          r.obj.position.set(h.x, r.obj.userData.baseY, h.z);
-          r.obj.rotation.y = h.ry;
+        things.forEach(function(o){
+          var h = o.userData.home;
+          o.position.set(h.x, o.userData.baseY, h.z);
+          o.rotation.y = h.ry;
         });
         render();
         flash('摆回原来的位置了。');
@@ -809,13 +796,22 @@
 
   /* ============ 起飞 ============ */
 
+  function loadPhoto(src, cb){
+    if (!src) return;
+    var img = new Image();
+    img.onload = function(){ cb({ ok: true, img: img }); };
+    img.src = src;
+  }
+
+  var list = D.album || [];
+  if (list[0] && list[0].src) loadPhoto(list[0].src, function(o){ shotBig = o; drawMagazine(); });
+  var second = list[1] || list[0];
+  if (second && second.src) loadPhoto(second.src, function(o){ shotSmall = o; drawPolaroid(); });
+
   window.addEventListener('resize', fit);
   fit();
-  loadPhotos();
 
-  setTimeout(function(){
-    if (boot) boot.textContent = '';
-  }, 1200);
+  setTimeout(function(){ if (boot) boot.textContent = ''; }, 1200);
 
   requestAnimationFrame(loop);
 
