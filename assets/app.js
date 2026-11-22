@@ -310,7 +310,7 @@
   function buildBody(s, stream){
     var hist = s.messages.filter(function(m){ return m.role === 'user' || m.role === 'assistant'; });
     hist = hist.slice(-Math.max(2, cfg.ctx));
-    var sys = cfg.sys + activeWorldbookContext(hist);
+    var sys = cfg.sys + profilePrompt() + activeWorldbookContext(hist);
     var arr = [{ role: 'system', content: sys }].concat(hist.map(function(m){
       return { role: m.role, content: m.content };
     }));
@@ -572,6 +572,8 @@
     setDrawerCurrent(target);
     homeScreen.hidden = true; $('#app').hidden = true;
     if (target === 'calendar' || target === 'schedule' || target === 'todo') viewPlanner(target);
+    else if (target === 'profile') viewProfile();
+    else if (target === 'notice') viewNotices();
     else if (target === 'countdown') viewCountdown();
     else if (target === 'mood') viewMood();
     else if (target === 'moments') viewMoments();
@@ -769,6 +771,8 @@
       closeDrawer();
       homeScreen.hidden = true; $('#app').hidden = true;
       if (v === 'calendar' || v === 'schedule' || v === 'todo') viewPlanner(v);
+      else if (v === 'profile') viewProfile();
+      else if (v === 'notice') viewNotices();
       else if (v === 'countdown') viewCountdown();
       else if (v === 'mood') viewMood();
       else if (v === 'moments') viewMoments();
@@ -1201,6 +1205,56 @@
     render();
   }
 
+
+  /* ================= 相处 · 人设档案与通知 ================= */
+  var K_PROFILE='liwu.profile',K_NOTICES='liwu.notices',K_NOTICE_READ='liwu.notice.read';
+  function profileData(){return Object.assign({name:'宋祁',relationship:'',personality:'',appearance:'',speech:'',background:''},LS.get(K_PROFILE,{}));}
+  function profilePrompt(){
+    var p=profileData(),parts=[];
+    if(p.name)parts.push('名字：'+p.name);
+    if(p.relationship)parts.push('关系与相处：'+p.relationship);
+    if(p.personality)parts.push('性格：'+p.personality);
+    if(p.appearance)parts.push('外观设定（保持一致）：'+p.appearance);
+    if(p.speech)parts.push('说话方式：'+p.speech);
+    if(p.background)parts.push('共同背景：'+p.background);
+    return parts.length?'\n\n【人设档案】\n'+parts.join('\n'):'';
+  }
+  function viewProfile(){
+    var p=profileData();
+    var html='<div class="planner-intro"><p class="lead">这里记录宋祁是谁，以及你们共同确认过的设定。保存后会随聊天一起提供给模型。</p></div>'+
+      '<form class="profile-form" id="profileForm">'+
+      '<section class="profile-section"><small>IDENTITY</small><h3>基本信息</h3><label class="field"><span>名字</span><input id="pfName" maxlength="40" value="'+esc(p.name)+'"></label><label class="field"><span>关系与相处方式</span><textarea id="pfRelation" rows="2" placeholder="你们如何称呼彼此、如何相处…">'+esc(p.relationship)+'</textarea></label></section>'+
+      '<section class="profile-section"><small>PERSONALITY</small><h3>性格与表达</h3><label class="field"><span>性格特征</span><textarea id="pfPersonality" rows="4" placeholder="性格、价值观、习惯与边界…">'+esc(p.personality)+'</textarea></label><label class="field"><span>说话方式</span><textarea id="pfSpeech" rows="3" placeholder="语气、句子长短、表达习惯…">'+esc(p.speech)+'</textarea></label></section>'+
+      '<section class="profile-section"><small>APPEARANCE</small><h3>外观档案</h3><p class="tip">外观描述保留为一整段文字，不拆成零散选项。建议用英文描述细节，方便后续生图保持一致。</p><textarea id="pfAppearance" rows="8" placeholder="A detailed English appearance description...">'+esc(p.appearance)+'</textarea></section>'+
+      '<section class="profile-section"><small>SHARED WORLD</small><h3>共同背景</h3><label class="field"><span>生活背景与重要设定</span><textarea id="pfBackground" rows="4" placeholder="居住环境、共同经历、长期设定…">'+esc(p.background)+'</textarea></label></section>'+
+      '<div class="profile-save-row"><button class="ghost solid" type="submit">保存档案</button><span class="tip">只保存在本机，修改后会用于之后的聊天。</span></div></form>';
+    openView('人设档案','Profile',html);
+    $('#viewBody').onsubmit=function(ev){if(ev.target.id!=='profileForm')return;ev.preventDefault();var next={name:$('#pfName').value.trim()||'宋祁',relationship:$('#pfRelation').value.trim(),personality:$('#pfPersonality').value.trim(),speech:$('#pfSpeech').value.trim(),appearance:$('#pfAppearance').value.trim(),background:$('#pfBackground').value.trim(),updatedAt:Date.now()};if(LS.set(K_PROFILE,next))toast('人设档案已保存，之后的聊天会带上这些设定。');};
+  }
+  function viewNotices(){
+    var manual=LS.get(K_NOTICES,[]),read=LS.get(K_NOTICE_READ,[]),auto=[];
+    var todayValue=today(),limit=new Date();limit.setDate(limit.getDate()+7);var limitValue=limit.getFullYear()+'-'+p2(limit.getMonth()+1)+'-'+p2(limit.getDate());
+    plannerItems('schedule').forEach(function(x){if(x.date>=todayValue&&x.date<=limitValue)auto.push({id:'schedule:'+x.id,title:x.title,body:'安排 · '+x.date+(x.time?' '+x.time:'')+(x.place?' · '+x.place:''),date:x.date,kind:'安排'});});
+    plannerItems('calendar').forEach(function(x){if(x.date>=todayValue&&x.date<=limitValue)auto.push({id:'calendar:'+x.id,title:x.title,body:'日历记录 · '+x.date+(x.note?' · '+x.note:''),date:x.date,kind:'日历'});});
+    plannerItems('todo').forEach(function(x){if(!x.done&&x.date&&x.date<=todayValue)auto.push({id:'todo:'+x.id,title:x.title,body:'待办已到期 · '+x.date,date:x.date,kind:'待办'});});
+    var all=manual.map(function(x){return Object.assign({manual:true},x);}).concat(auto.map(function(x){return Object.assign({manual:false},x);}));
+    all.sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
+    var unread=all.filter(function(x){return read.indexOf(x.id)<0;}).length;
+    var html='<div class="planner-intro"><p class="lead">即将到来的安排、日历记录和逾期待办会自动出现在这里。不会发送系统推送，只在你打开里屋时整理提醒。</p><div class="planner-stat"><strong>'+unread+'</strong><span>条未读</span></div></div>'+
+      '<div class="notice-toolbar"><button class="ghost" id="noticeReadAll" type="button">全部标为已读</button><button class="ghost solid" id="noticeNew" type="button">＋ 写一条提醒</button></div>'+
+      '<form class="planner-form" id="noticeForm" hidden><strong>新提醒</strong><input id="noticeTitle" maxlength="80" placeholder="提醒标题"><input id="noticeDate" type="date" value="'+today()+'"><textarea id="noticeBody" rows="3" placeholder="提醒内容（可选）"></textarea><div class="planner-form-actions"><button class="ghost solid" type="submit">保存提醒</button><button class="ghost" id="noticeCancel" type="button">取消</button></div></form>';
+    html+=all.length?'<div class="notice-list">'+all.map(function(x){var isRead=read.indexOf(x.id)>=0;return '<article class="notice-item '+(isRead?'is-read':'')+'"><span class="notice-dot"></span><div class="notice-main"><div class="notice-meta"><small>'+esc(x.kind||'提醒')+'</small><time>'+esc(x.date||'')+'</time></div><strong>'+esc(x.title)+'</strong><p>'+esc(x.body||'')+'</p><div class="planner-item-actions"><button class="mini" type="button" data-notice-read="'+esc(x.id)+'">'+(isRead?'标为未读':'标为已读')+'</button>'+(x.manual?'<button class="mini danger" type="button" data-notice-delete="'+esc(x.id)+'">删除</button>':'')+'</div></div></article>';}).join('')+'</div>':'<div class="blank planner-empty">暂时没有提醒。重要的日子和待办会在这里出现。</div>';
+    openView('通知','Notice',html);var body=$('#viewBody');
+    body.onclick=function(ev){
+      if(ev.target.id==='noticeNew'){$('#noticeForm').hidden=false;$('#noticeTitle').focus();return;}
+      if(ev.target.id==='noticeCancel'){$('#noticeForm').hidden=true;return;}
+      if(ev.target.id==='noticeReadAll'){LS.set(K_NOTICE_READ,all.map(function(x){return x.id;}));viewNotices();toast('已全部标为已读。');return;}
+      var readBtn=ev.target.closest('[data-notice-read]');if(readBtn){var id=readBtn.getAttribute('data-notice-read'),list=LS.get(K_NOTICE_READ,[]);if(list.indexOf(id)>=0)list=list.filter(function(x){return x!==id;});else list.push(id);LS.set(K_NOTICE_READ,list);viewNotices();return;}
+      var del=ev.target.closest('[data-notice-delete]');if(del&&confirm('删除这条提醒？')){LS.set(K_NOTICES,LS.get(K_NOTICES,[]).filter(function(x){return x.id!==del.getAttribute('data-notice-delete');}));viewNotices();toast('提醒已删除。');}
+    };
+    body.onsubmit=function(ev){if(ev.target.id!=='noticeForm')return;ev.preventDefault();var title=$('#noticeTitle').value.trim();if(!title){toast('先写提醒标题。');return;}var list=LS.get(K_NOTICES,[]);list.push({id:uid(),title:title,date:$('#noticeDate').value||today(),body:$('#noticeBody').value.trim(),createdAt:Date.now()});if(LS.set(K_NOTICES,list)){viewNotices();toast('提醒已保存。');}};
+  }
+
   /* ================= 世界书 · 笔记本与条目 ================= */
   var K_WORLDBOOKS = 'liwu.worldbooks';
   function worldbooks(){ return LS.get(K_WORLDBOOKS, []); }
@@ -1531,7 +1585,7 @@
         });
       }
       if (ev.target.id === 'cExport'){
-        var data = { v: 8, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), memory: LS.get(K_MEMORY, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites') };
+        var data = { v: 9, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), memory: LS.get(K_MEMORY, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites'), profile: LS.get(K_PROFILE, {}), notices: LS.get(K_NOTICES, []), noticeRead: LS.get(K_NOTICE_READ, []) };
         var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -1565,6 +1619,9 @@
               if (Array.isArray(obj.memory)) LS.set(K_MEMORY, obj.memory);
               if (Array.isArray(obj.quotes)) LS.set('liwu.quotes', obj.quotes);
               if (Array.isArray(obj.favorites)) LS.set('liwu.favorites', obj.favorites);
+              if (obj.profile && typeof obj.profile === 'object') LS.set(K_PROFILE, obj.profile);
+              if (Array.isArray(obj.notices)) LS.set(K_NOTICES, obj.notices);
+              if (Array.isArray(obj.noticeRead)) LS.set(K_NOTICE_READ, obj.noticeRead);
               applyTheme();
               renderAll();
               toast('导进来了。');
