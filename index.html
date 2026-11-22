@@ -3,18 +3,29 @@
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1'>
-<meta name='theme-color' content='#EFE9DC'>
+<meta name='theme-color' content='#12141A'>
 <meta name='description' content='里屋。一张靠窗的书桌。'>
 <meta name='apple-mobile-web-app-capable' content='yes'>
 <title>里屋</title>
 <link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23EFE9DC%27/%3E%3Crect x=%2715.2%27 y=%277%27 width=%271.4%27 height=%2718%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
 <link rel='preconnect' href='https://fonts.googleapis.com'>
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
-<link rel='preconnect' href='https://cdn.staticfile.net' crossorigin>
 <link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@300;400;500&display=swap' rel='stylesheet'>
-<link rel='stylesheet' href='assets/style.css?v=29'>
-<link rel='stylesheet' href='assets/desk.css?v=29'>
-<link rel='stylesheet' href='assets/smooth.css?v=29'>
+<link rel='stylesheet' href='assets/style.css?v=30'>
+<link rel='stylesheet' href='assets/desk.css?v=30'>
+<link rel='stylesheet' href='assets/smooth.css?v=30'>
+<style>
+  #scene{display:block}
+  .up-btn{
+    position:absolute;right:14px;bottom:66px;z-index:7;
+    padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.22);
+    background:rgba(20,22,28,.52);color:#F2EEE6;
+    font:500 13px/1 -apple-system,'Noto Serif SC',serif;letter-spacing:.04em;
+    -webkit-backdrop-filter:none;backdrop-filter:none;
+    transition:transform .3s cubic-bezier(.22,.61,.36,1),background .3s;
+  }
+  .up-btn:active{transform:scale(.93);background:rgba(30,33,40,.7)}
+</style>
 </head>
 <body data-theme='paper' class='home'>
 <script>
@@ -24,14 +35,13 @@
 }catch(e){}})();
 </script>
 <div id='desk-wrap'>
-  <canvas id='stage'></canvas>
   <div class='hud'>
     <button class='hud-btn' id='hudMenu' type='button' aria-label='会话'>≡</button>
     <div class='clock'><span class='t' id='hudTime'>--:--</span><span class='d' id='hudDate'></span></div>
     <button class='pill' id='hudMode' type='button'>预览：白天</button>
   </div>
   <div class='boot' id='boot'>正在推开窗……</div>
-  <div class='desk-foot'><span>屋子是自己搭的 · 念头借自 qiaosi 的窗台</span></div>
+  <div class='desk-foot'><span>场景基于 tangfanovo/qiaosi · 窗台（AGPL-3.0）修改</span></div>
   <div class='desk-dock' id='deskDock'></div>
 </div>
 <div id='app'>
@@ -77,13 +87,11 @@
 window.addEventListener('error', function(e){
   var h = document.getElementById('hint');
   if (h) h.textContent = '出了点问题：' + (e.message || '未知');
-  var b = document.getElementById('boot');
-  if (b) b.textContent = '出了点问题：' + (e.message || '未知');
 });
 </script>
-<script src='data.js?v=29'></script>
-<script src='assets/app.js?v=29'></script>
-<script src='assets/smooth.js?v=29'></script>
-<script src='assets/room.js?v=29'></script>
+<script src='data.js?v=30'></script>
+<script src='assets/app.js?v=30'></script>
+<script src='assets/smooth.js?v=30'></script>
+<script src='assets/scene.js?v=30'></script>
 </body>
 </html>
