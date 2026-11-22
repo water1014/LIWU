@@ -1713,3 +1713,24 @@ body.room-open{overscroll-behavior:none}
  .mood-choice{min-height:60px}
  .mood-choice span{font-size:9px}
 }
+
+/* Personal moments, quotes and favorites */
+.collection-toolbar{display:flex;gap:9px;align-items:center;margin:17px 0;flex-wrap:wrap}
+.collection-toolbar input{flex:1 1 150px;min-width:0;padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--bg-2);color:var(--ink);font:inherit;font-size:12px}
+.moments-feed,.quote-list,.favorite-list{display:grid;gap:13px;margin-top:16px}
+.moment-card{padding:16px 0;border-bottom:1px solid var(--line)}
+.moment-card>time{color:var(--ink-3);font-size:10px}
+.moment-card h3{margin:7px 0;font:500 17px var(--serif)}
+.moment-card>p{margin:0 0 12px;color:var(--ink-2);font-size:13px;line-height:1.85;white-space:pre-wrap;overflow-wrap:anywhere}
+.quote-card{position:relative;padding:18px 17px 14px;border:1px solid var(--line);border-radius:15px;background:var(--bg-2)}
+.quote-mark{display:block;height:23px;color:var(--seal);font:32px/1 var(--serif)}
+.quote-card blockquote{margin:4px 0 12px;font:500 16px/1.85 var(--serif);white-space:pre-wrap;overflow-wrap:anywhere}
+.quote-card cite{display:block;color:var(--ink-3);font-size:11px;font-style:normal}
+.quote-card>p{margin:10px 0 0;color:var(--ink-2);font-size:11px;line-height:1.7}
+.quote-card>small{display:block;margin-top:8px;color:var(--ink-3);font-size:10px}
+.quote-card .planner-item-actions,.favorite-card .planner-item-actions{margin-top:13px}
+.favorite-card{padding:15px 0;border-bottom:1px solid var(--line)}
+.favorite-card-top{display:flex;justify-content:space-between;align-items:center;color:var(--ink-3);font-size:10px}
+.favorite-card-top small{color:var(--seal)}
+.favorite-card h3{margin:7px 0;font-size:14px;font-weight:600}
+.favorite-card>p{margin:0;color:var(--ink-2);font-size:12px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}
