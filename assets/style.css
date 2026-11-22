@@ -296,3 +296,45 @@ input,textarea{font-family:inherit;color:inherit}
 .track.on::after{transform:translateX(19px);background:var(--bg)}
 
 input[type='range']{width:100%;accent-color:var(--seal)}
+
+
+/* ---------- LIWU UI Skill: touch, focus and motion quality gate ---------- */
+.icon{
+  width:44px;height:44px;min-width:44px;min-height:44px;
+}
+.send,.stop{
+  width:44px;height:44px;min-width:44px;min-height:44px;
+}
+.drawer-nav button,.newchat,.chip,.ghost{
+  min-height:44px;
+}
+.sess{min-height:44px}
+.sess .more{
+  min-width:44px;min-height:44px;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.search,.field input,.field select{
+  min-height:44px;
+}
+.think summary{
+  display:flex;align-items:center;min-height:44px;
+}
+.acts{gap:6px}
+.acts button{
+  min-height:40px;padding:6px 8px;
+}
+:where(button,a,input,textarea,select,[tabindex]):focus-visible{
+  outline:2px solid var(--seal);
+  outline-offset:2px;
+}
+@media (hover:none){
+  .msg .acts{opacity:1}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
