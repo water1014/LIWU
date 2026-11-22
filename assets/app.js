@@ -535,14 +535,31 @@
     var memory = $('#homeMemory');
     memory.innerHTML = memories.length ? '<strong>' + esc(memories[0].title || '一段记忆') + '</strong><p>' + esc((memories[0].body || '').slice(0,92)) + '</p><time>' + esc(memories[0].date || '') + '</time>' : '<p class="home-empty">重要的事，会慢慢收集起来。</p>';
   }
+  var viewReturnTarget = 'home';
+  function setDrawerCurrent(target){
+    $('.drawer-nav button').forEach(function(b){
+      b.classList.toggle('nav-current', b.getAttribute('data-view') === target);
+    });
+  }
+  function backFromView(){
+    closeView();
+    if (viewReturnTarget === 'chat') showChat();
+    else showHome();
+  }
   function showHome(){
     closeDrawer(); closeView(); $('#app').hidden = true; homeScreen.hidden = false; paintHome();
+    setDrawerCurrent('home');
     $('.home-tab').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-home-tab') === 'home'); });
   }
-  function showChat(){ homeScreen.hidden = true; $('#app').hidden = false; closeView(); paintTop(); renderThread(); }
+  function showChat(){
+    homeScreen.hidden = true; $('#app').hidden = false; closeView();
+    setDrawerCurrent('chat'); paintTop(); renderThread();
+  }
   function goHomeTarget(target){
     if (target === 'home'){ showHome(); return; }
     if (target === 'chat'){ showChat(); $('#input').focus(); return; }
+    if (['diary','album','memory','settings'].indexOf(target) < 0) return;
+    viewReturnTarget = 'home';
     homeScreen.hidden = true; $('#app').hidden = true;
     if (target === 'diary') viewDiary();
     else if (target === 'album') viewAlbum();
@@ -570,7 +587,7 @@
   $('#newBtn').addEventListener('click', newSession);
   $('#newChat').addEventListener('click', function(){ newSession(); closeDrawer(); });
   $('#search').addEventListener('input', renderSessions);
-  $('#viewBack').addEventListener('click', function(){ showHome(); });
+  $('#viewBack').addEventListener('click', backFromView);
 
   $('#sessions').addEventListener('click', function(ev){
     var more = ev.target.closest('[data-more]');
@@ -702,17 +719,19 @@
     $('#viewBody').scrollTop = 0;
   }
 
-  $$('.drawer-nav button').forEach(function(b){
+  $('.drawer-nav button').forEach(function(b){
     b.addEventListener('click', function(){
       var v = b.getAttribute('data-view');
+      if (v === 'home'){ showHome(); return; }
+      if (v === 'chat'){ showChat(); $('#input').focus(); return; }
+      if (['diary','album','memory','settings'].indexOf(v) < 0) return;
+      viewReturnTarget = homeScreen.hidden && !$('#app').hidden ? 'chat' : 'home';
       closeDrawer();
-      if (v === 'home'){ showHome(); }
-      if (v === 'chat'){ showChat(); $('#input').focus(); }
-      if (v === 'diary' || v === 'album' || v === 'memory' || v === 'settings'){ homeScreen.hidden = true; $('#app').hidden = true; }
+      homeScreen.hidden = true; $('#app').hidden = true;
       if (v === 'diary') viewDiary();
-      if (v === 'album') viewAlbum();
-      if (v === 'memory') viewMemory();
-      if (v === 'settings') viewSettings();
+      else if (v === 'album') viewAlbum();
+      else if (v === 'memory') viewMemory();
+      else if (v === 'settings') viewSettings();
     });
   });
 
@@ -1024,7 +1043,7 @@
 
   document.addEventListener('keydown', function(ev){
     if (ev.key === 'Escape'){
-      if (!view.hidden) closeView();
+      if (!view.hidden) backFromView();
       else if (!drawer.hidden) closeDrawer();
     }
   });
