@@ -9,6 +9,7 @@
 <link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23EFEBE2%27/%3E%3Crect x=%2715.2%27 y=%277%27 width=%271.4%27 height=%2718%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
 <link rel='preconnect' href='https://fonts.googleapis.com'>
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+<link rel='preconnect' href='https://unpkg.com' crossorigin>
 <link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Serif+SC:wght@300;400;500&display=swap' rel='stylesheet'>
 <link rel='stylesheet' href='assets/style.css'>
 </head>
@@ -48,7 +49,7 @@
     <div class='presets'>
       <button class='chip' data-preset='deepseek' type='button'>DeepSeek</button>
       <button class='chip' data-preset='openai' type='button'>OpenAI</button>
-      <button class='chip' data-preset='go' type='button'>OpenCode Go</button>
+      <button class='chip' data-preset='opencodego' type='button'>OpenCode Go</button>
     </div>
 
     <label class='field'>
@@ -78,6 +79,23 @@
     <p class='tip'>Key 只存在这台手机的浏览器里，不进仓库，也不会上传。</p>
   </div>
 </div>
+
+<script>
+(function(){
+  var slow = setTimeout(function(){
+    var b = document.getElementById('boot');
+    if (b && !b.hidden) b.textContent = '网有点慢，3D 还在下载。下面那排先用着。';
+  }, 7000);
+
+  window.addEventListener('error', function(e){
+    var b = document.getElementById('boot');
+    if (b && !b.hidden){
+      clearTimeout(slow);
+      b.textContent = '屋子里出了点问题：' + (e.message || '未知错误') + ' —— 告诉我就行。';
+    }
+  });
+})();
+</script>
 
 <script src='data.js'></script>
 <script src='assets/panel.js'></script>
