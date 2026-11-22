@@ -1138,7 +1138,7 @@
         var text=scan;
         function has(list){return (list||[]).some(function(k){if(!k)return false;var source=String(k);return e.caseSensitive?text.indexOf(source)>=0:text.toLowerCase().indexOf(source.toLowerCase())>=0;});}
         var primary=has(e.keys),secondary=has(e.secondaryKeys);
-        var triggered=e.constant||!e.selective||(primary&&(!(e.secondaryKeys||[]).length|| (e.selectiveLogic==='or'?primary||secondary:secondary)));
+        var secondaryList=e.secondaryKeys||[];var secondaryMatch=!secondaryList.length||(e.selectiveLogic==='or'?secondary:secondaryList.every(function(k){var q=String(k);return e.caseSensitive?text.indexOf(q)>=0:text.toLowerCase().indexOf(q.toLowerCase())>=0;}));var triggered=e.constant||!e.selective||(primary&&secondaryMatch);
         if(triggered)matched.push({book:book.name,title:e.title,content:e.content,order:Number(e.insertionOrder)||100});
       });
     });
