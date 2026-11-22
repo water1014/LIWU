@@ -10,10 +10,11 @@
 <link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23EFE9DC%27/%3E%3Crect x=%2715.2%27 y=%277%27 width=%271.4%27 height=%2718%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
 <link rel='preconnect' href='https://fonts.googleapis.com'>
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+<link rel='preconnect' href='https://unpkg.com' crossorigin>
 <link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@300;400;500&display=swap' rel='stylesheet'>
-<link rel='stylesheet' href='assets/style.css?v=23'>
-<link rel='stylesheet' href='assets/desk.css?v=23'>
-<link rel='stylesheet' href='assets/smooth.css?v=23'>
+<link rel='stylesheet' href='assets/style.css?v=24'>
+<link rel='stylesheet' href='assets/desk.css?v=24'>
+<link rel='stylesheet' href='assets/smooth.css?v=24'>
 </head>
 <body data-theme='paper' class='home'>
 
@@ -35,7 +36,7 @@
 </script>
 
 <div id='desk-wrap'>
-  <iframe id='scene' src='windowsill/index.html' title='靠窗的书桌' allow='fullscreen' scrolling='no'></iframe>
+  <canvas id='stage'></canvas>
 
   <div class='hud'>
     <button class='hud-btn' id='hudMenu' type='button' aria-label='会话'>≡</button>
@@ -46,12 +47,10 @@
     <button class='pill' id='hudMode' type='button'>预览：白天</button>
   </div>
 
-  <button class='lookup' id='lookUp' type='button'>抬头看窗外</button>
-
-  <div class='boot' id='boot'>正在把窗推开……</div>
+  <div class='boot' id='boot'>正在推开窗……</div>
 
   <div class='desk-foot'>
-    <span>场景基于 tangfanovo/qiaosi · 窗台（AGPL-3.0）修改</span>
+    <span>屋子是自己搭的 · 念头借自 qiaosi 的窗台</span>
   </div>
 
   <div class='desk-dock' id='deskDock'></div>
@@ -126,9 +125,9 @@ window.addEventListener('error', function(e){
 });
 </script>
 
-<script src='data.js?v=23'></script>
-<script src='assets/app.js?v=23'></script>
-<script src='assets/scene.js?v=23'></script>
-<script src='assets/smooth.js?v=23'></script>
+<script src='data.js?v=24'></script>
+<script src='assets/app.js?v=24'></script>
+<script src='assets/smooth.js?v=24'></script>
+<script type='module' src='assets/room.js?v=24'></script>
 </body>
 </html>
