@@ -319,6 +319,31 @@
     });
     return out;
   }
+  function enabledPluginToolSpecs(){
+    return manageList('liwu.plugins').filter(function(p){return p.enabled&&p.endpoint;}).map(function(p){
+      var schema={type:'object',properties:{}};
+      if(p.inputSchema){try{schema=JSON.parse(p.inputSchema);}catch(_){schema={type:'object',properties:{}};}}
+      var name='plugin_'+String(p.id).replace(/[^a-zA-Z0-9_]/g,'').slice(0,14);
+      return {type:'function',function:{name:name,description:('Plugin '+p.name+': '+(p.description||p.category||'Custom API')).slice(0,900),parameters:schema},pluginId:p.id};
+    });
+  }
+  async function executePluginToolByName(name,args){
+    var spec=enabledPluginToolSpecs().find(function(x){return x.function.name===name;});if(!spec)return 'Plugin tool unavailable: '+name;
+    var plugin=manageList('liwu.plugins').find(function(x){return x.id===spec.pluginId;});if(!plugin)return 'Plugin no longer exists.';
+    var method=String(plugin.method||'POST').toUpperCase(),url=plugin.endpoint,headers={'Content-Type':'application/json','Accept':'application/json'};
+    if(plugin.token)headers.Authorization=/^Bearer\s/i.test(plugin.token)?plugin.token:'Bearer '+plugin.token;
+    if(plugin.headers){try{var custom=JSON.parse(plugin.headers);Object.keys(custom).forEach(function(k){headers[k]=String(custom[k]);});}catch(_){return 'Plugin custom headers are invalid JSON.';}}
+    var options={method:method,headers:headers,signal:ctrl&&ctrl.signal};
+    if(method==='GET'||method==='HEAD'){var query=new URLSearchParams();Object.keys(args||{}).forEach(function(k){var v=args[k];query.set(k,typeof v==='string'?v:JSON.stringify(v));});if(query.toString())url+=(url.indexOf('?')>=0?'&':'?')+query.toString();}
+    else options.body=JSON.stringify(args||{});
+    try{var res=await fetch(url,options),text=await res.text();if(!res.ok)throw new Error('HTTP '+res.status+' '+text.slice(0,180));try{return JSON.stringify(JSON.parse(text));}catch(_){return text.slice(0,6000);}}
+    catch(e){return 'Plugin request failed: '+String(e.message||e);}
+  }
+  async function executeAnyToolByName(name,args){
+    if(enabledMcpToolSpecs().some(function(x){return x.function.name===name;}))return executeMcpToolByName(name,args);
+    return executePluginToolByName(name,args);
+  }
+
   function mcpResponsePayload(text){
     try{return JSON.parse(text);}catch(_){
       var line=String(text||'').split(/\r?\n/).filter(function(x){return x.indexOf('data:')===0;}).pop();
@@ -350,7 +375,7 @@
     var sys = cfg.sys + profilePrompt() + activeWorldbookContext(hist);
     var arr = [{ role: 'system', content: sys }].concat(hist.map(function(m){ return { role: m.role, content: m.content }; }));
     var body = { model: cfg.model, messages: arr, stream: !!stream };
-    var tools=enabledMcpToolSpecs();
+    var tools=enabledMcpToolSpecs().concat(enabledPluginToolSpecs());
     if(tools.length){body.tools=tools.map(function(x){return {type:'function',function:x.function};});body.tool_choice='auto';body.stream=false;}
     if (typeof cfg.temp === 'number') body.temperature = cfg.temp;
     return body;
@@ -465,7 +490,7 @@
           for(var tc=0;tc<one.tool_calls.length;tc++){
             var call=one.tool_calls[tc],fn=call.function||{},args={};
             try{args=fn.arguments?JSON.parse(fn.arguments):{};}catch(_){args={};}
-            var result=await executeMcpToolByName(fn.name,args);
+            var result=await executeAnyToolByName(fn.name,args);
             requestBody.messages.push({role:'tool',tool_call_id:call.id,content:String(result).slice(0,6000)});
           }
           toolRound++;
@@ -1600,19 +1625,19 @@
     var key='liwu.plugins',editing='';
     function render(){
       var all=manageList(key),current=all.find(function(x){return x.id===editing;});
-      var html='<div class="planner-intro"><p class="lead">管理里屋的扩展清单。这里保存插件说明、服务地址和启用状态，尚未接入的插件不会假装已经能调用。</p><div class="planner-stat"><strong>'+all.filter(function(x){return x.enabled;}).length+'/'+all.length+'</strong><span>已启用</span></div></div>'+
+      var html='<div class="planner-intro"><p class="lead">管理里屋的扩展工具。启用且填写服务地址的插件会作为函数工具提供给支持 function calling 的聊天模型；服务端跨域和权限仍需正确配置。</p><div class="planner-stat"><strong>'+all.filter(function(x){return x.enabled;}).length+'/'+all.length+'</strong><span>已启用</span></div></div>'+
         '<div class="planner-toolbar"><button class="ghost solid" id="pluginNew" type="button">＋ 添加插件</button></div>'+
-        '<form class="planner-form" id="pluginForm" '+(editing?'':'hidden')+'><strong>'+(editing?'修改插件':'添加插件')+'</strong><input id="pluginName" maxlength="80" required value="'+esc(current?current.name:'')+'" placeholder="插件名称"><div class="planner-fields"><label>分类<select id="pluginCategory"><option>效率</option><option>创作</option><option>生活</option><option>媒体</option><option>其他</option></select></label><label>状态<select id="pluginEnabled"><option value="1">启用</option><option value="0">停用</option></select></label></div><input id="pluginEndpoint" type="url" value="'+esc(current?current.endpoint:'')+'" placeholder="服务地址（可选）"><textarea id="pluginDescription" rows="3" placeholder="功能说明与使用方式">'+esc(current?current.description:'')+'</textarea><div class="planner-form-actions"><button class="ghost solid" type="submit">保存插件</button><button class="ghost" id="pluginCancel" type="button">取消</button></div></form>'+
+        '<form class="planner-form" id="pluginForm" '+(editing?'':'hidden')+'><strong>'+(editing?'修改插件':'添加插件')+'</strong><input id="pluginName" maxlength="80" required value="'+esc(current?current.name:'')+'" placeholder="插件名称"><div class="planner-fields"><label>分类<select id="pluginCategory"><option>效率</option><option>创作</option><option>生活</option><option>媒体</option><option>其他</option></select></label><label>状态<select id="pluginEnabled"><option value="1">启用</option><option value="0">停用</option></select></label></div><input id="pluginEndpoint" type="url" value="'+esc(current?current.endpoint:'')+'" placeholder="服务地址（可选）"><div class="planner-fields"><label>请求方式<select id="pluginMethod"><option>POST</option><option>GET</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select></label><label>Bearer Token<input id="pluginToken" type="password" value="'+esc(current?current.token:'')+'" placeholder="可选"></label></div><label>自定义请求头 JSON（可选）<textarea id="pluginHeaders" rows="2">'+esc(current?current.headers:'')+'</textarea></label><label>参数 JSON Schema（可选）<textarea id="pluginSchema" rows="4" placeholder=\'{"type":"object","properties":{"query":{"type":"string"}}}\'>'+esc(current?current.inputSchema:'')+'</textarea></label><textarea id="pluginDescription" rows="3" placeholder="功能说明与使用方式">'+esc(current?current.description:'')+'</textarea><div class="planner-form-actions"><button class="ghost solid" type="submit">保存插件</button><button class="ghost" id="pluginCancel" type="button">取消</button></div></form>'+
         (all.length?'<div class="integration-list">'+all.map(function(x){return '<article class="integration-card"><div class="integration-head"><div><strong>'+esc(x.name)+'</strong><small>'+esc(x.category||'其他')+'</small></div><span class="integration-status '+(x.enabled?'ok':'')+'">'+(x.enabled?'已启用':'已停用')+'</span></div><p>'+esc(x.description||'暂无说明')+'</p>'+(x.endpoint?'<p>'+esc(x.endpoint)+'</p>':'')+'<div class="planner-item-actions"><button class="mini" type="button" data-plugin-toggle="'+esc(x.id)+'">'+(x.enabled?'停用':'启用')+'</button><button class="mini" type="button" data-plugin-edit="'+esc(x.id)+'">编辑</button><button class="mini danger" type="button" data-plugin-delete="'+esc(x.id)+'">删除</button></div></article>';}).join('')+'</div>':'<div class="blank">插件清单还空着。可以先登记你准备接入的扩展。</div>');
       openView('插件','Plugins',html);var body=$('#viewBody');
       body.onclick=function(ev){
         if(ev.target.id==='pluginNew'){editing='';render();$('#pluginForm').hidden=false;$('#pluginName').focus();return;}
         if(ev.target.id==='pluginCancel'){editing='';render();return;}
-        var edit=ev.target.closest('[data-plugin-edit]');if(edit){editing=edit.getAttribute('data-plugin-edit');render();$('#pluginForm').hidden=false;$('#pluginCategory').value=current&&current.category||'其他';$('#pluginEnabled').value=current&&current.enabled?'1':'0';return;}
+        var edit=ev.target.closest('[data-plugin-edit]');if(edit){editing=edit.getAttribute('data-plugin-edit');render();$('#pluginForm').hidden=false;var selected=manageList(key).find(function(x){return x.id===editing;});$('#pluginCategory').value=selected&&selected.category||'其他';$('#pluginEnabled').value=selected&&selected.enabled?'1':'0';$('#pluginMethod').value=selected&&selected.method||'POST';return;}
         var toggle=ev.target.closest('[data-plugin-toggle]');if(toggle){var list=manageList(key),item=list.find(function(x){return x.id===toggle.getAttribute('data-plugin-toggle');});if(item){item.enabled=!item.enabled;manageSave(key,list);render();}return;}
         var del=ev.target.closest('[data-plugin-delete]');if(del&&confirm('删除这个插件配置？')){manageSave(key,manageList(key).filter(function(x){return x.id!==del.getAttribute('data-plugin-delete');}));editing='';render();}
       };
-      body.onsubmit=function(ev){if(ev.target.id!=='pluginForm')return;ev.preventDefault();var name=$('#pluginName').value.trim();if(!name){toast('请填写插件名称。');return;}var list=manageList(key),item={id:editing||uid(),name:name,category:$('#pluginCategory').value,enabled:$('#pluginEnabled').value==='1',endpoint:$('#pluginEndpoint').value.trim(),description:$('#pluginDescription').value.trim(),createdAt:current?current.createdAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=item;else list.push(item);if(manageSave(key,list)){editing='';render();toast('插件配置已保存。');}};
+      body.onsubmit=function(ev){if(ev.target.id!=='pluginForm')return;ev.preventDefault();var name=$('#pluginName').value.trim();if(!name){toast('请填写插件名称。');return;}var headers=$('#pluginHeaders').value.trim(),schema=$('#pluginSchema').value.trim();if(headers){try{var h=JSON.parse(headers);if(!h||typeof h!=='object'||Array.isArray(h))throw 0;}catch(e){toast('自定义请求头不是有效 JSON。');return;}}if(schema){try{var s=JSON.parse(schema);if(!s||typeof s!=='object'||Array.isArray(s))throw 0;}catch(e){toast('参数 JSON Schema 格式不正确。');return;}}var list=manageList(key),item={id:editing||uid(),name:name,category:$('#pluginCategory').value,enabled:$('#pluginEnabled').value==='1',endpoint:$('#pluginEndpoint').value.trim(),method:$('#pluginMethod').value,token:$('#pluginToken').value.trim(),headers:headers,inputSchema:schema,description:$('#pluginDescription').value.trim(),createdAt:current?current.createdAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=item;else list.push(item);if(manageSave(key,list)){editing='';render();toast('插件配置已保存。');}};
     }
     render();
   }
