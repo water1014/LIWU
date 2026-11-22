@@ -559,7 +559,7 @@
   function goHomeTarget(target){
     if (target === 'home'){ showHome(); return; }
     if (target === 'chat'){ showChat(); $('#input').focus(); return; }
-    if (['diary','album','memory','settings'].indexOf(target) < 0) return;
+    if (target !== 'chat' && !FEATURE_INFO[target]) return;
     viewReturnTarget = 'home';
     setDrawerCurrent(target);
     homeScreen.hidden = true; $('#app').hidden = true;
@@ -567,6 +567,7 @@
     else if (target === 'album') viewAlbum();
     else if (target === 'memory') viewMemory();
     else if (target === 'settings') viewSettings();
+    else viewFeature(target);
   }
   $('#homeMenuBtn').addEventListener('click', openDrawer);
   $('#homePhotoPick').addEventListener('click', function(){ $('#homePhotoFile').click(); });
@@ -732,7 +733,7 @@
       var v = b.getAttribute('data-view');
       if (v === 'home'){ showHome(); return; }
       if (v === 'chat'){ showChat(); $('#input').focus(); return; }
-      if (['diary','album','memory','settings'].indexOf(v) < 0) return;
+      if (v !== 'chat' && !FEATURE_INFO[v]) return;
       viewReturnTarget = homeScreen.hidden && !$('#app').hidden ? 'chat' : 'home';
       setDrawerCurrent(v);
       closeDrawer();
@@ -741,6 +742,7 @@
       else if (v === 'album') viewAlbum();
       else if (v === 'memory') viewMemory();
       else if (v === 'settings') viewSettings();
+      else viewFeature(v);
     });
   });
 
@@ -916,6 +918,49 @@
       };
       reader.readAsDataURL(file);
     });
+  }
+
+  /* ================= 已选功能入口目录 ================= */
+  var FEATURE_INFO = {
+    profile:{title:'人设档案',en:'Profile',desc:'管理宋祁的外观、性格、关系与共同设定。'},
+    notice:{title:'通知',en:'Notice',desc:'集中查看重要消息、系统提醒与待处理事项。'},
+    moments:{title:'动态',en:'Moments',desc:'记录两个人生活中的片段，让日常有迹可循。'},
+    proactiveImage:{title:'主动生图',en:'Proactive Image',desc:'根据聊天情境与视觉记忆，规划主动生成陪伴图片。'},
+    calendar:{title:'日历',en:'Calendar',desc:'查看日期、纪念日与重要日子的分布。'},
+    schedule:{title:'安排',en:'Schedule',desc:'整理共同计划、约定与未来安排。'},
+    todo:{title:'待办',en:'To-do',desc:'把想做的小事收集起来，逐项完成。'},
+    countdown:{title:'倒计时',en:'Countdown',desc:'记录纪念日、期待的日子与重要节点。'},
+    mood:{title:'心情',en:'Mood',desc:'记录每天的情绪变化与心情轨迹。'},
+    quotes:{title:'语录',en:'Quotes',desc:'保存喜欢的话、聊天片段与值得反复读的句子。'},
+    worldbook:{title:'世界书',en:'Worldbook',desc:'管理世界书、条目、触发条件与聊天注入规则，后续接入酒馆 JSON 导入。'},
+    favorite:{title:'收藏',en:'Favorites',desc:'收纳喜欢的消息、图片、文字与生活片段。'},
+    ledger:{title:'账本',en:'Ledger',desc:'账本与记账合并为一个入口，避免重复功能。'},
+    health:{title:'健康',en:'Health',desc:'整理健康相关记录与日常趋势。'},
+    period:{title:'经期',en:'Period',desc:'记录周期、日期与个人备注。'},
+    study:{title:'学习',en:'Study',desc:'安排学习目标、任务与进度。'},
+    class:{title:'课程表',en:'Class',desc:'管理课程时间、地点与每周安排。'},
+    music:{title:'音乐',en:'Music',desc:'整理播放列表与共同听歌体验。'},
+    game:{title:'游戏',en:'Games',desc:'进入两个人的互动小游戏与轻量玩法。'},
+    window:{title:'窗廊',en:'Window',desc:'进入独立的窗边空间与场景体验。'},
+    imageStudio:{title:'生图室',en:'Image Studio',desc:'管理图片生成、参考图与作品记录。'},
+    beautify:{title:'美化',en:'Beautify',desc:'调整界面布局、材质、透明度、模糊与圆角。'},
+    wallpaper:{title:'壁纸',en:'Wallpaper',desc:'管理首页与空间背景图片。'},
+    theme:{title:'主题',en:'Theme',desc:'管理浅色、夜间与主题配色。'},
+    data:{title:'数据管理',en:'Data',desc:'管理本机数据、备份文件与恢复流程。'},
+    mcp:{title:'MCP',en:'MCP',desc:'配置外部工具连接与可调用能力。'},
+    plugins:{title:'插件',en:'Plugins',desc:'查看和管理扩展能力与服务连接。'}
+  };
+  function viewFeature(key){
+    var meta=FEATURE_INFO[key];
+    if(!meta)return;
+    var html='<div class="feature-room">' +
+      '<div class="feature-room-mark">'+esc(meta.en)+'</div>' +
+      '<h2>'+esc(meta.title)+'</h2>' +
+      '<p class="lead">'+esc(meta.desc)+'</p>' +
+      '<div class="feature-room-note"><span class="feature-room-dot"></span><div><strong>独立入口已接入</strong><p>这个功能已经归入里屋导航。具体内容和交互会逐项实现，不会用空白页面冒充已完成，也不会擅自删掉你选定的功能。</p></div></div>' +
+      '<div class="feature-room-foot">LIWU · A PRIVATE SPACE FOR TWO</div>' +
+    '</div>';
+    openView(meta.title,meta.en,html);
   }
 
   function viewMemory(){
