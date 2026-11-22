@@ -540,6 +540,7 @@
     var diaries = diaryItems();
     var diary = $('#homeDiary');
     diary.innerHTML = diaries.length ? '<strong>' + esc(diaries[0].title || '今天的日记') + '</strong><p>' + esc((diaries[0].body || '').slice(0,76) || '留下一点今天的记录。') + '</p><time>' + esc(diaries[0].date) + '</time>' : '<p class="home-empty">今天还没有写日记，留一句给未来的我们。</p>';
+    applySavedWallpaper();
     var memories = (D.memory || []).concat(LS.get(K_MEMORY, []));
     var memory = $('#homeMemory');
     memory.innerHTML = memories.length ? '<strong>' + esc(memories[0].title || '一段记忆') + '</strong><p>' + esc((memories[0].body || '').slice(0,92)) + '</p><time>' + esc(memories[0].date || '') + '</time>' : '<p class="home-empty">重要的事，会慢慢收集起来。</p>';
@@ -581,6 +582,10 @@
     else if (target === 'period') viewPeriod();
     else if (target === 'study') viewStudy();
     else if (target === 'class') viewClass();
+    else if (target === 'beautify') viewSettingsSection('玻璃材质','美化','Beautify');
+    else if (target === 'theme') viewSettingsSection('外观','主题','Theme');
+    else if (target === 'data') viewSettingsSection('数据','数据管理','Data');
+    else if (target === 'wallpaper') viewWallpaper();
     else if (target === 'music') viewMusic();
     else if (target === 'game') viewGame();
     else if (target === 'window') viewWindow();
@@ -596,12 +601,11 @@
   }
   $('#homeMenuBtn').addEventListener('click', openDrawer);
   $('#homePhotoPick').addEventListener('click', function(){ $('#homePhotoFile').click(); });
-  $('#homePhotoFile').addEventListener('change', function(ev){
+  $('#homePhotoFile').addEventListener('change', async function(ev){
     var file = ev.target.files && ev.target.files[0];
     if (!file) return;
-    var url = URL.createObjectURL(file);
-    $('#homePhotoImg').src = url;
-    $('#homePhotoWindow').classList.add('has-photo');
+    try{var data = await compressAlbumImage(file);if(LS.set('liwu.wallpaper',data)){applySavedWallpaper();toast('首页照片已保存。');}}
+    catch(e){toast('图片保存失败，请换一张较小的图片。');}
   });
   $('#homeScreen').addEventListener('click', function(ev){
     var go = ev.target.closest('[data-home-go]');
@@ -788,6 +792,10 @@
       else if (v === 'period') viewPeriod();
       else if (v === 'study') viewStudy();
       else if (v === 'class') viewClass();
+      else if (v === 'beautify') viewSettingsSection('玻璃材质','美化','Beautify');
+      else if (v === 'theme') viewSettingsSection('外观','主题','Theme');
+      else if (v === 'data') viewSettingsSection('数据','数据管理','Data');
+      else if (v === 'wallpaper') viewWallpaper();
       else if (v === 'music') viewMusic();
       else if (v === 'game') viewGame();
       else if (v === 'window') viewWindow();
@@ -1467,6 +1475,38 @@
       };
     }
     render();
+  }
+
+
+  /* ================= 外观与数据入口 ================= */
+  function viewSettingsSection(section,title,en){
+    viewSettings();
+    $('#viewTitle').textContent=title;
+    $('#viewEn').textContent=en;
+    var body=$('#viewBody'),inner=body.querySelector('.view-inner');
+    Array.from(inner.children).forEach(function(node){
+      if(node.classList&&node.classList.contains('group')){
+        var h=node.querySelector('h3');node.hidden=!h||h.textContent.trim()!==section;
+      }else if(node.classList&&node.classList.contains('row')){node.hidden=false;}
+      else if(node.classList&&node.classList.contains('tip')){node.hidden=true;}
+    });
+  }
+  function applySavedWallpaper(){
+    var src=LS.get('liwu.wallpaper',''),img=$('#homePhotoImg'),win=$('#homePhotoWindow');
+    if(!img||!win)return;
+    if(src){img.src=src;win.classList.add('has-photo');}
+    else{img.removeAttribute('src');win.classList.remove('has-photo');}
+  }
+  function viewWallpaper(){
+    var src=LS.get('liwu.wallpaper','');
+    var html='<div class="planner-intro"><p class="lead">给首页的照片窗换一张图。图片压缩后保存在本机，刷新页面也会保留。</p></div>'+
+      '<div class="wallpaper-preview" id="wallpaperPreview">'+(src?'<img src="'+esc(src)+'" alt="当前首页照片">':'<div><strong>首页照片窗</strong><small>还没有设置图片</small></div>')+'</div>'+
+      '<div class="wallpaper-actions"><label class="ghost solid">选择照片<input id="wallpaperFile" type="file" accept="image/*" hidden></label><button class="ghost" id="wallpaperRemove" type="button" '+(src?'':'disabled')+'>移除照片</button></div>'+
+      '<p class="tip">建议使用横向或方形图片。过大的图片会自动缩小并压缩。</p>';
+    openView('壁纸','Wallpaper',html);
+    var body=$('#viewBody');
+    body.onchange=async function(ev){if(ev.target.id!=='wallpaperFile')return;var file=ev.target.files&&ev.target.files[0];if(!file)return;try{var data=await compressAlbumImage(file);if(LS.set('liwu.wallpaper',data)){applySavedWallpaper();viewWallpaper();toast('首页照片已保存。');}}catch(e){toast('图片保存失败，请换一张较小的图片。');}};
+    body.onclick=function(ev){if(ev.target.id==='wallpaperRemove'&&confirm('移除首页照片？')){LS.set('liwu.wallpaper','');applySavedWallpaper();viewWallpaper();toast('首页照片已移除。');}};
   }
 
   /* ================= 世界书 · 笔记本与条目 ================= */
