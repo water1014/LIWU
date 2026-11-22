@@ -241,6 +241,15 @@
     g.arcTo(x, y, x + w, y, r);
     g.closePath();
   }
+  function drawCover(g, img, x, y, w, h){
+    var s = Math.max(w / img.width, h / img.height);
+    g.save();
+    g.beginPath();
+    g.rect(x, y, w, h);
+    g.clip();
+    g.drawImage(img, x + (w - img.width * s) / 2, y + (h - img.height * s) / 2, img.width * s, img.height * s);
+    g.restore();
+  }
 
   var SERIF = 'Noto Serif SC, Songti SC, serif';
   var NUM = 'Cormorant Garamond, Songti SC, Georgia, serif';
@@ -260,76 +269,66 @@
     g.fillStyle = paperBG();
     g.fillRect(0, 0, W, H);
 
-    // 刊名
-    g.fillStyle = ink();
     g.textAlign = 'left';
+    g.fillStyle = ink();
     g.font = '500 76px ' + SERIF;
-    g.fillText('里屋', 54, 116);
+    g.fillText('里屋', 54, 118);
 
     g.fillStyle = RED;
-    g.fillRect(54, 132, 34, 3);
+    g.fillRect(54, 134, 34, 3);
 
-    // 副标
     g.fillStyle = sub();
     g.font = '400 14px ' + NUM;
-    g.fillText('L I W U   —   A   S M A L L   R O O M', 100, 138);
+    g.fillText('L I W U   —   A   S M A L L   R O O M', 100, 140);
 
-    // 期号
     g.textAlign = 'right';
-    g.font = 'italic 400 19px ' + NUM;
     g.fillStyle = ink();
-    g.fillText('VOL. 01', W - 54, 92);
+    g.font = 'italic 400 19px ' + NUM;
+    g.fillText('VOL. 01', W - 54, 94);
     g.fillStyle = sub();
     g.font = '400 13px ' + NUM;
-    g.fillText('2026 · 11', W - 54, 116);
+    g.fillText('2026 · 11', W - 54, 118);
+    g.textAlign = 'left';
 
-    // 横线
     g.strokeStyle = mode === 'night' ? 'rgba(231,226,214,.2)' : 'rgba(120,100,70,.28)';
     g.lineWidth = 1;
-    g.beginPath(); g.moveTo(54, 166); g.lineTo(W - 54, 166); g.stroke();
+    g.beginPath(); g.moveTo(54, 168); g.lineTo(W - 54, 168); g.stroke();
 
-    // 封面大图
-    var ix = 54, iy = 190, iw = W - 108, ih = 520;
+    var ix = 54, iy = 192, iw = W - 108, ih = 512;
     g.fillStyle = mode === 'night' ? '#2A2620' : '#E4DCCC';
     g.fillRect(ix, iy, iw, ih);
 
     if (shotBig && shotBig.ok){
-      var s = Math.max(iw / shotBig.img.width, ih / shotBig.img.height);
-      g.save();
-      g.beginPath(); g.rect(ix, iy, iw, ih); g.clip();
-      g.drawImage(shotBig.img, ix + (iw - shotBig.img.width * s) / 2, iy + (ih - shotBig.img.height * s) / 2, shotBig.img.width * s, shotBig.img.height * s);
-      g.restore();
+      drawCover(g, shotBig.img, ix, iy, iw, ih);
     } else {
       g.fillStyle = sub();
       g.textAlign = 'center';
       g.font = '400 19px ' + SERIF;
       g.fillText('封面还空着', ix + iw / 2, iy + ih / 2 - 8);
       g.font = '400 14px ' + SERIF;
-      g.fillText('放一张图进去，它就上封面', ix + iw / 2, iy + ih / 2 + 24);
+      g.fillText('放一张图进去，它就上封面', ix + iw / 2, iy + ih / 2 + 26);
       g.textAlign = 'left';
     }
 
-    // 封面语
     g.fillStyle = ink();
     g.font = '400 33px ' + SERIF;
-    g.fillText(D.hero || '屋子不大，够两个人住。', 54, 782);
+    g.fillText(D.hero || '屋子不大，够两个人住。', 54, 776);
 
     var capText = (shotBig && shotBig.ok && D.album && D.album[0])
       ? (D.album[0].caption || D.album[0].date || '')
       : '本期封面';
     g.fillStyle = sub();
     g.font = '400 14px ' + SERIF;
-    g.fillText(capText, 54, 814);
+    g.fillText(capText, 54, 808);
 
-    // 要目
-    g.beginPath(); g.moveTo(54, 848); g.lineTo(W - 54, 848); g.stroke();
+    g.beginPath(); g.moveTo(54, 842); g.lineTo(W - 54, 842); g.stroke();
 
     g.fillStyle = sub();
     g.font = '400 13px ' + SERIF;
-    g.fillText('本期要目   IN THIS ISSUE', 54, 880);
+    g.fillText('本期要目   IN THIS ISSUE', 54, 874);
 
     var memos = (D.memory || []).slice(0, 3);
-    var y = 918;
+    var y = 912;
     for (var i = 0; i < memos.length; i++){
       g.fillStyle = ink();
       g.font = '400 19px ' + SERIF;
@@ -339,24 +338,24 @@
       g.font = 'italic 400 17px ' + NUM;
       g.fillText('0' + (i + 1), W - 54, y);
       g.textAlign = 'left';
-      y += 32;
+      y += 30;
     }
 
-    // 页脚
     var w = D.weather || {};
-    g.beginPath(); g.moveTo(54, 1000); g.lineTo(W - 54, 1000); g.stroke();
+    g.strokeStyle = mode === 'night' ? 'rgba(231,226,214,.2)' : 'rgba(120,100,70,.28)';
+    g.beginPath(); g.moveTo(54, 986); g.lineTo(W - 54, 986); g.stroke();
     g.fillStyle = sub();
     g.font = '400 13px ' + NUM;
-    g.fillText((w.temp || '—') + '   ' + (w.text || ''), 54, 1024);
+    g.fillText((w.temp || '—') + '   ' + (w.text || ''), 54, 1008);
     var dc = dayCount();
     g.textAlign = 'right';
     g.font = 'italic 400 15px ' + NUM;
-    g.fillText(dc ? ('第 ' + dc + ' 天') : '第 — 天', W - 54, 1024);
+    g.fillText(dc ? ('第 ' + dc + ' 天') : '第 — 天', W - 54, 1008);
     g.textAlign = 'left';
 
     if (coverTex) coverTex.dispose();
     coverTex = tex(c);
-    if (magMesh) { magMesh.material.map = coverTex; magMesh.material.needsUpdate = true; }
+    if (magFace) { magFace.material.map = coverTex; magFace.material.needsUpdate = true; }
   }
 
   /* ---- 压在下头的旧纸（记忆） ---- */
@@ -374,20 +373,20 @@
 
     g.fillStyle = sub();
     g.font = '400 20px ' + SERIF;
-    g.fillText('记   MEMORY', 54, 120);
+    g.fillText('记   M E M O R Y', 54, 120);
 
     g.strokeStyle = mode === 'night' ? 'rgba(231,226,214,.12)' : 'rgba(120,100,70,.22)';
-    for (var y = 170; y < H - 120; y += 46){
+    for (var y = 170; y < H - 130; y += 46){
       g.beginPath(); g.moveTo(54, y); g.lineTo(W - 54, y); g.stroke();
     }
 
     g.fillStyle = sub();
     g.font = '400 15px ' + SERIF;
-    g.fillText('怕忘的事，一句一件。', 54, H - 70);
+    g.fillText('怕忘的事，一句一件。', 54, H - 66);
 
     if (underTex) underTex.dispose();
     underTex = tex(c);
-    if (underMesh) { underMesh.material.map = underTex; underMesh.material.needsUpdate = true; }
+    if (underFace) { underFace.material.map = underTex; underFace.material.needsUpdate = true; }
   }
 
   /* ---- 拍立得 ---- */
@@ -407,13 +406,7 @@
     g.fillStyle = mode === 'night' ? '#2A2620' : '#E7DFCE';
     g.fillRect(px, py, pw, ph);
 
-    if (shotSmall && shotSmall.ok){
-      var s = Math.max(pw / shotSmall.img.width, ph / shotSmall.img.height);
-      g.save();
-      g.beginPath(); g.rect(px, py, pw, ph); g.clip();
-      g.drawImage(shotSmall.img, px + (pw - shotSmall.img.width * s) / 2, py + (ph - shotSmall.img.height * s) / 2, shotSmall.img.width * s, shotSmall.img.height * s);
-      g.restore();
-    }
+    if (shotSmall && shotSmall.ok) drawCover(g, shotSmall.img, px, py, pw, ph);
 
     g.fillStyle = sub();
     g.textAlign = 'center';
@@ -423,7 +416,7 @@
 
     if (polTex) polTex.dispose();
     polTex = tex(c);
-    if (polMesh) { polMesh.material.map = polTex; polMesh.material.needsUpdate = true; }
+    if (polFace) { polFace.material.map = polTex; polFace.material.needsUpdate = true; }
   }
 
   /* ---- 便签 ---- */
@@ -454,7 +447,7 @@
 
     if (noteTex) noteTex.dispose();
     noteTex = tex(c);
-    if (noteMesh) { noteMesh.material.map = noteTex; noteMesh.material.needsUpdate = true; }
+    if (noteFace) { noteFace.material.map = noteTex; noteFace.material.needsUpdate = true; }
   }
 
   /* ---- 工牌 ---- */
@@ -491,16 +484,21 @@
 
     if (tagTex) tagTex.dispose();
     tagTex = tex(c);
-    if (tagMesh) { tagMesh.material.map = tagTex; tagMesh.material.needsUpdate = true; }
+    if (tagFace) { tagFace.material.map = tagTex; tagFace.material.needsUpdate = true; }
   }
 
   /* ============ 物件 ============ */
 
-  var magMesh = null, underMesh = null, polMesh = null, noteMesh = null, tagMesh = null;
+  var magMesh = null, magFace = null;
+  var underMesh = null, underFace = null;
+  var polMesh = null, polFace = null;
+  var noteMesh = null, noteFace = null;
+  var tagMesh = null, tagFace = null;
   var vinylMesh = null;
 
   function sheet(w, h, th, texture, tint){
     var g = new THREE.Group();
+
     var body = new THREE.Mesh(
       new THREE.BoxGeometry(w, th, h),
       new THREE.MeshStandardMaterial({ color: tint, roughness: 0.95 })
@@ -514,7 +512,7 @@
       new THREE.MeshStandardMaterial({ map: texture, roughness: 0.95 })
     );
     face.rotation.x = -Math.PI / 2;
-    face.position.y = th / 2 + 0.001;
+    face.position.y = th / 2 + 0.0015;
     face.receiveShadow = true;
     g.add(face);
 
@@ -522,37 +520,38 @@
     return g;
   }
 
-  function buildAll(){
-    drawMagazine();
-    magMesh = sheet(1.5, 2.0, 0.012, coverTex, mode === 'night' ? 0x24211C : 0xFCFAF3);
-    magMesh.userData.key = 'album';
-    scene.add(magMesh);
+  drawMagazine();
+  drawUnder();
+  drawPolaroid();
+  drawNote();
+  drawTag();
 
-    drawUnder();
-    underMesh = sheet(1.44, 1.94, 0.008, underTex, mode === 'night' ? 0x1F1C18 : 0xEDE6D7);
-    underMesh.userData.key = 'memory';
-    scene.add(underMesh);
+  magMesh = sheet(1.5, 2.0, 0.012, coverTex, mode === 'night' ? 0x24211C : 0xFCFAF3);
+  magFace = magMesh.userData.face;
+  magMesh.userData.key = 'album';
+  scene.add(magMesh);
 
-    drawPolaroid();
-    polMesh = sheet(0.62, 0.75, 0.01, polTex, mode === 'night' ? 0x242018 : 0xFFFDF7);
-    polMesh.userData.key = 'album';
-    scene.add(polMesh);
+  underMesh = sheet(1.44, 1.94, 0.008, underTex, mode === 'night' ? 0x1F1C18 : 0xEDE6D7);
+  underFace = underMesh.userData.face;
+  underMesh.userData.key = 'memory';
+  scene.add(underMesh);
 
-    drawNote();
-    noteMesh = sheet(0.56, 0.66, 0.014, noteTex, mode === 'night' ? 0x3E3922 : 0xF5E8A4);
-    noteMesh.userData.key = 'diary';
-    scene.add(noteMesh);
+  polMesh = sheet(0.62, 0.75, 0.01, polTex, mode === 'night' ? 0x242018 : 0xFFFDF7);
+  polFace = polMesh.userData.face;
+  polMesh.userData.key = 'album';
+  scene.add(polMesh);
 
-    drawTag();
-    tagMesh = sheet(0.44, 0.57, 0.016, tagTex, mode === 'night' ? 0x221F1B : 0xFBF8F0);
-    tagMesh.userData.key = 'settings';
-    scene.add(tagMesh);
+  noteMesh = sheet(0.56, 0.66, 0.014, noteTex, mode === 'night' ? 0x3E3922 : 0xF5E8A4);
+  noteFace = noteMesh.userData.face;
+  noteMesh.userData.key = 'diary';
+  scene.add(noteMesh);
 
-    vinylMesh = buildVinyl();
-    scene.add(vinylMesh);
-  }
+  tagMesh = sheet(0.44, 0.57, 0.016, tagTex, mode === 'night' ? 0x221F1B : 0xFBF8F0);
+  tagFace = tagMesh.userData.face;
+  tagMesh.userData.key = 'settings';
+  scene.add(tagMesh);
 
-  function buildVinyl(){
+  vinylMesh = (function(){
     var g = new THREE.Group();
 
     var base = new THREE.Mesh(
@@ -592,15 +591,14 @@
     g.userData.spin = disc;
     g.userData.baseBox = base;
     return g;
-  }
-
-  buildAll();
+  })();
+  scene.add(vinylMesh);
 
   /* ============ 摆位 ============ */
 
   var HOME = {
     mag: { x: 0, z: 0.02, ry: 0.008 },
-    under: { x: 0.03, z: 0.06, ry: 0.06 },
+    under: { x: 0.04, z: 0.07, ry: 0.07 },
     polaroid: { x: -1.26, z: -1.42, ry: -0.07 },
     note: { x: 1.22, z: -1.45, ry: 0.05 },
     vinyl: { x: 1.04, z: 1.56, ry: -0.02 },
@@ -624,12 +622,12 @@
     things.push(obj);
   }
 
-  place('under', underMesh, 0.004);
-  place('mag', magMesh, 0.012);
-  place('polaroid', polMesh, 0.006);
-  place('note', noteMesh, 0.008);
+  place('under', underMesh, 0.002);
+  place('mag', magMesh, 0.01);
+  place('polaroid', polMesh, 0.004);
+  place('note', noteMesh, 0.006);
   place('vinyl', vinylMesh, 0);
-  place('tag', tagMesh, 0.009);
+  place('tag', tagMesh, 0.008);
 
   /* ============ 重绘 / 换肤色 ============ */
 
@@ -804,9 +802,9 @@
   }
 
   var list = D.album || [];
-  if (list[0] && list[0].src) loadPhoto(list[0].src, function(o){ shotBig = o; drawMagazine(); });
+  if (list[0] && list[0].src) loadPhoto(list[0].src, function(o){ shotBig = o; drawMagazine(); render(); });
   var second = list[1] || list[0];
-  if (second && second.src) loadPhoto(second.src, function(o){ shotSmall = o; drawPolaroid(); });
+  if (second && second.src) loadPhoto(second.src, function(o){ shotSmall = o; drawPolaroid(); render(); });
 
   window.addEventListener('resize', fit);
   fit();
