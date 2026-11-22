@@ -2,124 +2,40 @@
 <html lang='zh-CN'>
 <head>
 <meta charset='utf-8'>
-<meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'>
-<meta name='theme-color' content='#F3F0E9'>
+<meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1'>
+<meta name='theme-color' content='#EFEBE2'>
 <meta name='description' content='里屋。屋子不大，够两个人住。'>
 <title>里屋</title>
-<link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23F3F0E9%27/%3E%3Crect x=%2715.2%27 y=%277%27 width=%271.4%27 height=%2718%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
+<link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23EFEBE2%27/%3E%3Crect x=%2715.2%27 y=%277%27 width=%271.4%27 height=%2718%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
 <link rel='preconnect' href='https://fonts.googleapis.com'>
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
-<link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Noto+Serif+SC:wght@300;400;500&display=swap' rel='stylesheet'>
+<link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Serif+SC:wght@300;400;500&display=swap' rel='stylesheet'>
 <link rel='stylesheet' href='assets/style.css'>
 </head>
 <body>
 
-<div id='app'>
+<canvas id='stage'></canvas>
 
-  <header class='bar'>
-    <span class='brand'>里屋</span>
-    <span class='meta' id='barMeta'></span>
-  </header>
+<div class='hud'>
+  <span class='brand'>里屋</span>
+  <span class='meta' id='hudDays'></span>
+</div>
 
-  <main class='deck' id='deck'>
+<div class='boot' id='boot'>正在开门……</div>
 
-    <section class='room hall' data-room='门厅'>
-      <div class='seam'></div>
-      <div class='hall-inner'>
-        <div class='brandmark'>里屋</div>
-        <p class='hero' id='hero'></p>
-        <div class='stamp' id='hallDays'>第 — 天</div>
+<div class='dock' id='dock'></div>
+
+<div class='panel' id='panel' hidden>
+  <div class='panel-in'>
+    <div class='panel-head'>
+      <div>
+        <h2 id='pTitle'></h2>
+        <span class='en' id='pEn'></span>
       </div>
-      <div class='swipe'>向右滑</div>
-    </section>
-
-    <section class='room' data-room='这些天'>
-      <div class='inner'>
-        <div class='head'>
-          <h2>这些天</h2>
-          <span class='en'>Days</span>
-        </div>
-        <div class='counter'>
-          <span class='num' id='bigDays'>—</span>
-          <span class='unit'>天</span>
-        </div>
-        <button class='since' id='sinceBtn'>起算日还没填 · 点这填</button>
-        <input type='date' id='sinceInput' hidden>
-        <ul class='log' id='timeline'></ul>
-      </div>
-    </section>
-
-    <section class='room' data-room='日记'>
-      <div class='inner'>
-        <div class='head'>
-          <h2>日记</h2>
-          <span class='en'>Diary</span>
-        </div>
-        <p class='lead'>你自己写的那些只留在你这台手机里，换设备就没了。要留住，就说一声，我挪进 data.js。</p>
-        <button class='ghost' id='writeBtn'>写一篇</button>
-
-        <form class='compose' id='compose' hidden>
-          <input id='dTitle' placeholder='标题' maxlength='40' autocomplete='off'>
-          <textarea id='dBody' rows='6' placeholder='今天……'></textarea>
-          <div class='row'>
-            <button class='ghost solid' type='submit'>收好</button>
-            <button class='ghost' type='button' id='cancelBtn'>算了</button>
-          </div>
-        </form>
-
-        <div class='stream' id='diaryList'></div>
-      </div>
-    </section>
-
-    <section class='room' data-room='相册'>
-      <div class='inner'>
-        <div class='head'>
-          <h2>相册</h2>
-          <span class='en'>Album</span>
-        </div>
-        <p class='lead'>照片放进 images/ 文件夹，在 data.js 里加一行，它就摆上来了。</p>
-        <div class='grid' id='albumGrid'></div>
-        <div class='empty' id='albumEmpty'>还没有照片。</div>
-      </div>
-    </section>
-
-    <section class='room' data-room='记忆'>
-      <div class='inner'>
-        <div class='head'>
-          <h2>记忆</h2>
-          <span class='en'>Memory</span>
-        </div>
-        <p class='lead'>怕忘的事。不写长的，一句一件。</p>
-        <div class='stream' id='memoryList'></div>
-      </div>
-    </section>
-
-    <section class='room talk' data-room='说话'>
-      <div class='inner'>
-        <div class='head'>
-          <h2>说话</h2>
-          <span class='en'>Talk</span>
-        </div>
-        <button class='wire' id='wireBtn' type='button'>接线的地方</button>
-
-        <div class='chat' id='chat'></div>
-
-        <form class='say' id='sayForm'>
-          <textarea id='sayInput' rows='1' placeholder='说一句'></textarea>
-          <button class='ghost solid' id='sayBtn' type='submit'>说</button>
-          <button class='ghost' id='stopBtn' type='button' hidden>停</button>
-        </form>
-        <p class='tip' id='chatTip'></p>
-      </div>
-    </section>
-
-  </main>
-
-  <nav class='nav'>
-    <div class='ticks' id='ticks'></div>
-    <div class='navname' id='navName'></div>
-  </nav>
-
+      <button class='mini' id='pClose' type='button'>关</button>
+    </div>
+    <div class='panel-body' id='pBody'></div>
+  </div>
 </div>
 
 <div class='sheet' id='sheet' hidden>
@@ -159,11 +75,12 @@
     </div>
 
     <p class='tip' id='cfgTip'></p>
-    <p class='tip'>Key 只存在这台手机的浏览器里，不进仓库，也不会上传。换手机要重新填。</p>
+    <p class='tip'>Key 只存在这台手机的浏览器里，不进仓库，也不会上传。</p>
   </div>
 </div>
 
 <script src='data.js'></script>
-<script src='assets/app.js'></script>
+<script src='assets/panel.js'></script>
+<script type='module' src='assets/room3d.js'></script>
 </body>
 </html>
