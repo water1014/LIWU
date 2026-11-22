@@ -1871,3 +1871,17 @@ body.room-open{overscroll-behavior:none}
 .wallpaper-preview>div small{color:var(--ink-3);font-size:11px}
 .wallpaper-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}
 .wallpaper-actions label{cursor:pointer}
+
+/* MCP and plugin registry */
+.integration-list{display:grid;gap:12px;margin:16px 0}
+.integration-card{padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--bg-2)}
+.integration-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.integration-head>div{display:grid;gap:4px;min-width:0}
+.integration-head strong{font-size:13px;overflow-wrap:anywhere}
+.integration-head small,.integration-last{color:var(--ink-3);font-size:10px}
+.integration-status{flex-shrink:0;padding:4px 8px;border:1px solid var(--line);border-radius:99px;color:var(--ink-3);font-size:9px}
+.integration-status.ok{border-color:rgba(69,130,100,.3);color:#4f896e}
+.integration-status.error{border-color:rgba(173,83,83,.3);color:#a65d5d}
+.integration-card>p{margin:9px 0 0;color:var(--ink-2);font-size:11px;line-height:1.65;overflow-wrap:anywhere}
+.integration-card .planner-item-actions{margin-top:12px}
+.integration-last{display:block;margin-top:10px;line-height:1.6;overflow-wrap:anywhere}
