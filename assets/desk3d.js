@@ -1,12 +1,11 @@
-/* 里屋 · 3D 桌面（three.js）
-   桌面就是一页杂志封面。上面压着五样东西：拍立得、便签、唱片机、工牌、一张小卡。
-   东西能拖，位置存本机；点一下进对应那间；双击抬头时间全部复位。 */
+/* 里屋 · 靠窗的书桌（three.js）
+   一桌、一窗、窗外一片天。左右拖着看，点桌上的东西镜头推过去。
+   桌上不放字：东西只是东西，文字点开后在网页里看，所以不会糊。 */
 
 (async function(){
   'use strict';
 
   var D = window.LIWU || {};
-  var K_LAYOUT = 'liwu.desk.layout';
   var $ = function(s){ return document.querySelector(s); };
   var p2 = function(n){ return n < 10 ? '0' + n : '' + n; };
 
@@ -26,29 +25,14 @@
   paintClock();
   setInterval(paintClock, 20000);
 
-  function sinceText(){
-    var s = '';
-    try{ s = JSON.parse(localStorage.getItem('liwu.since') || '""') || ''; }catch(e){}
-    if (!s && D.since) s = D.since;
-    return s;
-  }
-  function dayCount(){
-    var s = sinceText();
-    if (!s) return null;
-    var a = new Date(s + 'T00:00:00');
-    if (isNaN(a.getTime())) return null;
-    var n = new Date();
-    var b = new Date(n.getFullYear(), n.getMonth(), n.getDate());
-    var c = Math.floor((b - a) / 86400000) + 1;
-    return c > 0 ? c : null;
-  }
-
   /* ---------- 跳转 ---------- */
 
   var fromHome = false;
+  var pushed = false;
 
   function open(key){
     if (!key) return;
+    fromHome = false;
     if (key === 'chat'){
       document.body.classList.remove('home');
       var inp = document.getElementById('input');
@@ -65,10 +49,8 @@
   function setHome(on){
     if (on){
       document.body.classList.add('home');
-      if (THREE){
-        drawPoster(); drawPolaroid(); drawNote(); drawTag(); drawMemo();
-        fit();
-      }
+      pushed = false;
+      if (THREE){ fit(); }
     } else {
       document.body.classList.remove('home');
     }
@@ -128,7 +110,7 @@
     document.body.setAttribute('data-theme', m);
     if (modeBtn) modeBtn.textContent = m === 'night' ? '预览：夜晚' : '预览：白天';
     var meta = document.querySelector('meta[name=theme-color]');
-    if (meta) meta.setAttribute('content', m === 'night' ? '#14120F' : '#EFE9DC');
+    if (meta) meta.setAttribute('content', m === 'night' ? '#0E1015' : '#E8E1D3');
     try{
       var c = JSON.parse(localStorage.getItem('liwu.cfg3') || '{}') || {};
       c.theme = m;
@@ -156,10 +138,6 @@
     return;
   }
 
-  var ink = function(){ return mode === 'night' ? '#E7E2D6' : '#2A2620'; };
-  var sub = function(){ return mode === 'night' ? '#7F776A' : '#8A7E68'; };
-  var bgc = function(){ return mode === 'night' ? '#1B1916' : '#F7F3E9'; };
-
   var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(window.innerWidth, window.innerHeight, false);
@@ -168,395 +146,426 @@
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   var scene = new THREE.Scene();
-  scene.background = new THREE.Color(mode === 'night' ? 0x14120F : 0xE6E0D2);
+  var camera = new THREE.PerspectiveCamera(46, window.innerWidth / window.innerHeight, 0.05, 80);
 
-  var camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 60);
+  function C(hex){ return new THREE.Color(hex); }
+  function mat(c, r, m){
+    return new THREE.MeshStandardMaterial({ color: c, roughness: r == null ? 0.9 : r, metalness: m || 0 });
+  }
 
-  var hemi = new THREE.HemisphereLight(0xFFF6E6, 0x8C8272, 0.95);
+  /* ---------- 灯 ---------- */
+
+  var hemi = new THREE.HemisphereLight(0xFFF1DC, 0x8A7F70, 0.85);
   scene.add(hemi);
 
-  var key = new THREE.DirectionalLight(0xFFF1D8, 1.25);
-  key.position.set(-2.2, 6.2, 3.4);
-  key.castShadow = true;
-  key.shadow.mapSize.width = 1024;
-  key.shadow.mapSize.height = 1024;
-  key.shadow.camera.left = -3.6;
-  key.shadow.camera.right = 3.6;
-  key.shadow.camera.top = 4.2;
-  key.shadow.camera.bottom = -4.2;
-  key.shadow.camera.near = 0.5;
-  key.shadow.camera.far = 22;
-  key.shadow.bias = -0.0012;
-  scene.add(key);
+  var sunLight = new THREE.DirectionalLight(0xFFE7C2, 2.2);
+  sunLight.position.set(2.6, 3.2, -3.4);
+  sunLight.castShadow = true;
+  sunLight.shadow.mapSize.width = 1024;
+  sunLight.shadow.mapSize.height = 1024;
+  sunLight.shadow.camera.left = -3;
+  sunLight.shadow.camera.right = 3;
+  sunLight.shadow.camera.top = 3;
+  sunLight.shadow.camera.bottom = -1;
+  sunLight.shadow.camera.near = 0.5;
+  sunLight.shadow.camera.far = 12;
+  sunLight.shadow.bias = -0.001;
+  scene.add(sunLight);
 
-  /* ---------- 画布工具 ---------- */
+  var lampLight = new THREE.PointLight(0xFFC892, 0, 3.2, 2);
+  lampLight.position.set(-0.78, 1.22, -1.32);
+  scene.add(lampLight);
 
-  var SERIF = 'Noto Serif SC, Songti SC, serif';
-  var NUM = 'Cormorant Garamond, Songti SC, Georgia, serif';
-  var RED = '#8A3B2C';
+  /* ---------- 房间 ---------- */
 
-  function makeCanvas(w, h){
+  var RW = 4.2, RD = 3.4, RH = 2.6;
+
+  var floor = new THREE.Mesh(new THREE.PlaneGeometry(RW, RD), mat(0xC9B89C, 0.95));
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.set(0, 0, 0.2);
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  var backWall = new THREE.Mesh(new THREE.PlaneGeometry(RW, RH), mat(0xEDE6D8, 0.98));
+  backWall.position.set(0, RH / 2, -RD / 2 + 0.2);
+  backWall.receiveShadow = true;
+  scene.add(backWall);
+
+  var leftWall = new THREE.Mesh(new THREE.PlaneGeometry(RD, RH), mat(0xE7DFD0, 0.98));
+  leftWall.rotation.y = Math.PI / 2;
+  leftWall.position.set(-RW / 2, RH / 2, 0.2);
+  leftWall.receiveShadow = true;
+  scene.add(leftWall);
+
+  var rightWall = new THREE.Mesh(new THREE.PlaneGeometry(RD, RH), mat(0xE7DFD0, 0.98));
+  rightWall.rotation.y = -Math.PI / 2;
+  rightWall.position.set(RW / 2, RH / 2, 0.2);
+  rightWall.receiveShadow = true;
+  scene.add(rightWall);
+
+  /* ---------- 窗 ---------- */
+
+  var WX = 0.95, WY = 1.58, WW = 1.5, WH = 1.25;
+
+  // 窗外：天空
+  function skyTexture(){
     var c = document.createElement('canvas');
-    c.width = w; c.height = h;
-    return c;
-  }
-  function tex(c){
+    c.width = 8; c.height = 256;
+    var g = c.getContext('2d');
+    var grd = g.createLinearGradient(0, 0, 0, 256);
+    if (mode === 'night'){
+      grd.addColorStop(0, '#0C1424');
+      grd.addColorStop(0.55, '#1B2A45');
+      grd.addColorStop(1, '#2C3B55');
+    } else {
+      grd.addColorStop(0, '#A9C6DA');
+      grd.addColorStop(0.55, '#CFDDE4');
+      grd.addColorStop(1, '#EDE6D6');
+    }
+    g.fillStyle = grd;
+    g.fillRect(0, 0, 8, 256);
     var t = new THREE.CanvasTexture(c);
     if ('colorSpace' in t) t.colorSpace = THREE.SRGBColorSpace;
-    t.anisotropy = 4;
     return t;
   }
-  function cover(g, img, x, y, w, h){
-    var s = Math.max(w / img.width, h / img.height);
-    g.save();
-    g.beginPath(); g.rect(x, y, w, h); g.clip();
-    g.drawImage(img, x + (w - img.width * s) / 2, y + (h - img.height * s) / 2, img.width * s, img.height * s);
-    g.restore();
+
+  var skyMat = new THREE.MeshBasicMaterial({ map: skyTexture() });
+  var sky = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 2.2), skyMat);
+  sky.position.set(WX, WY + 0.1, -RD / 2 - 0.6);
+  scene.add(sky);
+
+  // 海
+  var seaMat = new THREE.MeshBasicMaterial({ color: mode === 'night' ? 0x213247 : 0x9FBCC4 });
+  var sea = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.1), seaMat);
+  sea.position.set(WX, WY - 0.55, -RD / 2 - 0.58);
+  scene.add(sea);
+
+  // 沙滩
+  var sandMat = new THREE.MeshBasicMaterial({ color: mode === 'night' ? 0x2A2620 : 0xDFD2B8 });
+  var sand = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 0.35), sandMat);
+  sand.position.set(WX, WY - 0.93, -RD / 2 - 0.56);
+  scene.add(sand);
+
+  // 窗框
+  var frameMat = mat(0xF7F3EA, 0.9);
+  var fz = -RD / 2 + 0.2 + 0.005;
+
+  var fT = new THREE.Mesh(new THREE.BoxGeometry(WW + 0.14, 0.07, 0.05), frameMat);
+  fT.position.set(WX, WY + WH / 2, fz);
+  fT.castShadow = true;
+  scene.add(fT);
+
+  var fB = new THREE.Mesh(new THREE.BoxGeometry(WW + 0.14, 0.07, 0.05), frameMat);
+  fB.position.set(WX, WY - WH / 2, fz);
+  fB.castShadow = true;
+  scene.add(fB);
+
+  var fL = new THREE.Mesh(new THREE.BoxGeometry(0.07, WH, 0.05), frameMat);
+  fL.position.set(WX - WW / 2, WY, fz);
+  fL.castShadow = true;
+  scene.add(fL);
+
+  var fR = new THREE.Mesh(new THREE.BoxGeometry(0.07, WH, 0.05), frameMat);
+  fR.position.set(WX + WW / 2, WY, fz);
+  fR.castShadow = true;
+  scene.add(fR);
+
+  var fM = new THREE.Mesh(new THREE.BoxGeometry(0.05, WH, 0.04), frameMat);
+  fM.position.set(WX, WY, fz);
+  scene.add(fM);
+
+  var fH = new THREE.Mesh(new THREE.BoxGeometry(WW, 0.04, 0.04), frameMat);
+  fH.position.set(WX, WY + 0.18, fz);
+  scene.add(fH);
+
+  // 窗台板
+  var sill = new THREE.Mesh(new THREE.BoxGeometry(WW + 0.24, 0.06, 0.2), mat(0xF2EDE2, 0.9));
+  sill.position.set(WX, WY - WH / 2 - 0.04, fz + 0.09);
+  sill.castShadow = true;
+  sill.receiveShadow = true;
+  scene.add(sill);
+
+  // 窗台上一个小花盆
+  var pot = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.042, 0.08, 14), mat(0xB9A183, 0.9));
+  pot.position.set(WX + 0.5, WY - WH / 2 + 0.0, fz + 0.09);
+  pot.castShadow = true;
+  scene.add(pot);
+
+  var leaf = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 8), mat(0x6F7F5A, 0.95));
+  leaf.position.set(WX + 0.5, WY - WH / 2 + 0.1, fz + 0.09);
+  leaf.scale.set(1, 1.2, 1);
+  leaf.castShadow = true;
+  scene.add(leaf);
+
+  /* ---------- 书桌 ---------- */
+
+  var desk = new THREE.Group();
+  var DW = 1.9, DD = 0.82, DH = 0.75;
+  var dx = -0.05, dz = -RD / 2 + 0.62;
+
+  var top = new THREE.Mesh(new THREE.BoxGeometry(DW, 0.06, DD), mat(0xB08A5E, 0.85));
+  top.position.set(dx, DH, dz);
+  top.castShadow = true;
+  top.receiveShadow = true;
+  desk.add(top);
+
+  var legPos = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+  for (var i = 0; i < legPos.length; i++){
+    var lg = new THREE.Mesh(new THREE.BoxGeometry(0.07, DH, 0.07), mat(0x8A6A46, 0.9));
+    lg.position.set(dx + legPos[i][0] * (DW / 2 - 0.08), DH / 2, dz + legPos[i][1] * (DD / 2 - 0.07));
+    lg.castShadow = true;
+    desk.add(lg);
   }
-  function line(g, x1, y1, x2, y2){
-    g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
-  }
+  scene.add(desk);
 
-  /* ================= 封面（桌面就是这一页） ================= */
+  /* ---------- 桌上的东西 ---------- */
 
-  var coverCanvas = null, coverTex = null, coverMesh = null;
-  var shotBig = null, shotSmall = null;
-
-  var PW = 3.3, PH = 5.8;
-
-  function drawPoster(){
-    var W = 1000, H = 1760;
-    var c = coverCanvas || makeCanvas(W, H);
-    coverCanvas = c;
-    var g = c.getContext('2d');
-
-    g.fillStyle = bgc();
-    g.fillRect(0, 0, W, H);
-
-    g.strokeStyle = mode === 'night' ? 'rgba(231,226,214,.16)' : 'rgba(120,100,70,.24)';
-    g.lineWidth = 2;
-
-    /* 刊头 */
-    g.textAlign = 'left';
-    g.fillStyle = ink();
-    g.font = '500 112px ' + SERIF;
-    g.fillText('里屋', 76, 196);
-
-    g.fillStyle = RED;
-    g.fillRect(80, 224, 48, 4);
-
-    g.fillStyle = sub();
-    g.font = '400 19px ' + NUM;
-    g.fillText('L I W U', 146, 228);
-
-    g.textAlign = 'right';
-    g.fillStyle = ink();
-    g.font = 'italic 400 27px ' + NUM;
-    g.fillText('VOL. 01', W - 76, 132);
-    g.fillStyle = sub();
-    g.font = '400 17px ' + NUM;
-    g.fillText('2026 · 11', W - 76, 164);
-    g.font = '400 16px ' + SERIF;
-    g.fillText('一本关于两个人的刊物', W - 76, 198);
-    g.textAlign = 'left';
-
-    line(g, 76, 266, W - 76, 266);
-
-    /* 封面主图 */
-    var ix = 76, iy = 306, iw = W - 152, ih = 742;
-    g.fillStyle = mode === 'night' ? '#2A2620' : '#E2DAC8';
-    g.fillRect(ix, iy, iw, ih);
-
-    if (shotBig && shotBig.ok){
-      cover(g, shotBig.img, ix, iy, iw, ih);
-    } else {
-      g.fillStyle = sub();
-      g.textAlign = 'center';
-      g.font = '400 24px ' + SERIF;
-      g.fillText('封面空着', ix + iw / 2, iy + ih / 2 - 14);
-      g.font = '400 18px ' + SERIF;
-      g.fillText('放一张图进 images/，它就上封面', ix + iw / 2, iy + ih / 2 + 28);
-      g.textAlign = 'left';
-    }
-
-    g.fillStyle = sub();
-    g.font = '400 14px ' + NUM;
-    g.textAlign = 'right';
-    g.fillText('COVER', W - 88, iy + 30);
-    g.textAlign = 'left';
-
-    /* 封面语 */
-    g.fillStyle = ink();
-    g.font = '400 54px ' + SERIF;
-    g.fillText(D.hero || '屋子不大，够两个人住。', 76, 1142);
-
-    var capText = (shotBig && shotBig.ok && D.album && D.album[0])
-      ? (D.album[0].caption || D.album[0].date || '')
-      : '';
-    g.fillStyle = sub();
-    g.font = '400 19px ' + SERIF;
-    g.fillText(capText, 76, 1184);
-
-    line(g, 76, 1218, W - 76, 1218);
-
-    /* 目录 */
-    g.fillStyle = sub();
-    g.font = '400 15px ' + SERIF;
-    g.fillText('目 录   C O N T E N T S', 76, 1258);
-
-    var memos = (D.memory || []).slice(0, 3);
-    var y = 1312;
-    for (var i = 0; i < memos.length; i++){
-      g.fillStyle = ink();
-      g.font = '400 27px ' + SERIF;
-      g.fillText(String(memos[i].title || '').slice(0, 12), 76, y);
-      g.fillStyle = sub();
-      g.textAlign = 'right';
-      g.font = 'italic 400 22px ' + NUM;
-      g.fillText('0' + (i + 1), W - 76, y);
-      g.textAlign = 'left';
-      y += 50;
-    }
-
-    /* 页脚 */
-    var w = D.weather || {};
-    line(g, 76, 1610, W - 76, 1610);
-    g.fillStyle = sub();
-    g.font = '400 18px ' + NUM;
-    g.fillText((w.temp || '—') + '    ' + (w.text || ''), 76, 1652);
-    var dc = dayCount();
-    g.textAlign = 'right';
-    g.font = 'italic 400 20px ' + NUM;
-    g.fillText(dc ? ('第 ' + dc + ' 天') : '第 — 天', W - 76, 1652);
-    g.textAlign = 'left';
-
-    if (coverTex) coverTex.dispose();
-    coverTex = tex(c);
-
-    if (!coverMesh){
-      coverMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(PW, PH),
-        new THREE.MeshStandardMaterial({ map: coverTex, roughness: 0.96, metalness: 0 })
-      );
-      coverMesh.rotation.x = -Math.PI / 2;
-      coverMesh.receiveShadow = true;
-      coverMesh.position.y = 0;
-      scene.add(coverMesh);
-    } else {
-      coverMesh.material.map = coverTex;
-      coverMesh.material.needsUpdate = true;
-    }
-  }
-
-  /* ================= 小东西 ================= */
-
-  var polC, polT, noteC, noteT, tagC, tagT, memC, memT;
-
-  function drawPolaroid(){
-    var W = 512, H = 620;
-    var c = polC || makeCanvas(W, H); polC = c;
-    var g = c.getContext('2d');
-    g.fillStyle = mode === 'night' ? '#262117' : '#FFFDF7';
-    g.fillRect(0, 0, W, H);
-    var p = 34, s = W - 68;
-    g.fillStyle = mode === 'night' ? '#2A2620' : '#E7DFCE';
-    g.fillRect(p, p, s, s);
-    if (shotSmall && shotSmall.ok) cover(g, shotSmall.img, p, p, s, s);
-    g.fillStyle = sub();
-    g.textAlign = 'center';
-    g.font = 'italic 400 30px ' + NUM;
-    g.fillText('our room', W / 2, H - 60);
-    g.textAlign = 'left';
-    if (polT) polT.dispose();
-    polT = tex(c);
-    if (polFace){ polFace.material.map = polT; polFace.material.needsUpdate = true; }
-  }
-
-  function drawNote(){
-    var W = 512, H = 580;
-    var c = noteC || makeCanvas(W, H); noteC = c;
-    var g = c.getContext('2d');
-    g.fillStyle = mode === 'night' ? '#3E3922' : '#F5E8A4';
-    g.fillRect(0, 0, W, H);
-    g.strokeStyle = mode === 'night' ? 'rgba(255,255,255,.07)' : 'rgba(255,255,255,.6)';
-    for (var y = 96; y < H - 70; y += 60) line(g, 0, y, W, y);
-    g.fillStyle = mode === 'night' ? '#E3D9A8' : '#5C5233';
-    g.font = '400 34px ' + SERIF;
-    g.fillText('今天想说的话', 44, 74);
-    g.fillStyle = mode === 'night' ? '#948A56' : '#8C7C40';
-    g.font = '400 23px ' + SERIF;
-    g.fillText('写一句 →', 44, H - 44);
-    if (noteT) noteT.dispose();
-    noteT = tex(c);
-    if (noteFace){ noteFace.material.map = noteT; noteFace.material.needsUpdate = true; }
-  }
-
-  function drawTag(){
-    var W = 400, H = 520;
-    var c = tagC || makeCanvas(W, H); tagC = c;
-    var g = c.getContext('2d');
-    g.fillStyle = mode === 'night' ? '#221F1B' : '#FBF8F0';
-    g.fillRect(0, 0, W, H);
-    g.strokeStyle = mode === 'night' ? 'rgba(231,226,214,.2)' : 'rgba(120,100,70,.32)';
-    g.lineWidth = 3;
-    g.beginPath();
-    g.arc(W / 2, 44, 26, 0, Math.PI * 2);
-    g.stroke();
-    g.fillStyle = ink();
-    g.textAlign = 'center';
-    g.font = '400 56px ' + SERIF;
-    g.fillText('里屋', W / 2, 262);
-    g.fillStyle = sub();
-    g.font = 'italic 400 24px ' + NUM;
-    g.fillText('L I W U', W / 2, 312);
-    g.textAlign = 'left';
-    if (tagT) tagT.dispose();
-    tagT = tex(c);
-    if (tagFace){ tagFace.material.map = tagT; tagFace.material.needsUpdate = true; }
-  }
-
-  function drawMemo(){
-    var W = 460, H = 560;
-    var c = memC || makeCanvas(W, H); memC = c;
-    var g = c.getContext('2d');
-    g.fillStyle = mode === 'night' ? '#1F1C18' : '#EDE6D7';
-    g.fillRect(0, 0, W, H);
-    g.fillStyle = sub();
-    g.font = '400 22px ' + SERIF;
-    g.fillText('记   M E M O R Y', 44, 74);
-    g.strokeStyle = mode === 'night' ? 'rgba(231,226,214,.12)' : 'rgba(120,100,70,.22)';
-    g.lineWidth = 1;
-    for (var y = 120; y < H - 90; y += 38) line(g, 44, y, W - 44, y);
-    g.fillStyle = sub();
-    g.font = '400 16px ' + SERIF;
-    g.fillText('怕忘的事，一句一件。', 44, H - 44);
-    if (memT) memT.dispose();
-    memT = tex(c);
-    if (memFace){ memFace.material.map = memT; memFace.material.needsUpdate = true; }
-  }
-
-  /* ---------- 造物件 ---------- */
-
-  var polFace = null, noteFace = null, tagFace = null, memFace = null;
-  var vinylMesh = null;
   var things = [];
 
-  function sheet(w, h, th, texture, tint){
-    var g = new THREE.Group();
-    var body = new THREE.Mesh(
-      new THREE.BoxGeometry(w, th, h),
-      new THREE.MeshStandardMaterial({ color: tint, roughness: 0.95 })
-    );
-    body.castShadow = true; body.receiveShadow = true;
-    g.add(body);
-    var face = new THREE.Mesh(
-      new THREE.PlaneGeometry(w, h),
-      new THREE.MeshStandardMaterial({ map: texture, roughness: 0.95 })
-    );
-    face.rotation.x = -Math.PI / 2;
-    face.position.y = th / 2 + 0.0015;
-    face.receiveShadow = true;
-    g.add(face);
-    g.userData.face = face;
-    return g;
-  }
-
-  function buildVinyl(){
-    var g = new THREE.Group();
-    var base = new THREE.Mesh(
-      new THREE.BoxGeometry(0.74, 0.05, 0.58),
-      new THREE.MeshStandardMaterial({ color: mode === 'night' ? 0x242019 : 0xE4DED1, roughness: 0.9 })
-    );
-    base.position.y = 0.025; base.castShadow = true; base.receiveShadow = true;
-    g.add(base);
-
-    var disc = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.23, 0.23, 0.012, 40),
-      new THREE.MeshStandardMaterial({ color: 0x141414, roughness: 0.45, metalness: 0.1 })
-    );
-    disc.position.set(-0.05, 0.056, 0.02); disc.castShadow = true;
-    g.add(disc);
-
-    var lab = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.075, 0.075, 0.016, 28),
-      new THREE.MeshStandardMaterial({ color: 0xB2452F, roughness: 0.8 })
-    );
-    lab.position.set(-0.05, 0.058, 0.02);
-    g.add(lab);
-
-    var arm = new THREE.Mesh(
-      new THREE.BoxGeometry(0.27, 0.012, 0.016),
-      new THREE.MeshStandardMaterial({ color: 0xA39A8A, roughness: 0.6, metalness: 0.3 })
-    );
-    arm.position.set(0.21, 0.072, -0.17);
-    arm.rotation.y = -0.5; arm.castShadow = true;
-    g.add(arm);
-
-    g.userData.key = 'chat';
-    g.userData.spin = disc;
-    g.userData.baseBox = base;
-    return g;
-  }
-
-  drawPolaroid(); drawNote(); drawTag(); drawMemo();
-
-  var polMesh = sheet(0.62, 0.75, 0.01, polT, mode === 'night' ? 0x262117 : 0xFFFDF7);
-  polFace = polMesh.userData.face; polMesh.userData.key = 'album';
-
-  var noteMesh = sheet(0.56, 0.64, 0.014, noteT, mode === 'night' ? 0x3E3922 : 0xF5E8A4);
-  noteFace = noteMesh.userData.face; noteMesh.userData.key = 'diary';
-
-  var tagMesh = sheet(0.42, 0.55, 0.016, tagT, mode === 'night' ? 0x221F1B : 0xFBF8F0);
-  tagFace = tagMesh.userData.face; tagMesh.userData.key = 'settings';
-
-  var memMesh = sheet(0.44, 0.54, 0.008, memT, mode === 'night' ? 0x1F1C18 : 0xEDE6D7);
-  memFace = memMesh.userData.face; memMesh.userData.key = 'memory';
-
-  vinylMesh = buildVinyl();
-
-  drawPoster();
-
-  /* ---------- 摆位 ---------- */
-
-  var HOME = {
-    polaroid: { x: -0.92, z: -1.62, ry: -0.09 },
-    note: { x: 0.92, z: -1.42, ry: 0.06 },
-    vinyl: { x: 0.86, z: 0.62, ry: -0.03 },
-    tag: { x: -0.92, z: 1.15, ry: 0.07 },
-    memo: { x: 0.05, z: 2.05, ry: -0.05 }
-  };
-
-  var layout = {};
-  try{ layout = JSON.parse(localStorage.getItem(K_LAYOUT) || '{}') || {}; }catch(e){ layout = {}; }
-  function saveLayout(){ try{ localStorage.setItem(K_LAYOUT, JSON.stringify(layout)); }catch(e){} }
-
-  function place(key, obj, y){
-    var home = HOME[key];
-    var pos = layout[key] || { x: home.x, z: home.z };
-    obj.position.set(pos.x, y, pos.z);
-    obj.rotation.y = home.ry;
-    obj.userData.home = home;
-    obj.userData.baseY = y;
-    obj.userData.regKey = key;
+  function addThing(obj, key){
+    obj.userData.key = key;
+    obj.traverse(function(o){ o.userData.key = key; });
     scene.add(obj);
     things.push(obj);
+    return obj;
   }
 
-  place('polaroid', polMesh, 0.004);
-  place('note', noteMesh, 0.006);
-  place('vinyl', vinylMesh, 0);
-  place('tag', tagMesh, 0.008);
-  place('memo', memMesh, 0.002);
+  // 摊开的笔记本 → 日记
+  var book = new THREE.Group();
+  var bCover = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.018, 0.26), mat(0x8A3B2C, 0.85));
+  bCover.position.set(0, 0.012, 0);
+  bCover.castShadow = true;
+  book.add(bCover);
+  var pl = new THREE.Mesh(new THREE.BoxGeometry(0.155, 0.014, 0.24), mat(0xF7F3E8, 0.95));
+  pl.position.set(-0.083, 0.028, 0);
+  pl.rotation.z = 0.05;
+  pl.castShadow = true;
+  book.add(pl);
+  var pr = new THREE.Mesh(new THREE.BoxGeometry(0.155, 0.014, 0.24), mat(0xF7F3E8, 0.95));
+  pr.position.set(0.083, 0.028, 0);
+  pr.rotation.z = -0.05;
+  pr.castShadow = true;
+  book.add(pr);
+  book.position.set(dx - 0.5, DH + 0.03, dz + 0.12);
+  book.rotation.y = 0.16;
+  addThing(book, 'diary');
 
-  /* ---------- 换色 ---------- */
+  // 相框 → 相册
+  var frameG = new THREE.Group();
+  var fr = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.36, 0.022), mat(0x6B4E36, 0.85));
+  fr.castShadow = true;
+  frameG.add(fr);
+  var pic = new THREE.Mesh(new THREE.PlaneGeometry(0.23, 0.29), mat(0xE4DCCC, 0.95));
+  pic.position.z = 0.013;
+  frameG.add(pic);
+  var stand = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.2, 0.012), mat(0x6B4E36, 0.9));
+  stand.position.set(0, -0.1, -0.09);
+  stand.rotation.x = 0.32;
+  frameG.add(stand);
+  frameG.position.set(dx + 0.62, DH + 0.2, dz - 0.22);
+  frameG.rotation.y = -0.22;
+  addThing(frameG, 'album');
+
+  // 收音机 → 说话
+  var radio = new THREE.Group();
+  var rb = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.14, 0.16), mat(0x7E6A55, 0.75));
+  rb.position.y = 0.07;
+  rb.castShadow = true;
+  radio.add(rb);
+  var rf = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.06, 0.012), mat(0x4A3C2E, 0.7));
+  rf.position.set(-0.02, 0.08, 0.083);
+  radio.add(rf);
+  var knob = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.02, 12), mat(0xC9A66B, 0.5));
+  knob.rotation.x = Math.PI / 2;
+  knob.position.set(0.1, 0.07, 0.085);
+  radio.add(knob);
+  radio.position.set(dx + 0.3, DH + 0.03, dz + 0.18);
+  radio.rotation.y = -0.3;
+  addThing(radio, 'chat');
+
+  // 一叠书 → 记忆
+  var stack = new THREE.Group();
+  var cols = [0x6E7A5A, 0x8A3B2C, 0x4B5A6B];
+  for (var b = 0; b < 3; b++){
+    var bk = new THREE.Mesh(new THREE.BoxGeometry(0.26 - b * 0.02, 0.035, 0.19 - b * 0.015), mat(cols[b], 0.9));
+    bk.position.set(0, 0.02 + b * 0.038, 0);
+    bk.rotation.y = 0.06 * (b + 1);
+    bk.castShadow = true;
+    stack.add(bk);
+  }
+  stack.position.set(dx - 0.72, DH + 0.03, dz - 0.16);
+  addThing(stack, 'memory');
+
+  // 台灯 → 设置
+  var lamp = new THREE.Group();
+  var lBase = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 0.025, 16), mat(0x4A3C2E, 0.7));
+  lBase.position.y = 0.012;
+  lBase.castShadow = true;
+  lamp.add(lBase);
+  var lStem = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.4, 10), mat(0x6B5A45, 0.6));
+  lStem.position.y = 0.22;
+  lamp.add(lStem);
+  var lShade = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.065, 0.12, 18, 1, true), mat(0xE8DCC4, 0.85));
+  lShade.position.y = 0.44;
+  lamp.add(lShade);
+  lamp.position.set(dx - 0.86, DH + 0.03, dz + 0.24);
+  addThing(lamp, 'settings');
+
+  /* ---------- 相机 ---------- */
+
+  var ORBIT = { yaw: 0, pitch: 0.12, dist: 2.15 };
+  var center = new THREE.Vector3(0, 1.05, -1.05);
+  var yawT = 0, yawNow = 0;
+  var camPos = new THREE.Vector3();
+  var camLook = new THREE.Vector3();
+  var posT = new THREE.Vector3();
+  var lookT = new THREE.Vector3();
+
+  function computeCam(){
+    var y = yawNow;
+    var sp = Math.sin(ORBIT.pitch);
+    camPos.set(
+      center.x + Math.sin(y) * ORBIT.dist * Math.cos(ORBIT.pitch),
+      center.y + Math.sin(ORBIT.pitch) * ORBIT.dist * 2.2,
+      center.z + Math.cos(y) * ORBIT.dist * Math.cos(ORBIT.pitch)
+    );
+    camLook.copy(center);
+  }
+
+  function fit(){
+    var w = window.innerWidth, h = window.innerHeight;
+    if (!w || !h) return;
+    var a = w / h;
+    camera.aspect = a;
+    camera.fov = a < 0.8 ? 58 : 44;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false);
+    center.set(0, 1.05, -1.05);
+    ORBIT.dist = a < 0.8 ? 2.5 : 2.15;
+    posT.copy(camPos);
+    lookT.copy(camLook);
+    render();
+  }
+
+  /* ---------- 渲染 ---------- */
+
+  var raf = null;
+  function render(){
+    if (raf) return;
+    raf = requestAnimationFrame(function(){ raf = null; renderer.render(scene, camera); });
+  }
+
+  function loop(){
+    requestAnimationFrame(loop);
+    if (!document.body.classList.contains('home')) return;
+    yawNow += (yawT - yawNow) * 0.12;
+    computeCam();
+    camera.position.lerp(camPos, 0.14);
+    camLook.lerp(center, 0.14);
+    camera.lookAt(camLook);
+    renderer.render(scene, camera);
+  }
+
+  /* ---------- 拖与点 ---------- */
+
+  var ray = new THREE.Raycaster();
+  var ndc = new THREE.Vector2();
+  var downX = 0, dragging = false, movedFar = false;
+
+  function pick(x, y){
+    ndc.x = (x / window.innerWidth) * 2 - 1;
+    ndc.y = -(y / window.innerHeight) * 2 + 1;
+    ray.setFromCamera(ndc, camera);
+    var hits = ray.intersectObjects(things, true);
+    return hits.length ? hits[0].object : null;
+  }
+
+  canvas.addEventListener('pointerdown', function(ev){
+    downX = ev.clientX;
+    dragging = true;
+    movedFar = false;
+    try{ canvas.setPointerCapture(ev.pointerId); }catch(e){}
+  });
+
+  canvas.addEventListener('pointermove', function(ev){
+    if (!dragging) return;
+    var dx = ev.clientX - downX;
+    if (Math.abs(dx) > 5) movedFar = true;
+    yawT = Math.max(-0.55, Math.min(0.55, yawT + (ev.clientX - downX) * -0.0022));
+    downX = ev.clientX;
+    render();
+  });
+
+  canvas.addEventListener('pointerup', function(ev){
+    dragging = false;
+    if (movedFar) return;
+    var o = pick(ev.clientX, ev.clientY);
+    if (!o) return;
+    var ob = o;
+    while (ob && !ob.userData) ob = ob.parent;
+    var key = o.userData.key;
+    if (!key) return;
+
+    // 镜头往那个东西推一下，再开门
+    var p = new THREE.Vector3();
+    o.getWorldPosition(p);
+    posT.copy(p).add(new THREE.Vector3(0, 0.16, 0.62));
+    lookT.copy(p);
+    var t0 = 0;
+    function goIn(){
+      t0 += 0.05;
+      camera.position.lerp(posT, 0.18);
+      camera.lookAt(lookT);
+      renderer.render(scene, camera);
+      if (t0 < 0.45) requestAnimationFrame(goIn);
+      else open(key);
+    }
+    goIn();
+  });
+
+  canvas.addEventListener('pointercancel', function(){ dragging = false; });
+
+  /* ---------- 双击时间，镜头归位 ---------- */
+
+  var clockEl = $('.clock');
+  var lastTap = 0;
+  if (clockEl){
+    clockEl.addEventListener('click', function(){
+      var now = Date.now();
+      if (now - lastTap < 420){
+        yawT = 0;
+        yawNow = 0;
+        center.set(0, 1.05, -1.05);
+        flash('回到桌子前面。');
+      }
+      lastTap = now;
+    });
+  }
+
+  /* ---------- 日夜 ---------- */
 
   function restyle(){
-    scene.background = new THREE.Color(mode === 'night' ? 0x14120F : 0xE6E0D2);
-    hemi.intensity = mode === 'night' ? 0.45 : 0.95;
-    key.intensity = mode === 'night' ? 0.55 : 1.25;
-    key.color.setHex(mode === 'night' ? 0xBFCBE0 : 0xFFF1D8);
-    vinylMesh.userData.baseBox.material.color.setHex(mode === 'night' ? 0x242019 : 0xE4DED1);
-    drawPoster(); drawPolaroid(); drawNote(); drawTag(); drawMemo();
+    var day = mode !== 'night';
+    scene.background = C(day ? 0xE8E1D3 : 0x0E1015);
+    hemi.intensity = day ? 0.85 : 0.35;
+    hemi.color.setHex(day ? 0xFFF1DC : 0x6C7A93);
+    sunLight.intensity = day ? 2.2 : 0.55;
+    sunLight.color.setHex(day ? 0xFFE7C2 : 0x8FA6C6);
+    lampLight.intensity = day ? 0 : 1.6;
+
+    skyMat.map.dispose();
+    skyMat.map = skyTexture();
+    skyMat.needsUpdate = true;
+
+    seaMat.color.setHex(day ? 0x9FBCC4 : 0x213247);
+    sandMat.color.setHex(day ? 0xDFD2B8 : 0x2A2620);
+
+    backWall.material.color.setHex(day ? 0xEDE6D8 : 0x232028);
+    leftWall.material.color.setHex(day ? 0xE7DFD0 : 0x1E1C22);
+    rightWall.material.color.setHex(day ? 0xE7DFD0 : 0x1E1C22);
+    floor.material.color.setHex(day ? 0xC9B89C : 0x1A1713);
+    frameMat.color.setHex(day ? 0xF7F3EA : 0xD8D2C6);
+
     render();
   }
 
@@ -565,156 +574,18 @@
     restyle();
   });
 
-  /* ---------- 相机 ---------- */
-
-  function fit(){
-    var w = window.innerWidth, h = window.innerHeight;
-    if (!w || !h) return;
-    var a = w / h;
-    camera.aspect = a;
-    camera.fov = a < 0.8 ? 62 : 46;
-    camera.updateProjectionMatrix();
-
-    var vFov = camera.fov * Math.PI / 180;
-    var hFov = 2 * Math.atan(Math.tan(vFov / 2) * a);
-    var needW = PW + 0.3;
-    var dist = (needW / 2) / Math.tan(hFov / 2);
-    dist = Math.max(dist, 5.2);
-    dist = Math.min(dist, 30);
-
-    var pitch = 60 * Math.PI / 180;
-    camera.position.set(0, Math.sin(pitch) * dist, Math.cos(pitch) * dist);
-    camera.lookAt(0, 0, 0.15);
-    renderer.setSize(w, h, false);
-    render();
-  }
-
-  var raf = null;
-  function render(){
-    if (raf) return;
-    raf = requestAnimationFrame(function(){ raf = null; renderer.render(scene, camera); });
-  }
-
-  function loop(t){
-    requestAnimationFrame(loop);
-    if (!document.body.classList.contains('home')) return;
-    if (vinylMesh) vinylMesh.userData.spin.rotation.y = t * 0.0006;
-    renderer.render(scene, camera);
-  }
-
-  /* ---------- 拖与点 ---------- */
-
-  var ray = new THREE.Raycaster();
-  var ndc = new THREE.Vector2();
-  var planeY = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-  var hp = new THREE.Vector3();
-
-  var dragObj = null;
-  var off = new THREE.Vector3();
-  var downX = 0, downY = 0, moved = false;
-
-  function toDesk(x, y){
-    ndc.x = (x / window.innerWidth) * 2 - 1;
-    ndc.y = -(y / window.innerHeight) * 2 + 1;
-    ray.setFromCamera(ndc, camera);
-    if (ray.ray.intersectPlane(planeY, hp)) return hp.clone();
-    return null;
-  }
-
-  function pick(x, y){
-    ndc.x = (x / window.innerWidth) * 2 - 1;
-    ndc.y = -(y / window.innerHeight) * 2 + 1;
-    ray.setFromCamera(ndc, camera);
-    var hits = ray.intersectObjects(things, true);
-    if (!hits.length) return null;
-    var o = hits[0].object;
-    while (o && !o.userData.regKey) o = o.parent;
-    return o || null;
-  }
-
-  canvas.addEventListener('pointerdown', function(ev){
-    downX = ev.clientX; downY = ev.clientY; moved = false;
-    var t = pick(ev.clientX, ev.clientY);
-    if (!t) return;
-    dragObj = t;
-    var p = toDesk(ev.clientX, ev.clientY);
-    if (p) off.set(t.position.x - p.x, 0, t.position.z - p.z);
-    else off.set(0, 0, 0);
-    try{ canvas.setPointerCapture(ev.pointerId); }catch(e){}
-  });
-
-  canvas.addEventListener('pointermove', function(ev){
-    if (!dragObj) return;
-    if (!moved && (Math.abs(ev.clientX - downX) > 7 || Math.abs(ev.clientY - downY) > 7)){
-      moved = true;
-      dragObj.position.y = dragObj.userData.baseY + 0.1;
-    }
-    if (!moved) return;
-    var p = toDesk(ev.clientX, ev.clientY);
-    if (!p) return;
-    dragObj.position.x = Math.max(-1.6, Math.min(1.6, p.x + off.x));
-    dragObj.position.z = Math.max(-2.7, Math.min(2.7, p.z + off.z));
-    render();
-  });
-
-  canvas.addEventListener('pointerup', function(){
-    if (!dragObj) return;
-    var o = dragObj;
-    dragObj = null;
-    if (moved){
-      o.position.y = o.userData.baseY;
-      layout[o.userData.regKey] = { x: o.position.x, z: o.position.z };
-      saveLayout();
-      render();
-      return;
-    }
-    open(o.userData.key);
-  });
-
-  canvas.addEventListener('pointercancel', function(){
-    if (dragObj){ dragObj.position.y = dragObj.userData.baseY; dragObj = null; render(); }
-  });
-
-  /* ---------- 双击时间复位 ---------- */
-
-  var clockEl = $('.clock');
-  var lastTap = 0;
-  if (clockEl){
-    clockEl.addEventListener('click', function(){
-      var now = Date.now();
-      if (now - lastTap < 420){
-        layout = {};
-        saveLayout();
-        things.forEach(function(o){
-          var h = o.userData.home;
-          o.position.set(h.x, o.userData.baseY, h.z);
-          o.rotation.y = h.ry;
-        });
-        render();
-        flash('摆回原来的位置了。');
-      }
-      lastTap = now;
-    });
-  }
-
   /* ---------- 起 ---------- */
 
-  function loadPhoto(src, cb){
-    if (!src) return;
-    var img = new Image();
-    img.onload = function(){ cb({ ok: true, img: img }); };
-    img.src = src;
-  }
-
-  var list = D.album || [];
-  if (list[0] && list[0].src) loadPhoto(list[0].src, function(o){ shotBig = o; drawPoster(); render(); });
-  var second = list[1] || list[0];
-  if (second && second.src) loadPhoto(second.src, function(o){ shotSmall = o; drawPolaroid(); render(); });
+  scene.background = C(mode === 'night' ? 0x0E1015 : 0xE8E1D3);
+  computeCam();
+  camera.position.copy(camPos);
+  camera.lookAt(center);
 
   window.addEventListener('resize', fit);
   fit();
+  restyle();
 
-  setTimeout(function(){ if (boot) boot.textContent = ''; }, 1200);
+  setTimeout(function(){ if (boot) boot.textContent = ''; }, 1000);
   requestAnimationFrame(loop);
 
 })();
