@@ -1423,3 +1423,98 @@ body[data-theme='night']{
   .home-content{padding-top:12px}
   .home-top{padding-left:14px;padding-right:14px}
 }
+
+
+/* ---------- 移动端房间壳统一与触控优化 ---------- */
+@supports (height:100dvh){
+  html,body,#app,.home-screen,.view,.drawer{height:100dvh}
+  .view{min-height:100dvh}
+}
+.view{
+  min-height:100%;
+  background:var(--bg);
+  overscroll-behavior:contain;
+}
+.view-top{
+  position:relative;
+  z-index:2;
+  flex:0 0 auto;
+  min-height:60px;
+  padding:calc(env(safe-area-inset-top,0px) + 6px) 12px 6px;
+  border-bottom:1px solid var(--line);
+  background:color-mix(in srgb,var(--bg-2) 90%,transparent);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(135%);
+  backdrop-filter:blur(var(--glass-blur)) saturate(135%);
+}
+.view-top .icon{
+  width:44px;height:44px;min-width:44px;
+  border:1px solid var(--line);
+  background:var(--solid);
+  border-radius:14px;
+  font-size:19px;
+  touch-action:manipulation;
+}
+.view-title{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:15px;
+  font-weight:600;
+  letter-spacing:.025em;
+}
+.view-en{
+  flex:0 0 auto;
+  max-width:38%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.view-body{
+  min-height:0;
+  overscroll-behavior-y:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-y;
+  scroll-padding-top:18px;
+}
+.view-inner{width:100%;min-width:0}
+.drawer{max-height:100%;overscroll-behavior:contain}
+.drawer-in{
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+.drawer-nav button{
+  min-height:54px;
+  touch-action:manipulation;
+}
+.drawer-nav button:focus-visible,
+.home-tab:focus-visible,
+.home-menu:focus-visible,
+.view-top .icon:focus-visible,
+button:focus-visible{
+  outline:2px solid color-mix(in srgb,var(--ink-2) 70%,transparent);
+  outline-offset:2px;
+}
+.field input,.field textarea,.field select,
+.compose input,.compose textarea,
+.ghost,.newchat,.search{
+  scroll-margin-block:18px;
+}
+.field input,.field select{min-height:46px}
+.ghost{min-height:42px;touch-action:manipulation}
+.mini{min-height:36px;min-width:36px;touch-action:manipulation}
+body.room-open{overscroll-behavior:none}
+@media(max-width:520px){
+  .view-top{gap:8px;min-height:58px;padding-left:10px;padding-right:12px}
+  .view-title{font-size:15px}
+  .view-en{font-size:8px;letter-spacing:.1em}
+  .view-body{padding-top:17px;padding-left:17px;padding-right:17px}
+  .drawer{width:min(88vw,360px);max-width:360px}
+}
+@media(prefers-reduced-motion:reduce){
+  .view,.drawer{animation:none!important}
+  .view-body,.drawer-in,.sessions{scroll-behavior:auto!important}
+  *{transition-duration:.01ms!important}
+}
