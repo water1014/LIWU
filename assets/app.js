@@ -549,7 +549,7 @@
   function showHome(){
     closeDrawer(); closeView(); $('#app').hidden = true; homeScreen.hidden = false; paintHome();
     setDrawerCurrent('home');
-    $('.home-tab').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-home-tab') === 'home'); });
+    $$('.home-tab').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-home-tab') === 'home'); });
   }
   function showChat(){
     homeScreen.hidden = true; $('#app').hidden = false; closeView();
