@@ -975,7 +975,7 @@
     raw = raw || {};
     var keys = raw.keys || raw.key || [];
     if (!Array.isArray(keys)) keys = String(keys).split(/[,，\n]/);
-    var secondary = raw.secondary_keys || raw.secondaryKeys || [];
+    var secondary = raw.secondary_keys || raw.secondaryKeys || raw.keysecondary || [];
     if (!Array.isArray(secondary)) secondary = String(secondary).split(/[,，\n]/);
     return {
       id: String(raw.id || raw.uid || ('e' + Date.now().toString(36) + index + Math.random().toString(36).slice(2,5))),
@@ -986,7 +986,7 @@
       enabled: raw.enabled !== false && raw.disable !== true,
       constant: !!(raw.constant || raw.always_active),
       selective: raw.selective !== false,
-      selectiveLogic: String(raw.selectiveLogic || raw.selective_logic || 'and').toLowerCase() === 'or' ? 'or' : 'and',
+      selectiveLogic: (String(raw.selectiveLogic == null ? (raw.selective_logic == null ? 'and' : raw.selective_logic) : raw.selectiveLogic).toLowerCase() === 'or' || Number(raw.selectiveLogic) === 1) ? 'or' : 'and',
       caseSensitive: !!(raw.caseSensitive || raw.case_sensitive),
       position: raw.position == null ? 0 : raw.position,
       depth: Number(raw.depth || 4),
