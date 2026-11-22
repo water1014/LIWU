@@ -537,7 +537,7 @@
   }
   var viewReturnTarget = 'home';
   function setDrawerCurrent(target){
-    $('.drawer-nav button').forEach(function(b){
+    $$('.drawer-nav button').forEach(function(b){
       b.classList.toggle('nav-current', b.getAttribute('data-view') === target);
     });
   }
