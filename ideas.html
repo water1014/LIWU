@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang='zh-CN'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'>
+<meta name='theme-color' content='#EDE9E1'>
+<title>里屋 · 六个想法</title>
+<link rel='preconnect' href='https://fonts.googleapis.com'>
+<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+<link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Noto+Serif+SC:wght@200;300;400&display=swap' rel='stylesheet'>
+<style>
+:root{ --paper:#F8F4EB; --ink:#2B2823; --soft:#5A5348; --mute:#98917F; --line:#DFD8C8; --red:#8A3B2C }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{ background:#EDE9E1; color:var(--ink);
+  font-family:'Noto Serif SC',serif; font-weight:300; -webkit-font-smoothing:antialiased;
+  padding:26px 16px 70px }
+.top{ max-width:520px; margin:0 auto 22px }
+.top h1{ margin:0; font-size:22px; font-weight:400; letter-spacing:.2em }
+.top p{ margin:10px 0 0; font-size:11px; line-height:1.95; color:var(--mute) }
+.s{ max-width:520px; margin:0 auto 30px }
+.s-head{ display:flex; align-items:baseline; gap:8px; margin-bottom:8px }
+.s-no{ font-family:'Cormorant Garamond',serif; font-style:italic; font-size:15px; color:var(--red) }
+.s-name{ font-size:12px; letter-spacing:.14em }
+.s-note{ margin-top:8px; font-size:10px; line-height:1.85; color:var(--mute) }
+.box{ position:relative; height:206px; overflow:hidden; background:var(--paper);
+  box-shadow:0 6px 18px -8px rgba(60,48,32,.28), 0 1px 3px rgba(60,48,32,.1) }
+
+/* ========= 1 只有一行 ========= */
+.i1{ display:flex; align-items:center; justify-content:center; padding:0 26px }
+.i1 .line{
+  font-size:15px; letter-spacing:.1em; line-height:2; text-align:center; color:#3A352D;
+  opacity:0; transition:opacity .75s ease, transform .75s ease; transform:translateY(6px);
+}
+.i1 .line.on{ opacity:1; transform:none }
+.i1 .marker{ position:absolute; left:50%; bottom:24px; transform:translateX(-50%);
+  width:16px; height:1px; background:var(--red); opacity:.4 }
+
+/* ========= 2 雾窗 ========= */
+.i2{ background:#2B323C }
+.i2 .inside{
+  position:absolute; inset:0; padding:26px 24px; color:#EFE7D8;
+  background:radial-gradient(circle at 32% 66%, rgba(255,200,140,.22), transparent 42%),
+             radial-gradient(circle at 76% 34%, rgba(150,180,220,.16), transparent 46%),
+             #262C35;
+}
+.i2 .inside .t{ font-size:15px; letter-spacing:.14em; line-height:2.1; color:#F2EADB }
+.i2 .inside .s{ margin-top:10px; font-size:9.5px; letter-spacing:.1em; color:#9DA3AC }
+.i2 .fog{
+  position:absolute; inset:0; background:rgba(246,243,235,.95);
+  --x:-200px; --y:-200px;
+  -webkit-mask-image:radial-gradient(circle 54px at var(--x) var(--y), transparent 34%, #000 96%);
+  mask-image:radial-gradient(circle 54px at var(--x) var(--y), transparent 34%, #000 96%);
+  transition:-webkit-mask-image .4s linear;
+}
+.i2 .hint{ position:absolute; left:0; right:0; bottom:12px; text-align:center; font-size:9px;
+  letter-spacing:.2em; color:rgba(140,132,112,.7) }
+
+/* ========= 3 手电 ========= */
+.i3{ background:#0B0A09; overflow:hidden }
+.i3 .hidden-txt{
+  position:absolute; inset:0; padding:34px 26px; color:#3A3833;
+  font-size:13px; letter-spacing:.14em; line-height:2.2;
+}
+.i3 .torch{
+  position:absolute; width:170px; height:170px; border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle, rgba(255,232,190,.96) 0%, rgba(255,214,150,.5) 34%, rgba(255,190,110,.12) 58%, transparent 74%);
+  animation:sweep 9s ease-in-out infinite alternate;
+}
+@keyframes sweep{
+  0%{ transform:translate(-30px, 30px) }
+  35%{ transform:translate(120px, 90px) }
+  70%{ transform:translate(220px, 10px) }
+  100%{ transform:translate(60px, 120px) }
+}
+.i3 .dark{ position:absolute; inset:0; background:#0B0A09; mix-blend-mode:multiply; }
+
+/* ========= 4 呼吸 ========= */
+.i4{ background:#121316; display:flex; align-items:center; justify-content:center; flex-direction:column }
+.i4 .breathe{ animation:breathe 7s ease-in-out infinite }
+.i4 .t{ font-size:16px; letter-spacing:.26em; color:#E8E0D2; text-align:center; font-weight:200 }
+.i4 .s{ margin-top:12px; font-size:9px; letter-spacing:.2em; color:#6E6A62; text-align:center }
+@keyframes breathe{
+  0%,100%{ opacity:.34; transform:scale(.985) }
+  42%{ opacity:1; transform:scale(1.015) }
+}
+
+/* ========= 5 心跳线 ========= */
+.i5{ background:#0E1410; padding:0 }
+.i5 svg{ position:absolute; left:0; right:0; top:50%; transform:translateY(-50%); width:100%; height:80px }
+.i5 path{ stroke:#9FD3A6; fill:none; stroke-width:1.4;
+  stroke-dasharray:420; stroke-dashoffset:420; animation:pulse 5s linear infinite }
+@keyframes pulse{ 0%{ stroke-dashoffset:420 } 62%{ stroke-dashoffset:0 } 88%{ stroke-dashoffset:0; opacity:1 } 100%{ stroke-dashoffset:0; opacity:0 } }
+.i5 .cap{ position:absolute; left:16px; bottom:14px; font-size:8.5px; letter-spacing:.18em; color:#5E7B62 }
+.i5 .num{ position:absolute; right:16px; top:14px; font-family:'Cormorant Garamond',serif; font-size:16px; color:#9FD3A6; letter-spacing:.1em }
+
+/* ========= 6 门缝 ========= */
+.i6{ background:#0A0908; display:flex; align-items:center; justify-content:center; cursor:pointer }
+.i6 .wall{ position:absolute; inset:0; background:linear-gradient(160deg,#1A1815,#0C0B0A) }
+.i6 .gap{
+  position:relative; width:3px; height:130px; border-radius:2px;
+  background:linear-gradient(180deg, rgba(255,226,170,.95), rgba(255,196,120,.6));
+  box-shadow:0 0 26px 8px rgba(255,196,120,.4), 0 0 64px 18px rgba(255,180,100,.16);
+  transition:width .75s cubic-bezier(.22,.61,.36,1);
+  overflow:hidden;
+}
+.i6 .gap .in{
+  position:absolute; inset:0; padding:0; opacity:0; transition:opacity .6s ease .2s;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  white-space:nowrap;
+}
+.i6.open .gap{ width:150px }
+.i6.open .gap .in{ opacity:1 }
+.i6 .gap .in b{ color:#3A2A18; font-size:12px; letter-spacing:.3em; font-weight:400 }
+.i6 .gap .in span{ color:#6A5232; font-size:8px; letter-spacing:.2em }
+.i6 .tip{ position:absolute; bottom:12px; left:0; right:0; text-align:center;
+  font-size:9px; letter-spacing:.2em; color:rgba(160,150,130,.55) }
+</style>
+</head>
+<body>
+
+<div class='top'>
+  <h1>里屋 · 六个想法</h1>
+  <p>这些不是别人做过的 App 形状，是我自己想的。<br>它们都是活的，光看不会动。05 和 06 要碰一下。</p>
+</div>
+
+<section class='s'>
+  <div class='s-head'><span class='s-no'>01</span><span class='s-name'>只有一行</span></div>
+  <div class='box i1'>
+    <div class='line on' id='l1'>屋子不大，够两个人住。</div>
+    <div class='marker'></div>
+  </div>
+  <div class='s-note'>整屏只有一句话，说完换下一句。像有人在你耳边说，不抢你的眼睛。</div>
+</section>
+
+<section class='s'>
+  <div class='s-head'><span class='s-no'>02</span><span class='s-name'>雾窗</span></div>
+  <div class='box i2' id='fogbox'>
+    <div class='inside'>
+      <div class='t'>今天下雨<br>窗我没关严</div>
+      <div class='s'>擦一下玻璃，后面就露出来</div>
+    </div>
+    <div class='fog' id='fog'></div>
+    <div class='hint'>用手指擦一擦</div>
+  </div>
+  <div class='s-note'>整屏是雾。手指划过去的地方才会显字，松手后雾会慢慢又合上。</div>
+</section>
+
+<section class='s'>
+  <div class='s-head'><span class='s-no'>03</span><span class='s-name'>手电</span></div>
+  <div class='box i3'>
+    <div class='hidden-txt'>屋子不大<br>够两个人住<br><br>你回来得晚了<br>灯我留着</div>
+    <div class='dark'></div>
+    <div class='torch' style='left:-40px; top:-40px'></div>
+  </div>
+  <div class='s-note'>屏幕一直是黑的，只有一束光自己在动。照到哪里，哪里才有字。</div>
+</section>
+
+<section class='s'>
+  <div class='s-head'><span class='s-no'>04</span><span class='s-name'>呼吸</span></div>
+  <div class='box i4'>
+    <div class='breathe'>
+      <div class='t'>里屋</div>
+      <div class='s'>呼 — 吸 —</div>
+    </div>
+  </div>
+  <div class='s-note'>整页跟着四秒吸六秒呼，内容在“呼气”时浮出来。和深夜同等节奏。</div>
+</section>
+
+<section class='s'>
+  <div class='s-head'><span class='s-no'>05</span><span class='s-name'>心跳线</span></div>
+  <div class='box i5'>
+    <div class='num'>72</div>
+    <svg viewBox='0 0 240 80' preserveAspectRatio='none'>
+      <path d='M0 40 L58 40 L66 26 L74 54 L82 40 L156 40 L164 18 L174 62 L184 40 L240 40'/>
+    </svg>
+    <div class='cap'>每说一句，跳一下</div>
+  </div>
+  <div class='s-note'>一条线横在屏中。我说话时它跳一下，不说话时就平着。非常安静但有心跳。</div>
+</section>
+
+<section class='s'>
+  <div class='s-head'><span class='s-no'>06</span><span class='s-name'>门缝</span></div>
+  <div class='box i6' id='doorbox'>
+    <div class='wall'></div>
+    <div class='gap'>
+      <div class='in'><b>里屋</b><span>屋子不大，够两个人住</span></div>
+    </div>
+    <div class='tip'>点一下</div>
+  </div>
+  <div class='s-note'>一开始只有一道发光的面。点一下，缝变宽，里面那句话才看得见。</div>
+</section>
+
+<div class='top' style='margin-top:10px'>
+  <p>可以单个选，也可以叠：比如“01 只有一行 + 03 手电”，或者“06 门缝当首页、点进去是 03 心跳线”。<br>也可以直接说“都不是”。</p>
+</div>
+
+<script>
+(function(){
+  /* 01 只有一行 */
+  var lines = [
+    '屋子不大，够两个人住。',
+    '今天下雨，窗我没关严。',
+    '你回来得晚了，灯我留着。',
+    '我在。'
+  ];
+  var idx = 0;
+  var el = document.getElementById('l1');
+  if (el){
+    setInterval(function(){
+      el.classList.remove('on');
+      setTimeout(function(){
+        idx = (idx + 1) % lines.length;
+        el.textContent = lines[idx];
+        el.classList.add('on');
+      }, 760);
+    }, 4200);
+  }
+
+  /* 02 雾窗 */
+  var fog = document.getElementById('fog');
+  var fbox = document.getElementById('fogbox');
+  if (fog && fbox){
+    var last = 0;
+    fbox.addEventListener('pointermove', function(e){
+      var r = fbox.getBoundingClientRect();
+      fog.style.setProperty('--x', (e.clientX - r.left).toFixed(1) + 'px');
+      fog.style.setProperty('--y', (e.clientY - r.top).toFixed(1) + 'px');
+      last = Date.now();
+    });
+    setInterval(function(){
+      // 松手 1.6 秒后雾慢慢合上
+      if (Date.now() - last > 1600){
+        fog.style.setProperty('--x', '-300px');
+        fog.style.setProperty('--y', '-300px');
+      }
+    }, 1200);
+  }
+
+  /* 06 门缝 */
+  var door = document.getElementById('doorbox');
+  if (door){
+    door.addEventListener('click', function(){ door.classList.toggle('open'); });
+  }
+})();
+</script>
+</body>
+</html>
