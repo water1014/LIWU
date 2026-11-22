@@ -584,6 +584,7 @@
     b.addEventListener('click', function(){
       var v = b.getAttribute('data-view');
       closeDrawer();
+      if (v === 'chat'){ closeView(); $('#input').focus(); }
       if (v === 'diary') viewDiary();
       if (v === 'album') viewAlbum();
       if (v === 'memory') viewMemory();
