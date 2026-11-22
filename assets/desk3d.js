@@ -1,5 +1,5 @@
 /* 里屋 · 3D 桌面（three.js）
-   一整张海报铺在桌上当背景，上面散着五样东西：拍立得、便签、唱片机、工牌、一张小卡。
+   桌面就是一页杂志封面。上面压着五样东西：拍立得、便签、唱片机、工牌、一张小卡。
    东西能拖，位置存本机；点一下进对应那间；双击抬头时间全部复位。 */
 
 (async function(){
@@ -65,8 +65,10 @@
   function setHome(on){
     if (on){
       document.body.classList.add('home');
-      drawPoster(); drawPolaroid(); drawNote(); drawTag(); drawMemo();
-      fit();
+      if (THREE){
+        drawPoster(); drawPolaroid(); drawNote(); drawTag(); drawMemo();
+        fit();
+      }
     } else {
       document.body.classList.remove('home');
     }
@@ -156,7 +158,7 @@
 
   var ink = function(){ return mode === 'night' ? '#E7E2D6' : '#2A2620'; };
   var sub = function(){ return mode === 'night' ? '#7F776A' : '#8A7E68'; };
-  var bgc = function(){ return mode === 'night' ? '#1B1916' : '#F4EFE3'; };
+  var bgc = function(){ return mode === 'night' ? '#1B1916' : '#F7F3E9'; };
 
   var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -166,7 +168,7 @@
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   var scene = new THREE.Scene();
-  scene.background = new THREE.Color(mode === 'night' ? 0x14120F : 0xE8E2D4);
+  scene.background = new THREE.Color(mode === 'night' ? 0x14120F : 0xE6E0D2);
 
   var camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 60);
 
@@ -215,18 +217,17 @@
     g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke();
   }
 
-  /* ================= 海报（就是桌面本身） ================= */
+  /* ================= 封面（桌面就是这一页） ================= */
 
-  var posterCanvas = null, posterTex = null;
-  var posterMesh = null;
+  var coverCanvas = null, coverTex = null, coverMesh = null;
   var shotBig = null, shotSmall = null;
 
   var PW = 3.3, PH = 5.8;
 
   function drawPoster(){
     var W = 1000, H = 1760;
-    var c = posterCanvas || makeCanvas(W, H);
-    posterCanvas = c;
+    var c = coverCanvas || makeCanvas(W, H);
+    coverCanvas = c;
     var g = c.getContext('2d');
 
     g.fillStyle = bgc();
@@ -235,42 +236,34 @@
     g.strokeStyle = mode === 'night' ? 'rgba(231,226,214,.16)' : 'rgba(120,100,70,.24)';
     g.lineWidth = 2;
 
-    // 顶部
-    g.fillStyle = ink();
+    /* 刊头 */
     g.textAlign = 'left';
-    g.font = '500 92px ' + SERIF;
-    g.fillText('里屋', 72, 168);
+    g.fillStyle = ink();
+    g.font = '500 112px ' + SERIF;
+    g.fillText('里屋', 76, 196);
 
     g.fillStyle = RED;
-    g.fillRect(74, 192, 42, 4);
+    g.fillRect(80, 224, 48, 4);
 
     g.fillStyle = sub();
-    g.font = '400 17px ' + NUM;
-    g.fillText('L I W U', 132, 196);
+    g.font = '400 19px ' + NUM;
+    g.fillText('L I W U', 146, 228);
 
     g.textAlign = 'right';
     g.fillStyle = ink();
-    g.font = 'italic 400 24px ' + NUM;
-    g.fillText('VOL. 01', W - 72, 118);
+    g.font = 'italic 400 27px ' + NUM;
+    g.fillText('VOL. 01', W - 76, 132);
     g.fillStyle = sub();
-    g.font = '400 16px ' + NUM;
-    g.fillText('2026 · 11', W - 72, 148);
+    g.font = '400 17px ' + NUM;
+    g.fillText('2026 · 11', W - 76, 164);
+    g.font = '400 16px ' + SERIF;
+    g.fillText('一本关于两个人的刊物', W - 76, 198);
     g.textAlign = 'left';
 
-    line(g, 72, 236, W - 72, 236);
+    line(g, 76, 266, W - 76, 266);
 
-    // 大标题
-    g.fillStyle = ink();
-    g.font = '400 86px ' + SERIF;
-    g.fillText('屋子不大', 72, 348);
-    g.fillText('够两个人住', 72, 452);
-
-    g.fillStyle = sub();
-    g.font = '400 18px ' + NUM;
-    g.fillText('A   S M A L L   R O O M ,   F O R   T W O', 76, 496);
-
-    // 主图
-    var ix = 72, iy = 560, iw = W - 144, ih = 700;
+    /* 封面主图 */
+    var ix = 76, iy = 306, iw = W - 152, ih = 742;
     g.fillStyle = mode === 'night' ? '#2A2620' : '#E2DAC8';
     g.fillRect(ix, iy, iw, ih);
 
@@ -279,68 +272,79 @@
     } else {
       g.fillStyle = sub();
       g.textAlign = 'center';
-      g.font = '400 26px ' + SERIF;
-      g.fillText('把一张图放进 images/', ix + iw / 2, iy + ih / 2 - 16);
-      g.font = '400 20px ' + SERIF;
-      g.fillText('它就贴在这面墙上', ix + iw / 2, iy + ih / 2 + 30);
+      g.font = '400 24px ' + SERIF;
+      g.fillText('封面空着', ix + iw / 2, iy + ih / 2 - 14);
+      g.font = '400 18px ' + SERIF;
+      g.fillText('放一张图进 images/，它就上封面', ix + iw / 2, iy + ih / 2 + 28);
       g.textAlign = 'left';
     }
 
-    // 图下一句
+    g.fillStyle = sub();
+    g.font = '400 14px ' + NUM;
+    g.textAlign = 'right';
+    g.fillText('COVER', W - 88, iy + 30);
+    g.textAlign = 'left';
+
+    /* 封面语 */
+    g.fillStyle = ink();
+    g.font = '400 54px ' + SERIF;
+    g.fillText(D.hero || '屋子不大，够两个人住。', 76, 1142);
+
     var capText = (shotBig && shotBig.ok && D.album && D.album[0])
       ? (D.album[0].caption || D.album[0].date || '')
-      : '本期封面';
+      : '';
     g.fillStyle = sub();
-    g.font = '400 18px ' + SERIF;
-    g.fillText(capText, ix, iy + ih + 40);
+    g.font = '400 19px ' + SERIF;
+    g.fillText(capText, 76, 1184);
 
-    // 要目
-    line(g, 72, 1350, W - 72, 1350);
+    line(g, 76, 1218, W - 76, 1218);
+
+    /* 目录 */
     g.fillStyle = sub();
-    g.font = '400 16px ' + SERIF;
-    g.fillText('要有的事   I N   T H I S   R O O M', 72, 1392);
+    g.font = '400 15px ' + SERIF;
+    g.fillText('目 录   C O N T E N T S', 76, 1258);
 
     var memos = (D.memory || []).slice(0, 3);
-    var y = 1444;
+    var y = 1312;
     for (var i = 0; i < memos.length; i++){
       g.fillStyle = ink();
-      g.font = '400 26px ' + SERIF;
-      g.fillText(String(memos[i].title || '').slice(0, 12), 72, y);
+      g.font = '400 27px ' + SERIF;
+      g.fillText(String(memos[i].title || '').slice(0, 12), 76, y);
       g.fillStyle = sub();
       g.textAlign = 'right';
       g.font = 'italic 400 22px ' + NUM;
-      g.fillText('0' + (i + 1), W - 72, y);
+      g.fillText('0' + (i + 1), W - 76, y);
       g.textAlign = 'left';
-      y += 46;
+      y += 50;
     }
 
-    // 页脚
+    /* 页脚 */
     var w = D.weather || {};
-    line(g, 72, 1630, W - 72, 1630);
+    line(g, 76, 1610, W - 76, 1610);
     g.fillStyle = sub();
     g.font = '400 18px ' + NUM;
-    g.fillText((w.temp || '—') + '    ' + (w.text || ''), 72, 1670);
+    g.fillText((w.temp || '—') + '    ' + (w.text || ''), 76, 1652);
     var dc = dayCount();
     g.textAlign = 'right';
     g.font = 'italic 400 20px ' + NUM;
-    g.fillText(dc ? ('第 ' + dc + ' 天') : '第 — 天', W - 72, 1670);
+    g.fillText(dc ? ('第 ' + dc + ' 天') : '第 — 天', W - 76, 1652);
     g.textAlign = 'left';
 
-    if (posterTex) posterTex.dispose();
-    posterTex = tex(c);
+    if (coverTex) coverTex.dispose();
+    coverTex = tex(c);
 
-    if (!posterMesh){
-      posterMesh = new THREE.Mesh(
+    if (!coverMesh){
+      coverMesh = new THREE.Mesh(
         new THREE.PlaneGeometry(PW, PH),
-        new THREE.MeshStandardMaterial({ map: posterTex, roughness: 0.96, metalness: 0 })
+        new THREE.MeshStandardMaterial({ map: coverTex, roughness: 0.96, metalness: 0 })
       );
-      posterMesh.rotation.x = -Math.PI / 2;
-      posterMesh.receiveShadow = true;
-      posterMesh.position.y = 0;
-      scene.add(posterMesh);
+      coverMesh.rotation.x = -Math.PI / 2;
+      coverMesh.receiveShadow = true;
+      coverMesh.position.y = 0;
+      scene.add(coverMesh);
     } else {
-      posterMesh.material.map = posterTex;
-      posterMesh.material.needsUpdate = true;
+      coverMesh.material.map = coverTex;
+      coverMesh.material.needsUpdate = true;
     }
   }
 
@@ -396,9 +400,7 @@
     g.strokeStyle = mode === 'night' ? 'rgba(231,226,214,.2)' : 'rgba(120,100,70,.32)';
     g.lineWidth = 3;
     g.beginPath();
-    g.moveTo(173, 26); g.lineTo(227, 26);
-    g.arcTo(260, 26, 260, 60, 34);
-    g.lineTo(260, 26);
+    g.arc(W / 2, 44, 26, 0, Math.PI * 2);
     g.stroke();
     g.fillStyle = ink();
     g.textAlign = 'center';
@@ -549,7 +551,7 @@
   /* ---------- 换色 ---------- */
 
   function restyle(){
-    scene.background = new THREE.Color(mode === 'night' ? 0x14120F : 0xE8E2D4);
+    scene.background = new THREE.Color(mode === 'night' ? 0x14120F : 0xE6E0D2);
     hemi.intensity = mode === 'night' ? 0.45 : 0.95;
     key.intensity = mode === 'night' ? 0.55 : 1.25;
     key.color.setHex(mode === 'night' ? 0xBFCBE0 : 0xFFF1D8);
@@ -575,7 +577,7 @@
 
     var vFov = camera.fov * Math.PI / 180;
     var hFov = 2 * Math.atan(Math.tan(vFov / 2) * a);
-    var needW = PW + 0.35;
+    var needW = PW + 0.3;
     var dist = (needW / 2) / Math.tan(hFov / 2);
     dist = Math.max(dist, 5.2);
     dist = Math.min(dist, 30);
