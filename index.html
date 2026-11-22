@@ -3,17 +3,61 @@
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1'>
-<meta name='theme-color' content='#F3F0E9'>
+<meta name='theme-color' content='#EFEBE2'>
 <meta name='description' content='里屋。一间能说话、能记事、能住人的屋子。'>
 <meta name='apple-mobile-web-app-capable' content='yes'>
 <title>里屋</title>
-<link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23F3F0E9%27/%3E%3Crect x=%2715.2%27 y=%277%27 width=%271.4%27 height=%2718%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
+<link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23EFEBE2%27/%3E%3Crect x=%2715.2%27 y=%277%27 width=%271.4%27 height=%2718%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
 <link rel='preconnect' href='https://fonts.googleapis.com'>
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+<link rel='preconnect' href='https://unpkg.com' crossorigin>
 <link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Serif+SC:wght@300;400;500&display=swap' rel='stylesheet'>
 <link rel='stylesheet' href='assets/style.css'>
+<style>
+  /* 3D 主页 */
+  body.home #app{display:none}
+  body:not(.home) #stage-wrap{display:none}
+
+  #stage-wrap{position:fixed;inset:0;z-index:5;background:#EFEBE2}
+  #stage{width:100%;height:100%;display:block;touch-action:none}
+
+  .stage-hud{
+    position:fixed;left:0;right:0;top:0;z-index:7;pointer-events:none;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:calc(env(safe-area-inset-top,0px) + 14px) 22px 0;
+  }
+  .stage-brand{font-family:var(--serif);font-size:13px;letter-spacing:.44em;color:rgba(33,31,28,.58)}
+  .stage-days{font-family:var(--num);font-style:italic;font-size:12.5px;letter-spacing:.14em;color:rgba(33,31,28,.42)}
+
+  .stage-tip{
+    position:fixed;left:0;right:0;top:50%;z-index:7;transform:translateY(-50%);
+    text-align:center;font-size:11.5px;letter-spacing:.3em;color:rgba(33,31,28,.34);
+    pointer-events:none;transition:opacity .8s;
+  }
+  .stage-dock{
+    position:fixed;left:0;right:0;bottom:0;z-index:7;
+    display:flex;align-items:center;justify-content:center;gap:2px;
+    padding:8px 6px calc(env(safe-area-inset-bottom,0px) + 10px);
+    background:linear-gradient(180deg,rgba(239,235,226,0) 0%,rgba(239,235,226,.8) 45%,rgba(239,235,226,.94) 100%);
+  }
+  .stage-dock button{
+    appearance:none;background:none;border:0;cursor:pointer;
+    padding:7px 9px;font-size:11px;letter-spacing:.16em;color:rgba(33,31,28,.4);
+  }
+  .stage-dock button:hover{color:rgba(33,31,28,.82)}
+</style>
 </head>
-<body data-theme='paper'>
+<body data-theme='paper' class='home'>
+
+<div id='stage-wrap'>
+  <canvas id='stage'></canvas>
+  <div class='stage-hud'>
+    <span class='stage-brand'>里屋</span>
+    <span class='stage-days' id='stageDays'></span>
+  </div>
+  <div class='stage-tip' id='stageTip'>正在开门……</div>
+  <div class='stage-dock' id='stageDock'></div>
+</div>
 
 <div id='app'>
 
@@ -35,7 +79,7 @@
     <form class='in-row' id='form'>
       <textarea id='input' rows='1' placeholder='说一句' autocapitalize='off'></textarea>
       <button class='send' id='sendBtn' type='submit' aria-label='发'>↑</button>
-      <button class='stop' id='stopBtn' type='button' aria-label='停' hidden>■</button>
+      <button class='stop' id='stopBtn'类型='button' aria-label='停' hidden>■</button>
     </form>
     <div class='hint' id='hint'></div>
   </footer>
@@ -57,6 +101,7 @@
     <div class='sessions' id='sessions'></div>
 
     <nav class='drawer-nav'>
+      <button type='button' data-view='home'>回屋子</button>
       <button type='button' data-view='diary'>日记</button>
       <button type='button' data-view='album'>相册</button>
       <button type='button' data-view='memory'>记忆</button>
@@ -78,10 +123,13 @@
 window.addEventListener('error', function(e){
   var h = document.getElementById('hint');
   if (h) h.textContent = '出了点问题：' + (e.message || '未知') + (e.lineno ? '（第 ' + e.lineno + ' 行）' : '');
+  var t = document.getElementById('stageTip');
+  if (t) t.textContent = '出了点问题：' + (e.message || '未知');
 });
 </script>
 
 <script src='data.js'></script>
 <script src='assets/app.js'></script>
+<script type='module' src='assets/home3d.js'></script>
 </body>
 </html>
