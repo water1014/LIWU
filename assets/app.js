@@ -571,6 +571,9 @@
     if (target === 'calendar' || target === 'schedule' || target === 'todo') viewPlanner(target);
     else if (target === 'countdown') viewCountdown();
     else if (target === 'mood') viewMood();
+    else if (target === 'moments') viewMoments();
+    else if (target === 'quotes') viewQuotes();
+    else if (target === 'favorite') viewFavorites();
     else if (target === 'diary') viewDiary();
     else if (target === 'album') viewAlbum();
     else if (target === 'memory') viewMemory();
@@ -750,6 +753,9 @@
       if (v === 'calendar' || v === 'schedule' || v === 'todo') viewPlanner(v);
       else if (v === 'countdown') viewCountdown();
       else if (v === 'mood') viewMood();
+      else if (v === 'moments') viewMoments();
+      else if (v === 'quotes') viewQuotes();
+      else if (v === 'favorite') viewFavorites();
       else if (v === 'diary') viewDiary();
       else if (v === 'album') viewAlbum();
       else if (v === 'memory') viewMemory();
@@ -1109,6 +1115,74 @@
     render();
   }
 
+
+  /* ================= 共同片段 · 动态 / 语录 / 收藏 ================= */
+  function collectionList(key){var v=LS.get(key,[]);return Array.isArray(v)?v:[];}
+  function viewMoments(){
+    var key='liwu.moments',editing='',query='';
+    function render(){
+      var all=collectionList(key).slice().sort(function(a,b){return (b.date||'').localeCompare(a.date||'')||(b.createdAt||0)-(a.createdAt||0);});
+      var shown=all.filter(function(x){return !query||[x.title,x.content,x.date].join(' ').toLowerCase().includes(query.toLowerCase());});
+      var html='<div class="planner-intro"><p class="lead">把生活里值得停一下的瞬间留在这里。不是动态广场，只属于这间屋子的两个人。</p><div class="planner-stat"><strong>'+all.length+'</strong><span>段片刻</span></div></div>'+
+        '<div class="collection-toolbar"><input id="momentSearch" type="search" placeholder="搜索片段" value="'+esc(query)+'"><button class="ghost solid" id="momentNew" type="button">＋ 记一件小事</button></div>'+
+        '<form class="planner-form" id="momentForm" hidden><strong id="momentFormTitle">记下这一刻</strong><input id="momentTitle" maxlength="80" placeholder="给这一刻一个名字（可选）"><input id="momentDate" type="date" value="'+today()+'"><textarea id="momentContent" rows="5" placeholder="发生了什么？当时是什么感觉？"></textarea><div class="planner-form-actions"><button class="ghost solid" type="submit">保存片段</button><button class="ghost" id="momentCancel" type="button">取消</button></div></form>';
+      html+=shown.length?'<div class="moments-feed">'+shown.map(function(x){return '<article class="moment-card"><time>'+esc(plannerDateLabel(x.date))+'</time><h3>'+esc(x.title||'一个小片刻')+'</h3><p>'+esc(x.content)+'</p><div class="planner-item-actions"><button class="mini" type="button" data-moment-edit="'+esc(x.id)+'">编辑</button><button class="mini danger" type="button" data-moment-delete="'+esc(x.id)+'">删除</button></div></article>';}).join('')+'</div>':'<div class="blank planner-empty">'+(all.length?'没有找到相关片段。':'生活还在继续，等第一个瞬间落下来。')+'</div>';
+      openView('动态','Moments',html);var body=$('#viewBody');
+      body.onclick=function(ev){
+        if(ev.target.id==='momentNew'){editing='';$('#momentFormTitle').textContent='记下这一刻';$('#momentTitle').value='';$('#momentDate').value=today();$('#momentContent').value='';$('#momentForm').hidden=false;$('#momentTitle').focus();return;}
+        if(ev.target.id==='momentCancel'){$('#momentForm').hidden=true;editing='';return;}
+        var edit=ev.target.closest('[data-moment-edit]');if(edit){var x=all.find(function(a){return a.id===edit.getAttribute('data-moment-edit');});if(!x)return;editing=x.id;$('#momentFormTitle').textContent='修改片段';$('#momentTitle').value=x.title||'';$('#momentDate').value=x.date||today();$('#momentContent').value=x.content||'';$('#momentForm').hidden=false;$('#momentForm').scrollIntoView({behavior:'smooth',block:'nearest'});return;}
+        var del=ev.target.closest('[data-moment-delete]');if(del&&confirm('删除这段生活记录？')){LS.set(key,collectionList(key).filter(function(x){return x.id!==del.getAttribute('data-moment-delete');}));render();toast('片段已删除。');}
+      };
+      body.oninput=function(ev){if(ev.target.id==='momentSearch'){query=ev.target.value;var p=ev.target.selectionStart;render();$('#momentSearch').focus();try{$('#momentSearch').setSelectionRange(p,p);}catch(_){}}};
+      body.onsubmit=function(ev){if(ev.target.id!=='momentForm')return;ev.preventDefault();var content=$('#momentContent').value.trim();if(!content){toast('先写下这一刻吧。');return;}var list=collectionList(key),item={id:editing||uid(),title:$('#momentTitle').value.trim(),date:$('#momentDate').value||today(),content:content,updatedAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=Object.assign({},list[idx],item);else list.push(Object.assign({createdAt:Date.now()},item));if(LS.set(key,list)){editing='';query='';render();toast('这一刻收好了。');}};
+    }
+    render();
+  }
+  function viewQuotes(){
+    var key='liwu.quotes',editing='',query='';
+    function render(){
+      var all=collectionList(key).slice().sort(function(a,b){return (b.updatedAt||b.createdAt||0)-(a.updatedAt||a.createdAt||0);});
+      var shown=all.filter(function(x){return !query||[x.text,x.author,x.note,x.tags].join(' ').toLowerCase().includes(query.toLowerCase());});
+      var html='<div class="planner-intro"><p class="lead">喜欢的话、聊天里的一句、想反复读的文字，都可以留在这里。</p><div class="planner-stat"><strong>'+all.length+'</strong><span>句收藏</span></div></div>'+
+        '<div class="collection-toolbar"><input id="quoteSearch" type="search" placeholder="搜索语录、出处或标签" value="'+esc(query)+'"><button class="ghost solid" id="quoteNew" type="button">＋ 收下一句话</button></div>'+
+        '<form class="planner-form" id="quoteForm" hidden><strong id="quoteFormTitle">收下一句话</strong><textarea id="quoteText" rows="4" placeholder="写下喜欢的句子…"></textarea><input id="quoteAuthor" maxlength="80" placeholder="说话的人 / 出处（可选）"><input id="quoteTags" maxlength="120" placeholder="标签，用逗号分开（可选）"><textarea id="quoteNote" rows="2" placeholder="为什么想留下它？（可选）"></textarea><div class="planner-form-actions"><button class="ghost solid" type="submit">保存语录</button><button class="ghost" id="quoteCancel" type="button">取消</button></div></form>';
+      html+=shown.length?'<div class="quote-list">'+shown.map(function(x){return '<article class="quote-card"><span class="quote-mark">“</span><blockquote>'+esc(x.text)+'</blockquote>'+(x.author?'<cite>'+esc(x.author)+'</cite>':'')+(x.note?'<p>'+esc(x.note)+'</p>':'')+(x.tags?'<small>'+esc(x.tags)+'</small>':'')+'<div class="planner-item-actions"><button class="mini" type="button" data-quote-edit="'+esc(x.id)+'">编辑</button><button class="mini danger" type="button" data-quote-delete="'+esc(x.id)+'">删除</button></div></article>';}).join('')+'</div>':'<div class="blank planner-empty">'+(all.length?'没有找到相关语录。':'先收下一句喜欢的话吧。')+'</div>';
+      openView('语录','Quotes',html);var body=$('#viewBody');
+      body.onclick=function(ev){
+        if(ev.target.id==='quoteNew'){editing='';$('#quoteFormTitle').textContent='收下一句话';['quoteText','quoteAuthor','quoteTags','quoteNote'].forEach(function(id){$('#'+id).value='';});$('#quoteForm').hidden=false;$('#quoteText').focus();return;}
+        if(ev.target.id==='quoteCancel'){$('#quoteForm').hidden=true;editing='';return;}
+        var edit=ev.target.closest('[data-quote-edit]');if(edit){var x=all.find(function(a){return a.id===edit.getAttribute('data-quote-edit');});if(!x)return;editing=x.id;$('#quoteFormTitle').textContent='修改语录';$('#quoteText').value=x.text||'';$('#quoteAuthor').value=x.author||'';$('#quoteTags').value=x.tags||'';$('#quoteNote').value=x.note||'';$('#quoteForm').hidden=false;$('#quoteForm').scrollIntoView({behavior:'smooth',block:'nearest'});return;}
+        var del=ev.target.closest('[data-quote-delete]');if(del&&confirm('删除这句语录？')){LS.set(key,collectionList(key).filter(function(x){return x.id!==del.getAttribute('data-quote-delete');}));render();toast('语录已删除。');}
+      };
+      body.oninput=function(ev){if(ev.target.id==='quoteSearch'){query=ev.target.value;var p=ev.target.selectionStart;render();$('#quoteSearch').focus();try{$('#quoteSearch').setSelectionRange(p,p);}catch(_){}}};
+      body.onsubmit=function(ev){if(ev.target.id!=='quoteForm')return;ev.preventDefault();var text=$('#quoteText').value.trim();if(!text){toast('先写下句子吧。');return;}var list=collectionList(key),item={id:editing||uid(),text:text,author:$('#quoteAuthor').value.trim(),tags:$('#quoteTags').value.trim(),note:$('#quoteNote').value.trim(),updatedAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=Object.assign({},list[idx],item);else list.unshift(Object.assign({createdAt:Date.now()},item));if(LS.set(key,list)){editing='';query='';render();toast('语录收好了。');}};
+    }
+    render();
+  }
+  function viewFavorites(){
+    var key='liwu.favorites',editing='',query='';
+    function render(){
+      var all=collectionList(key).slice().sort(function(a,b){return Number(!!b.pinned)-Number(!!a.pinned)||(b.createdAt||0)-(a.createdAt||0);});
+      var shown=all.filter(function(x){return !query||[x.title,x.content,x.category].join(' ').toLowerCase().includes(query.toLowerCase());});
+      var html='<div class="planner-intro"><p class="lead">把想留住的文字、图片说明和生活片段收在一起。置顶的内容会排在前面。</p><div class="planner-stat"><strong>'+all.length+'</strong><span>份收藏</span></div></div>'+
+        '<div class="collection-toolbar"><input id="favoriteSearch" type="search" placeholder="搜索收藏" value="'+esc(query)+'"><button class="ghost solid" id="favoriteNew" type="button">＋ 添加收藏</button></div>'+
+        '<form class="planner-form" id="favoriteForm" hidden><strong id="favoriteFormTitle">添加收藏</strong><input id="favoriteTitle" maxlength="100" placeholder="标题"><select id="favoriteCategory"><option value="文字">文字</option><option value="图片">图片</option><option value="生活">生活片段</option><option value="其他">其他</option></select><textarea id="favoriteContent" rows="4" placeholder="收藏内容或图片说明"></textarea><label class="worldbook-switch"><input id="favoritePinned" type="checkbox"> 置顶这份收藏</label><div class="planner-form-actions"><button class="ghost solid" type="submit">保存收藏</button><button class="ghost" id="favoriteCancel" type="button">取消</button></div></form>';
+      html+=shown.length?'<div class="favorite-list">'+shown.map(function(x){return '<article class="favorite-card"><div class="favorite-card-top"><span>'+esc(x.category||'其他')+'</span>'+(x.pinned?'<small>已置顶</small>':'')+'</div><h3>'+esc(x.title||'未命名收藏')+'</h3><p>'+esc(x.content)+'</p><div class="planner-item-actions"><button class="mini" type="button" data-fav-edit="'+esc(x.id)+'">编辑</button><button class="mini" type="button" data-fav-pin="'+esc(x.id)+'">'+(x.pinned?'取消置顶':'置顶')+'</button><button class="mini danger" type="button" data-fav-delete="'+esc(x.id)+'">删除</button></div></article>';}).join('')+'</div>':'<div class="blank planner-empty">'+(all.length?'没有找到相关收藏。':'喜欢的内容可以放在这里。')+'</div>';
+      openView('收藏','Favorites',html);var body=$('#viewBody');
+      body.onclick=function(ev){
+        if(ev.target.id==='favoriteNew'){editing='';$('#favoriteFormTitle').textContent='添加收藏';$('#favoriteTitle').value='';$('#favoriteCategory').value='文字';$('#favoriteContent').value='';$('#favoritePinned').checked=false;$('#favoriteForm').hidden=false;$('#favoriteTitle').focus();return;}
+        if(ev.target.id==='favoriteCancel'){$('#favoriteForm').hidden=true;editing='';return;}
+        var edit=ev.target.closest('[data-fav-edit]');if(edit){var x=all.find(function(a){return a.id===edit.getAttribute('data-fav-edit');});if(!x)return;editing=x.id;$('#favoriteFormTitle').textContent='修改收藏';$('#favoriteTitle').value=x.title||'';$('#favoriteCategory').value=x.category||'文字';$('#favoriteContent').value=x.content||'';$('#favoritePinned').checked=!!x.pinned;$('#favoriteForm').hidden=false;$('#favoriteForm').scrollIntoView({behavior:'smooth',block:'nearest'});return;}
+        var pin=ev.target.closest('[data-fav-pin]');if(pin){var list=collectionList(key),item=list.find(function(x){return x.id===pin.getAttribute('data-fav-pin');});if(item){item.pinned=!item.pinned;LS.set(key,list);render();}return;}
+        var del=ev.target.closest('[data-fav-delete]');if(del&&confirm('删除这份收藏？')){LS.set(key,collectionList(key).filter(function(x){return x.id!==del.getAttribute('data-fav-delete');}));render();toast('收藏已删除。');}
+      };
+      body.oninput=function(ev){if(ev.target.id==='favoriteSearch'){query=ev.target.value;var p=ev.target.selectionStart;render();$('#favoriteSearch').focus();try{$('#favoriteSearch').setSelectionRange(p,p);}catch(_){}}};
+      body.onsubmit=function(ev){if(ev.target.id!=='favoriteForm')return;ev.preventDefault();var content=$('#favoriteContent').value.trim();if(!content){toast('收藏内容不能为空。');return;}var list=collectionList(key),item={id:editing||uid(),title:$('#favoriteTitle').value.trim(),category:$('#favoriteCategory').value,content:content,pinned:$('#favoritePinned').checked,updatedAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=Object.assign({},list[idx],item);else list.unshift(Object.assign({createdAt:Date.now()},item));if(LS.set(key,list)){editing='';query='';render();toast('已加入收藏。');}};
+    }
+    render();
+  }
+
   /* ================= 世界书 · 笔记本与条目 ================= */
   var K_WORLDBOOKS = 'liwu.worldbooks';
   function worldbooks(){ return LS.get(K_WORLDBOOKS, []); }
@@ -1429,7 +1503,7 @@
         });
       }
       if (ev.target.id === 'cExport'){
-        var data = { v: 6, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD) };
+        var data = { v: 7, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites') };
         var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -1459,6 +1533,9 @@
               if (Array.isArray(obj.todo)) LS.set(PLANNER_KEYS.todo, obj.todo);
               if (Array.isArray(obj.countdown)) LS.set(K_COUNTDOWN, obj.countdown);
               if (Array.isArray(obj.mood)) LS.set(K_MOOD, obj.mood);
+              if (Array.isArray(obj.moments)) LS.set('liwu.moments', obj.moments);
+              if (Array.isArray(obj.quotes)) LS.set('liwu.quotes', obj.quotes);
+              if (Array.isArray(obj.favorites)) LS.set('liwu.favorites', obj.favorites);
               applyTheme();
               renderAll();
               toast('导进来了。');
