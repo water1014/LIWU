@@ -1,228 +1,55 @@
-/* 里屋 · 桌面
-   一张摄5开的桌子。东西都是浮着的，能拖。
-   浮起来多少 = 每个物件里的 --tz；歪多少 = --rot；拖到哪 = 由 desk.js 写的 --tx/--ty。
-   想换桌面底色改 #desk-wrap 的 background。 */
+/* 里屋 · 桌面外壳
+   桌子本身在 assets/desk3d.js 里（three 场景）。这里只管叠在上面的抬头、提示、底部。 */
 
 body.home #app{display:none}
 body:not(.home) #desk-wrap{display:none}
 
-#desk-wrap{
-  position:fixed;inset:0;z-index:5;overflow:hidden;
-  background-color:#EFE9DC;
-  background-image:
-    radial-gradient(rgba(120,100,70,.055) 1px, transparent 1px),
-    radial-gradient(rgba(120,100,70,.035) 1px, transparent 1px);
-  background-size:13px 13px, 8px 8px;
-  background-position:0 0, 4px 6px;
-}
-#desk-wrap::after{
-  content:'';position:absolute;inset:0;pointer-events:none;z-index:90;
-  background:radial-gradient(120% 92% at 50% 20%, transparent 44%, rgba(90,70,40,.14) 100%);
-}
+#desk-wrap{position:fixed;inset:0;z-index:5;overflow:hidden;background:#EFE9DC}
+#stage{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
 
-.desk{
-  position:absolute;inset:0;
-  perspective:1100px;
-  perspective-origin:50% 36%;
-}
-.plane{
-  position:absolute;inset:0;
-  transform-style:preserve-3d;
-  transition:transform .55s cubic-bezier(.2,.8,.25,1);
-  will-change:transform;
-}
-
-/* ---------- 抬头 ---------- */
+/* 抬头 */
 .hud{
-  position:absolute;left:14px;right:14px;z-index:80;
+  position:absolute;left:14px;right:14px;z-index:20;
   top:calc(env(safe-area-inset-top,0px) + 8px);
   display:flex;align-items:center;justify-content:space-between;gap:8px;
+  pointer-events:none;
 }
 .hud-btn{
+  pointer-events:auto;
   appearance:none;width:36px;height:36px;flex:0 0 auto;
   border-radius:50%;border:1px solid rgba(120,100,70,.16);
   background:rgba(255,255,255,.7);color:#4A4338;
   font-size:15px;line-height:1;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   box-shadow:0 3px 8px rgba(80,60,30,.1);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
 }
-.clock{display:flex;flex-direction:column;align-items:center;line-height:1.1;cursor:pointer}
+.clock{display:flex;flex-direction:column;align-items:center;line-height:1.1;pointer-events:auto;cursor:pointer}
 .clock .t{font-family:var(--num);font-style:italic;font-size:21px;color:#4A4338}
 .clock .d{font-size:9px;letter-spacing:.16em;color:#9A8F7C;margin-top:2px}
 .pill{
+  pointer-events:auto;
   appearance:none;flex:0 0 auto;cursor:pointer;
   border:1px solid rgba(120,100,70,.16);border-radius:999px;
   background:rgba(255,255,255,.7);color:#7A6E5A;
   padding:6px 11px;font-size:10px;letter-spacing:.1em;
   box-shadow:0 3px 8px rgba(80,60,30,.1);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
 }
 
-/* ---------- 桌面上的东西 ---------- */
-.thing{
-  position:absolute;
-  transform:translate3d(var(--tx,0px), var(--ty,0px), var(--tz,0px)) rotate(var(--rot,0deg));
-  transform-style:preserve-3d;
-  cursor:grab;touch-action:none;
-  -webkit-user-select:none;user-select:none;
-  will-change:transform;
-}
-.thing.lifting{
-  --tz:64px;
-  cursor:grabbing;
-  z-index:200 !important;
-  box-shadow:0 28px 52px rgba(60,44,20,.3) !important;
+/* 刚打开时的一句 */
+.boot{
+  position:absolute;left:0;right:0;top:50%;z-index:15;transform:translateY(-50%);
+  text-align:center;font-size:11px;letter-spacing:.3em;color:rgba(74,67,56,.4);
+  pointer-events:none;transition:opacity .8s;
 }
 
-/* 报纸 */
-.paper{
-  left:0;right:0;margin:0 auto;
-  width:min(92%,436px);
-  top:calc(env(safe-area-inset-top,0px) + 54px);
-  z-index:10;
-  --rot:-.5deg;
-  --tz:0px;
-  background:#FCFAF3;
-  border:1px solid rgba(120,100,70,.16);
-  border-radius:2px;
-  padding:13px 13px 9px;
-  box-shadow:0 14px 30px rgba(80,60,30,.17), 0 1px 0 rgba(255,255,255,.9) inset;
-}
-.paper:active{cursor:grabbing}
-.paper-head{text-align:center;padding-bottom:8px;margin-bottom:9px;border-bottom:1px solid rgba(120,100,70,.24)}
-.paper-head h1{
-  margin:0;font-family:var(--serif);font-weight:500;
-  font-size:24px;letter-spacing:.24em;text-indent:.24em;color:#2A2620;
-}
-.paper-head span{
-  display:block;margin-top:4px;
-  font-family:var(--num);font-size:7.5px;letter-spacing:.3em;color:#A79C87;
-}
-.paper-body{display:grid;grid-template-columns:1fr 1.05fr;gap:11px}
-.memo{position:relative;padding-right:11px;border-right:1px dashed rgba(120,100,70,.26)}
-.memo h4,.feature h4{margin:0 0 7px;font-size:9.5px;letter-spacing:.18em;color:#8A7E68;font-weight:500}
-.memo h4 em,.feature h4 em{font-family:var(--num);font-style:normal;font-size:7px;letter-spacing:.2em;color:#BBAF98;margin-left:3px}
-#memoList{list-style:none;margin:0;padding:0}
-#memoList li{position:relative;padding:0 0 7px 11px;font-size:10.5px;line-height:1.45;color:#3B352C}
-#memoList li::before{content:'○';position:absolute;left:0;top:-1px;font-size:7px;color:#A79C87}
-#memoList li b{font-weight:400}
-#memoList li i{display:block;font-style:normal;font-size:8.5px;color:#A79C87;margin-top:1px;line-height:1.35}
-.feature{position:relative}
-.shot{
-  aspect-ratio:4/3;border-radius:1px;overflow:hidden;
-  background:#E7DFCE;background-size:cover;background-position:center;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 3px 9px rgba(80,60,30,.15);
-}
-.shot span{font-size:8.5px;line-height:1.7;color:#A79C87;text-align:center;letter-spacing:.05em}
-.feature .cap{margin:5px 0 0;font-size:8.5px;color:#8A7E68}
-.paper-foot{
-  display:flex;align-items:baseline;gap:7px;margin-top:10px;padding-top:7px;
-  border-top:1px solid rgba(120,100,70,.24);
-}
-.paper-foot .temp{font-family:var(--num);font-style:italic;font-size:18px;color:#2A2620}
-.paper-foot .weather{font-size:9px;color:#8A7E68;letter-spacing:.08em}
-.paper-foot .sep{flex:1 1 auto}
-.paper-foot .days{font-family:var(--num);font-style:italic;font-size:10.5px;color:#8A7E68}
-
-/* 拍立得 */
-.polaroid{
-  left:12px;top:47%;width:min(37%,152px);z-index:22;
-  --rot:-3.6deg;
-  --tz:26px;
-  background:#FFFDF7;
-  padding:6px 6px 22px;border-radius:1px;
-  box-shadow:0 16px 32px rgba(80,60,30,.2);
-}
-.polaroid .ph{aspect-ratio:1/1;background:#E7DFCE;background-size:cover;background-position:center}
-.polaroid .hand{
-  position:absolute;left:0;right:0;bottom:5px;text-align:center;
-  font-family:var(--num);font-style:italic;font-size:10.5px;color:#7A6E5A;
-}
-.tape{
-  position:absolute;top:-8px;left:50%;margin-left:-26px;
-  width:52px;height:17px;transform:rotate(-5deg);
-  background:rgba(226,212,180,.72);
-  border-left:1px dashed rgba(255,255,255,.55);border-right:1px dashed rgba(255,255,255,.55);
-  box-shadow:0 1px 2px rgba(80,60,30,.1);
-}
-
-/* 便签 */
-.note{
-  right:12px;top:44%;width:min(35%,142px);z-index:26;
-  --rot:2.4deg;
-  --tz:36px;
-  display:flex;flex-direction:column;min-height:140px;
-  padding:13px 11px 11px;border-radius:1px;
-  background-color:#F5E8A4;
-  background-image:linear-gradient(rgba(255,255,255,.55) 1px, transparent 1px);
-  background-size:100% 20px;
-  box-shadow:0 16px 30px rgba(80,60,30,.2);
-}
-.note-head{font-family:var(--serif);font-size:12.5px;letter-spacing:.06em;color:#5C5233}
-.note-rule{display:block;height:1px;background:rgba(140,120,60,.22);margin:10px 0}
-.note-foot{margin-top:auto;font-size:9.5px;letter-spacing:.08em;color:#8C7C40}
-
-/* 唱片机 */
-.vinyl-wrap{
-  right:4px;bottom:calc(env(safe-area-inset-bottom,0px) + 58px);
-  width:min(43%,172px);z-index:16;
-  --rot:-1.2deg;
-  --tz:12px;
-  min-height:160px;border-radius:8px;
-  background:#E4DED1;
-  box-shadow:0 16px 32px rgba(80,60,30,.2);
-  display:flex;align-items:center;justify-content:center;
-  padding:12px;
-}
-.vinyl{
-  width:104px;height:104px;border-radius:50%;
-  background:radial-gradient(circle at 50% 50%, #2C2C2C 0 31%, #141414 32% 100%);
-  box-shadow:0 3px 12px rgba(0,0,0,.38), inset 0 0 0 1px rgba(255,255,255,.07);
-  display:flex;align-items:center;justify-content:center;
-  animation:vw-spin 9s linear infinite;
-}
-@keyframes vw-spin{to{transform:rotate(360deg)}}
-.vinyl .label{width:32px;height:32px;border-radius:50%;background:#B2452F;box-shadow:inset 0 0 0 1px rgba(0,0,0,.22)}
-.arm{
-  position:absolute;top:15px;right:13px;width:40px;height:2px;border-radius:2px;
-  background:#A39A8A;transform-origin:100% 50%;transform:rotate(26deg);
-  box-shadow:0 1px 1px rgba(80,60,30,.2);
-}
-.vinyl-cap{
-  position:absolute;left:0;right:0;bottom:7px;text-align:center;
-  font-size:9px;letter-spacing:.14em;color:#8A7E68;
-}
-
-/* 工牌 */
-.tag{
-  left:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 70px);
-  width:min(33%,130px);z-index:36;
-  --rot:2.8deg;
-  --tz:46px;
-  min-height:160px;border-radius:3px;
-  background:#FBF8F0;border:1px solid rgba(120,100,70,.18);
-  box-shadow:0 18px 34px rgba(80,60,30,.22);
-  display:flex;align-items:center;justify-content:center;
-}
-.clip{
-  position:absolute;top:-8px;left:50%;margin-left:-15px;
-  width:30px;height:15px;border:2px solid #C0B5A0;border-radius:9px;
-}
-.tag-face{
-  font-family:var(--serif);font-size:14px;letter-spacing:.28em;text-indent:.28em;
-  color:#2A2620;text-align:center;
-}
-.tag-face em{
-  display:block;margin-top:6px;
-  font-family:var(--num);font-style:italic;font-size:9.5px;letter-spacing:.28em;color:#A79C87;
-}
-
-/* ---------- 底部那排（也是退路） ---------- */
+/* 底部那排（也是退路） */
 .desk-dock{
-  position:absolute;left:0;right:0;bottom:0;z-index:70;
+  position:absolute;left:0;right:0;bottom:0;z-index:20;
   display:flex;align-items:center;justify-content:center;gap:2px;
   padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 8px);
-  background:linear-gradient(180deg, rgba(239,233,220,0) 0%, rgba(239,233,220,.88) 48%, rgba(239,233,220,.97) 100%);
+  background:linear-gradient(180deg, rgba(239,233,220,0) 0%, rgba(239,233,220,.82) 48%, rgba(239,233,220,.96) 100%);
 }
 .desk-dock button{
   appearance:none;background:none;border:0;cursor:pointer;
@@ -230,36 +57,21 @@ body:not(.home) #desk-wrap{display:none}
 }
 .desk-dock button:hover{color:rgba(74,67,56,.9)}
 
-/* ---------- 夜 ---------- */
-body[data-theme='night'] #desk-wrap{
-  background-color:#1A1815;
-  background-image:
-    radial-gradient(rgba(231,226,214,.045) 1px, transparent 1px),
-    radial-gradient(rgba(231,226,214,.03) 1px, transparent 1px);
+/* 浮一句提醒 */
+.desk-flash{
+  position:absolute;left:0;right:0;z-index:25;
+  bottom:calc(env(safe-area-inset-bottom,0px) + 62px);
+  text-align:center;font-size:10.5px;letter-spacing:.16em;color:rgba(74,67,56,.6);
+  pointer-events:none;transition:opacity .4s;
 }
-body[data-theme='night'] .paper{background:#221F1B;border-color:rgba(231,226,214,.1)}
-body[data-theme='night'] .paper-head h1{color:#E7E2D6}
-body[data-theme='night'] .paper-head span,
-body[data-theme='night'] .memo h4,
-body[data-theme='night'] .feature h4,
-body[data-theme='night'] .feature .cap,
-body[data-theme='night'] .paper-foot .weather,
-body[data-theme='night'] .paper-foot .days,
-body[data-theme='night'] #memoList li i{color:#7C7466}
-body[data-theme='night'] #memoList li{color:#C9C2B4}
-body[data-theme='night'] .paper-foot .temp{color:#E7E2D6}
-body[data-theme='night'] .shot{background:#2A2620}
-body[data-theme='night'] .polaroid{background:#242018}
-body[data-theme='night'] .polaroid .ph{background:#2A2620}
-body[data-theme='night'] .polaroid .hand{color:#8A7E68}
+
+/* 夜 */
+body[data-theme='night'] #desk-wrap{background:#14120F}
 body[data-theme='night'] .clock .t{color:#E7E2D6}
+body[data-theme='night'] .clock .d{color:#7C7466}
 body[data-theme='night'] .hud-btn,
 body[data-theme='night'] .pill{background:rgba(255,255,255,.07);border-color:rgba(231,226,214,.14);color:#C9C2B4}
-body[data-theme='night'] .tag{background:#221F1B;border-color:rgba(231,226,214,.12)}
-body[data-theme='night'] .tag-face{color:#E7E2D6}
-body[data-theme='night'] .vinyl-wrap{background:#242019}
-body[data-theme='night'] .note{background-color:#4A4324;background-image:linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px)}
-body[data-theme='night'] .note-head{color:#E3D9A8}
-body[data-theme='night'] .note-foot{color:#948A56}
-body[data-theme='night'] .desk-dock{background:linear-gradient(180deg, rgba(26,24,21,0) 0%, rgba(26,24,21,.88) 48%, rgba(26,24,21,.97) 100%)}
+body[data-theme='night'] .desk-dock{background:linear-gradient(180deg, rgba(20,18,15,0) 0%, rgba(20,18,15,.85) 48%, rgba(20,18,15,.96) 100%)}
 body[data-theme='night'] .desk-dock button{color:rgba(231,226,214,.4)}
+body[data-theme='night'] .boot,
+body[data-theme='night'] .desk-flash{color:rgba(231,226,214,.45)}
