@@ -13,7 +13,7 @@ Primary product surfaces:
 - Personal rooms: diary, album, memory, settings, and future tools.
 - Navigation: a clear side drawer with visible entries; no bottom tab bar.
 
-The interface should feel calm, intimate, capable, and dependable. Content and daily use take priority over decoration.
+The interface should feel calm, intimate, capable, and dependable. Use monochrome surfaces with quiet blue-grey accents. Content and daily use take priority over decoration.
 
 ## 2. Chosen design direction
 
@@ -27,23 +27,23 @@ Do not combine every visual effect from these styles. Apple-like clarity is the 
 
 ## 3. Visual tokens
 
-The existing paper theme is the baseline. Preserve its cool blue-white direction; do not replace it with cream, brown, purple-dominant gradients, or generic SaaS indigo.
+The existing paper theme is being refined into a neutral monochrome baseline with restrained blue-grey details. Do not use cream, brown, purple-dominant gradients, or generic SaaS indigo.
 
 ### Color roles
 
 | Token | Value | Use |
 |---|---|---|
-| Background | #F2F6FD | Main light canvas |
-| Background elevated | #FAFCFF | Sheets, panels, composer |
-| Background muted | #E7EDF8 | Pressed/quiet surfaces |
-| Primary text | #28364F | Main text and primary actions |
-| Secondary text | #687792 | Supporting text |
-| Tertiary text | #9AA8C0 | Metadata only, never essential instructions |
-| Separator | rgba(73,97,142,.15) | Dividers and subtle outlines |
-| Accent | #8B91C5 | Small emphasis, selected states, not large fills |
-| Shadow | rgba(75,101,150,.12) | Low-elevation separation |
+| Background | #F5F6F8 | Main light canvas |
+| Background elevated | #FFFFFF | Sheets, panels, composer |
+| Background muted | #EBEEF2 | Pressed/quiet surfaces |
+| Primary text | #20252D | Main text and primary actions |
+| Secondary text | #626D7B | Supporting text |
+| Tertiary text | #8792A0 | Metadata only, never essential instructions |
+| Separator | rgba(35,47,63,.12) | Dividers and subtle outlines |
+| Accent | #71849C | Restrained blue-grey emphasis and selected states |
+| Shadow | rgba(24,37,54,.09) | Low-elevation separation |
 
-Night theme must retain the same semantic roles and pass contrast checks independently. Never assume light-theme contrast carries over.
+Night theme: background #111419, elevated #191E25, muted #242B34, primary text #F1F3F6, secondary #B1BAC5, tertiary #85909D, accent #91A4BC. Preserve the same semantic roles and test contrast independently.
 
 ### Typography
 
