@@ -60,6 +60,7 @@
   var K_CFG = 'liwu.cfg3';
   var K_DIARY = 'liwu.diary';
   var K_ALBUM = 'liwu.album.local';
+  var K_MEMORY = 'liwu.memory.local';
   var K_SINCE = 'liwu.since';
 
   var DEFAULT_SYS = [
@@ -279,6 +280,8 @@
         '<div class="sheet-actions">' +
           '<button type="button" data-act="copy" data-i="' + index + '"><span>复制文本</span><small>保存这条消息的文字</small></button>' +
           (mine ? '<button type="button" data-act="resend" data-i="' + index + '"><span>重新发送</span><small>从这条消息继续对话</small></button>' : '<button type="button" data-act="regen" data-i="' + index + '"><span>重新生成</span><small>保留提问，再试一次回复</small></button>') +
+          '<button type="button" data-act="favorite" data-i="' + index + '"><span>收藏这条消息</span><small>放进收藏夹，之后可以继续整理</small></button>' +
+          '<button type="button" data-act="quote" data-i="' + index + '"><span>存为语录</span><small>把这句话留在语录页</small></button>' +
           '<button type="button" class="sheet-danger" data-act="del" data-i="' + index + '"><span>删除消息</span><small>从当前对话中移除</small></button>' +
         '</div>' +
       '</section>';
@@ -537,7 +540,7 @@
     var diaries = diaryItems();
     var diary = $('#homeDiary');
     diary.innerHTML = diaries.length ? '<strong>' + esc(diaries[0].title || '今天的日记') + '</strong><p>' + esc((diaries[0].body || '').slice(0,76) || '留下一点今天的记录。') + '</p><time>' + esc(diaries[0].date) + '</time>' : '<p class="home-empty">今天还没有写日记，留一句给未来的我们。</p>';
-    var memories = D.memory || [];
+    var memories = (D.memory || []).concat(LS.get(K_MEMORY, []));
     var memory = $('#homeMemory');
     memory.innerHTML = memories.length ? '<strong>' + esc(memories[0].title || '一段记忆') + '</strong><p>' + esc((memories[0].body || '').slice(0,92)) + '</p><time>' + esc(memories[0].date || '') + '</time>' : '<p class="home-empty">重要的事，会慢慢收集起来。</p>';
   }
@@ -689,6 +692,21 @@
       } else {
         toast('复制不了，长按选吧。');
       }
+    }
+    if (act === 'favorite' || act === 'quote'){
+      var textToSave=String(m.content||'').trim();
+      if(textToSave){
+        if(act==='favorite'){
+          var favs=collectionList('liwu.favorites');
+          if(!favs.some(function(x){return x.content===textToSave;})){favs.unshift({id:uid(),title:textToSave.split(/\n/)[0].slice(0,48)||'聊天收藏',category:'文字',content:textToSave,pinned:false,createdAt:Date.now()});LS.set('liwu.favorites',favs);toast('已收藏到收藏夹。');}
+          else toast('这条消息已经收藏过了。');
+        }else{
+          var quotes=collectionList('liwu.quotes');
+          if(!quotes.some(function(x){return x.text===textToSave;})){quotes.unshift({id:uid(),text:textToSave,author:m.role==='assistant'?'宋祁':'我',tags:'聊天',note:'',createdAt:Date.now()});LS.set('liwu.quotes',quotes);toast('已存进语录。');}
+          else toast('这句话已经在语录里了。');
+        }
+      }
+      return;
     }
     if (act === 'del'){
       s.messages.splice(i, 1);
@@ -1365,19 +1383,29 @@
   }
 
   function viewMemory(){
-    var items = D.memory || [];
-    var head = '<p class="lead">怕忘的事。一句一件。</p>';
-    if (!items.length){
-      openView('记忆', 'Memory', head + '<div class="blank">还空着。</div>');
-      return;
+    var editing='',query='';
+    function render(){
+      var seeds=(D.memory||[]).map(function(x){return Object.assign({local:false},x);});
+      var local=LS.get(K_MEMORY,[]).map(function(x){return Object.assign({local:true},x);});
+      var all=seeds.concat(local).sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
+      var shown=all.filter(function(x){return !query||[x.title,x.body,x.date].join(' ').toLowerCase().indexOf(query.toLowerCase())>=0;});
+      var current=local.find(function(x){return x.id===editing;});
+      var html='<div class="room-intro"><p class="lead">把重要的事留在这里。原有记忆会保留，也可以继续添加自己的记录。</p><div class="room-stat"><strong>'+all.length+'</strong><span>段记忆</span></div></div>'+
+        '<div class="diary-tools"><input id="memorySearch" type="search" placeholder="搜索记忆" value="'+esc(query)+'"><button class="ghost solid" id="memoryNew" type="button">＋ 新记忆</button></div>'+
+        '<form class="compose diary-compose" id="memoryForm" '+(editing?'':'hidden')+'><div class="diary-compose-head"><strong>'+(editing?'修改记忆':'记下一段记忆')+'</strong><span>仅保存在本机</span></div><input id="memoryTitle" maxlength="80" placeholder="给这段记忆一个标题" value="'+esc(current?current.title:'')+'"><input id="memoryDate" type="date" value="'+esc(current?current.date:today())+'"><textarea id="memoryBody" rows="5" placeholder="这件事为什么值得记住？">'+esc(current?current.body:'')+'</textarea><div class="row"><button class="ghost solid" type="submit">保存记忆</button><button class="ghost" id="memoryCancel" type="button">取消</button></div></form>'+
+        (shown.length?'<div class="memory-list">'+shown.map(function(x){return '<article class="item memory-entry"><div class="k"><h4>'+esc(x.title)+'</h4><time>'+esc(x.date||'')+'</time></div><p>'+esc(x.body||'')+'</p>'+(x.local?'<div class="diary-actions"><button class="mini" type="button" data-memory-edit="'+esc(x.id)+'">编辑</button><button class="mini danger" type="button" data-memory-delete="'+esc(x.id)+'">删除</button></div>':'<span class="diary-source">初始记忆</span>')+'</article>';}).join('')+'</div>':'<div class="blank">还没有找到记忆。</div>');
+      openView('记忆','Memory',html);
+      var body=$('#viewBody');
+      body.onclick=function(ev){
+        if(ev.target.closest('#memoryNew')){editing='';render();$('#memoryForm').hidden=false;$('#memoryTitle').focus();return;}
+        if(ev.target.closest('#memoryCancel')){editing='';render();return;}
+        var edit=ev.target.closest('[data-memory-edit]');if(edit){editing=edit.getAttribute('data-memory-edit');render();$('#memoryForm').hidden=false;$('#memoryTitle').focus();return;}
+        var del=ev.target.closest('[data-memory-delete]');if(del&&confirm('删除这段记忆？')){LS.set(K_MEMORY,LS.get(K_MEMORY,[]).filter(function(x){return x.id!==del.getAttribute('data-memory-delete');}));editing='';render();toast('记忆已删除。');}
+      };
+      body.oninput=function(ev){if(ev.target.id==='memorySearch'){var pos=ev.target.selectionStart;query=ev.target.value;render();var el=$('#memorySearch');el.focus();try{el.setSelectionRange(pos,pos);}catch(_){}}};
+      body.onsubmit=function(ev){if(ev.target.id!=='memoryForm')return;ev.preventDefault();var title=$('#memoryTitle').value.trim(),bodyText=$('#memoryBody').value.trim();if(!title||!bodyText){toast('标题和内容都要写一点。');return;}var list=LS.get(K_MEMORY,[]),item={id:editing||uid(),title:title,date:$('#memoryDate').value||today(),body:bodyText,updatedAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=item;else list.unshift(item);if(LS.set(K_MEMORY,list)){editing='';render();toast('记忆收好了。');}};
     }
-    var html = head + items.map(function(it){
-      return '<div class="item">' +
-        '<div class="k"><h4>' + esc(it.title) + '</h4><time>' + esc(it.date) + '</time></div>' +
-        '<p>' + esc(it.body) + '</p>' +
-      '</div>';
-    }).join('');
-    openView('记忆', 'Memory', html);
+    render();
   }
 
   /* ================= 设置 ================= */
@@ -1503,7 +1531,7 @@
         });
       }
       if (ev.target.id === 'cExport'){
-        var data = { v: 7, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites') };
+        var data = { v: 8, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), memory: LS.get(K_MEMORY, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites') };
         var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -1534,6 +1562,7 @@
               if (Array.isArray(obj.countdown)) LS.set(K_COUNTDOWN, obj.countdown);
               if (Array.isArray(obj.mood)) LS.set(K_MOOD, obj.mood);
               if (Array.isArray(obj.moments)) LS.set('liwu.moments', obj.moments);
+              if (Array.isArray(obj.memory)) LS.set(K_MEMORY, obj.memory);
               if (Array.isArray(obj.quotes)) LS.set('liwu.quotes', obj.quotes);
               if (Array.isArray(obj.favorites)) LS.set('liwu.favorites', obj.favorites);
               applyTheme();
