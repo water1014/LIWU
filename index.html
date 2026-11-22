@@ -222,23 +222,6 @@ const mats = {
   outside: new THREE.MeshBasicMaterial({ color: 0x8fa8c9 }),
 };
 
-/* ---- 房间 ---- */
-function buildRoom() {
-  const g = new THREE.Group();
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), mats.woodDark);
-  floor.rotation.x = -Math.PI / 2;
-  floor.receiveShadow = true;
-  g.add(floor);
-  const bw = new THREE.Mesh(new THREE.PlaneGeometry(20, 10), mats.wall);
-  bw.position.set(0, 5, -3); bw.receiveShadow = true; g.add(bw);
-  const lw = new THREE.Mesh(new THREE.PlaneGeometry(20, 10), mats.wallSide);
-  lw.position.set(-3.5, 5, 0); lw.rotation.y = Math.PI / 2; lw.receiveShadow = true; g.add(lw);
-  const rw = new THREE.Mesh(new THREE.PlaneGeometry(20, 10), mats.wallSide);
-  rw.position.set(3.5, 5, 0); rw.rotation.y = -Math.PI / 2; rw.receiveShadow = true; g.add(rw);
-  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: 0xe9eef8, roughness: 1 }));
-  ceil.rotation.x = Math.PI / 2; ceil.position.y = 3.2; g.add(ceil);
-  return g;
-}
 /* ---- 窗边场景：只保留桌面与窗户，不再搭建完整房间 ---- */
 function buildWindow() {
   const g = new THREE.Group();
@@ -255,7 +238,7 @@ function buildWindow() {
     new THREE.MeshStandardMaterial({ color: 0x1a2a3a, transparent: true, opacity: 0.25, roughness: 0.02, metalness: 0.95 }));
   glass.rotation.y = Math.PI / 2; glass.position.set(0.02, 1.1, 0); g.add(glass);
   const out = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), mats.outside);
-  out.rotation.y = Math.PI / 2; out.position.set(-0.075, 1.1, 0); g.add(out);
+  out.rotation.y = Math.PI / 2; out.position.set(0.075, 1.1, 0); g.add(out);
   const sill = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.06, 1.85), mats.woodMid);
   sill.position.set(0.06, 0.03, 0); g.add(sill);
   // 盆栽
