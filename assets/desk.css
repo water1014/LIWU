@@ -1,13 +1,12 @@
-/* 里屋 · 桌面外壳
-   桌子本身在 assets/desk3d.js 里（three 场景）。这里只管叠在上面的抬头、提示、底部。 */
+/* 里屋 · 窗台壳
+   场景在 windowsill/index.html（iframe），这里只管叠在上面的抬头、底部、门。 */
 
 body.home #app{display:none}
 body:not(.home) #desk-wrap{display:none}
 
-#desk-wrap{position:fixed;inset:0;z-index:5;overflow:hidden;background:#EFE9DC}
-#stage{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#desk-wrap{position:fixed;inset:0;z-index:5;overflow:hidden;background:#E8E1D3}
+#scene{position:absolute;inset:0;width:100%;height:100%;border:0;display:block;background:transparent}
 
-/* 抬头 */
 .hud{
   position:absolute;left:14px;right:14px;z-index:20;
   top:calc(env(safe-area-inset-top,0px) + 8px);
@@ -15,49 +14,62 @@ body:not(.home) #desk-wrap{display:none}
   pointer-events:none;
 }
 .hud-btn{
-  pointer-events:auto;
-  appearance:none;width:36px;height:36px;flex:0 0 auto;
-  border-radius:50%;border:1px solid rgba(120,100,70,.16);
-  background:rgba(255,255,255,.7);color:#4A4338;
+  pointer-events:auto;appearance:none;width:36px;height:36px;flex:0 0 auto;
+  border-radius:50%;border:1px solid rgba(120,100,70,.18);
+  background:rgba(255,255,255,.66);color:#4A4338;
   font-size:15px;line-height:1;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
-  box-shadow:0 3px 8px rgba(80,60,30,.1);
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  box-shadow:0 3px 8px rgba(80,60,30,.12);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
 }
 .clock{display:flex;flex-direction:column;align-items:center;line-height:1.1;pointer-events:auto;cursor:pointer}
-.clock .t{font-family:var(--num);font-style:italic;font-size:21px;color:#4A4338}
-.clock .d{font-size:9px;letter-spacing:.16em;color:#9A8F7C;margin-top:2px}
+.clock .t{font-family:var(--num);font-style:italic;font-size:21px;color:#4A4338;text-shadow:0 1px 6px rgba(255,255,255,.6)}
+.clock .d{font-size:9px;letter-spacing:.16em;color:#7A7164;margin-top:2px}
 .pill{
-  pointer-events:auto;
-  appearance:none;flex:0 0 auto;cursor:pointer;
-  border:1px solid rgba(120,100,70,.16);border-radius:999px;
-  background:rgba(255,255,255,.7);color:#7A6E5A;
+  pointer-events:auto;appearance:none;flex:0 0 auto;cursor:pointer;
+  border:1px solid rgba(120,100,70,.18);border-radius:999px;
+  background:rgba(255,255,255,.66);color:#7A6E5A;
   padding:6px 11px;font-size:10px;letter-spacing:.1em;
-  box-shadow:0 3px 8px rgba(80,60,30,.1);
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  box-shadow:0 3px 8px rgba(80,60,30,.12);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
 }
 
-/* 刚打开时的一句 */
+.lookup{
+  position:absolute;right:14px;z-index:20;
+  bottom:calc(env(safe-area-inset-bottom,0px) + 92px);
+  appearance:none;cursor:pointer;
+  border:1px solid rgba(120,100,70,.18);border-radius:999px;
+  background:rgba(255,255,255,.62);color:#6B6256;
+  padding:7px 13px;font-size:10.5px;letter-spacing:.12em;
+  box-shadow:0 3px 8px rgba(80,60,30,.12);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+}
+
 .boot{
   position:absolute;left:0;right:0;top:50%;z-index:15;transform:translateY(-50%);
-  text-align:center;font-size:11px;letter-spacing:.3em;color:rgba(74,67,56,.4);
+  text-align:center;font-size:11px;letter-spacing:.3em;color:rgba(74,67,56,.45);
   pointer-events:none;transition:opacity .8s;
 }
 
-/* 底部那排（也是退路） */
+.desk-foot{
+  position:absolute;left:0;right:0;z-index:19;
+  bottom:calc(env(safe-area-inset-bottom,0px) + 44px);
+  text-align:center;font-size:8.5px;letter-spacing:.1em;
+  color:rgba(74,67,56,.34);pointer-events:none;
+}
+
 .desk-dock{
   position:absolute;left:0;right:0;bottom:0;z-index:20;
   display:flex;align-items:center;justify-content:center;gap:2px;
   padding:6px 6px calc(env(safe-area-inset-bottom,0px) + 8px);
-  background:linear-gradient(180deg, rgba(239,233,220,0) 0%, rgba(239,233,220,.82) 48%, rgba(239,233,220,.96) 100%);
+  background:linear-gradient(180deg, rgba(232,225,211,0) 0%, rgba(232,225,211,.72) 48%, rgba(232,225,211,.94) 100%);
 }
 .desk-dock button{
   appearance:none;background:none;border:0;cursor:pointer;
-  padding:6px 8px;font-size:10.5px;letter-spacing:.14em;color:rgba(74,67,56,.44);
+  padding:6px 8px;font-size:10.5px;letter-spacing:.14em;color:rgba(74,67,56,.48);
 }
-.desk-dock button:hover{color:rgba(74,67,56,.9)}
+.desk-dock button:hover{color:rgba(74,67,56,.92)}
 
-/* 浮一句提醒 */
 .desk-flash{
   position:absolute;left:0;right:0;z-index:25;
   bottom:calc(env(safe-area-inset-bottom,0px) + 62px);
@@ -66,12 +78,14 @@ body:not(.home) #desk-wrap{display:none}
 }
 
 /* 夜 */
-body[data-theme='night'] #desk-wrap{background:#14120F}
-body[data-theme='night'] .clock .t{color:#E7E2D6}
-body[data-theme='night'] .clock .d{color:#7C7466}
+body[data-theme='night'] #desk-wrap{background:#0E1015}
+body[data-theme='night'] .clock .t{color:#E7E2D6;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+body[data-theme='night'] .clock .d{color:#8B8478}
 body[data-theme='night'] .hud-btn,
-body[data-theme='night'] .pill{background:rgba(255,255,255,.07);border-color:rgba(231,226,214,.14);color:#C9C2B4}
-body[data-theme='night'] .desk-dock{background:linear-gradient(180deg, rgba(20,18,15,0) 0%, rgba(20,18,15,.85) 48%, rgba(20,18,15,.96) 100%)}
+body[data-theme='night'] .pill,
+body[data-theme='night'] .lookup{background:rgba(255,255,255,.09);border-color:rgba(231,226,214,.16);color:#C9C2B4}
+body[data-theme='night'] .desk-dock{background:linear-gradient(180deg, rgba(14,16,21,0) 0%, rgba(14,16,21,.82) 48%, rgba(14,16,21,.96) 100%)}
 body[data-theme='night'] .desk-dock button{color:rgba(231,226,214,.4)}
+body[data-theme='night'] .desk-foot,
 body[data-theme='night'] .boot,
-body[data-theme='night'] .desk-flash{color:rgba(231,226,214,.45)}
+body[data-theme='night'] .desk-flash{color:rgba(231,226,214,.4)}
