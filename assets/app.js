@@ -560,7 +560,7 @@
   function goHomeTarget(target){
     if (target === 'home'){ showHome(); return; }
     if (target === 'chat'){ showChat(); $('#input').focus(); return; }
-    if (target !== 'chat' && !FEATURE_INFO[target]) return;
+    if (target !== 'chat' && !FEATURE_INFO[target] && ['diary','album','memory','settings','worldbook'].indexOf(target) < 0) return;
     viewReturnTarget = 'home';
     setDrawerCurrent(target);
     homeScreen.hidden = true; $('#app').hidden = true;
@@ -735,7 +735,7 @@
       var v = b.getAttribute('data-view');
       if (v === 'home'){ showHome(); return; }
       if (v === 'chat'){ showChat(); $('#input').focus(); return; }
-      if (v !== 'chat' && !FEATURE_INFO[v]) return;
+      if (v !== 'chat' && !FEATURE_INFO[v] && ['diary','album','memory','settings','worldbook'].indexOf(v) < 0) return;
       viewReturnTarget = homeScreen.hidden && !$('#app').hidden ? 'chat' : 'home';
       setDrawerCurrent(v);
       closeDrawer();
@@ -1209,7 +1209,7 @@
           '<button class="ghost" id="cImport" type="button">导入</button>' +
           '<button class="ghost" id="cWipe" type="button">清空对话</button>' +
         '</div>' +
-        '<p class="tip">导出的是一份 JSON，含所有会话、配置和起算日。Key 也在里面，别乱发。</p>' +
+        '<p class="tip">导出 JSON 含会话、配置、日记、相册、世界书和起算日。Key 也在里面，别乱发。</p>' +
       '</div>' +
       '<div class="row"><button class="ghost solid" id="cSave" type="button">存好</button></div>' +
       '<p class="tip">改完不点存好，下次打开还是旧的。</p>';
