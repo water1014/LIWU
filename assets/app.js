@@ -307,7 +307,8 @@
   function buildBody(s, stream){
     var hist = s.messages.filter(function(m){ return m.role === 'user' || m.role === 'assistant'; });
     hist = hist.slice(-Math.max(2, cfg.ctx));
-    var arr = [{ role: 'system', content: cfg.sys }].concat(hist.map(function(m){
+    var sys = cfg.sys + activeWorldbookContext(hist);
+    var arr = [{ role: 'system', content: sys }].concat(hist.map(function(m){
       return { role: m.role, content: m.content };
     }));
     var body = { model: cfg.model, messages: arr, stream: !!stream };
@@ -567,6 +568,7 @@
     else if (target === 'album') viewAlbum();
     else if (target === 'memory') viewMemory();
     else if (target === 'settings') viewSettings();
+    else if (target === 'worldbook') viewWorldbook();
     else viewFeature(target);
   }
   $('#homeMenuBtn').addEventListener('click', openDrawer);
@@ -742,6 +744,7 @@
       else if (v === 'album') viewAlbum();
       else if (v === 'memory') viewMemory();
       else if (v === 'settings') viewSettings();
+      else if (v === 'worldbook') viewWorldbook();
       else viewFeature(v);
     });
   });
@@ -961,6 +964,187 @@
       '<div class="feature-room-foot">LIWU · A PRIVATE SPACE FOR TWO</div>' +
     '</div>';
     openView(meta.title,meta.en,html);
+  }
+
+
+  /* ================= 世界书 · 笔记本与条目 ================= */
+  var K_WORLDBOOKS = 'liwu.worldbooks';
+  function worldbooks(){ return LS.get(K_WORLDBOOKS, []); }
+  function saveWorldbooks(items){ return LS.set(K_WORLDBOOKS, items); }
+  function normalizeWorldbookEntry(raw, index){
+    raw = raw || {};
+    var keys = raw.keys || raw.key || [];
+    if (!Array.isArray(keys)) keys = String(keys).split(/[,，\n]/);
+    var secondary = raw.secondary_keys || raw.secondaryKeys || [];
+    if (!Array.isArray(secondary)) secondary = String(secondary).split(/[,，\n]/);
+    return {
+      id: String(raw.id || raw.uid || ('e' + Date.now().toString(36) + index + Math.random().toString(36).slice(2,5))),
+      title: String(raw.title || raw.comment || raw.name || ('条目 ' + (index + 1))),
+      keys: keys.map(function(x){return String(x).trim();}).filter(Boolean),
+      secondaryKeys: secondary.map(function(x){return String(x).trim();}).filter(Boolean),
+      content: String(raw.content || raw.text || ''),
+      enabled: raw.enabled !== false && raw.disable !== true,
+      constant: !!(raw.constant || raw.always_active),
+      selective: raw.selective !== false,
+      selectiveLogic: String(raw.selectiveLogic || raw.selective_logic || 'and').toLowerCase() === 'or' ? 'or' : 'and',
+      caseSensitive: !!(raw.caseSensitive || raw.case_sensitive),
+      position: raw.position == null ? 0 : raw.position,
+      depth: Number(raw.depth || 4),
+      insertionOrder: Number(raw.insertion_order || raw.insertionOrder || 100)
+    };
+  }
+  function parseWorldbookJSON(data, filename){
+    var root = data && typeof data === 'object' ? data : {};
+    var source = root.entries || (root.data && root.data.entries) || root.worldbook && root.worldbook.entries;
+    var entries = [];
+    if (Array.isArray(source)) entries = source.map(normalizeWorldbookEntry);
+    else if (source && typeof source === 'object') entries = Object.keys(source).map(function(k,i){
+      var item = Object.assign({}, source[k] || {});
+      if (item.uid == null) item.uid = k;
+      return normalizeWorldbookEntry(item, i);
+    });
+    else if (Array.isArray(root)) entries = root.map(normalizeWorldbookEntry);
+    else throw new Error('没有找到 entries 条目');
+    if (!entries.length) throw new Error('这个文件里没有可导入的条目');
+    return {
+      id: uid(),
+      name: String(root.name || root.title || (filename || '导入的世界书').replace(/\.json$/i,'')),
+      enabled: true,
+      entries: entries,
+      createdAt: Date.now()
+    };
+  }
+  function worldbookExport(book){
+    var entries = {};
+    book.entries.forEach(function(e,i){
+      entries[String(i)] = {
+        uid:i, key:e.keys, keysecondary:e.secondaryKeys, comment:e.title,
+        content:e.content, constant:e.constant, selective:e.selective,
+        selectiveLogic:e.selectiveLogic === 'or' ? 1 : 0,
+        enabled:e.enabled, position:e.position, depth:e.depth,
+        insertion_order:e.insertionOrder, case_sensitive:e.caseSensitive
+      };
+    });
+    return { name:book.name, entries:entries };
+  }
+  function downloadJSON(filename, data){
+    var blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');a.href=url;a.download=filename;a.click();
+    setTimeout(function(){URL.revokeObjectURL(url);},1000);
+  }
+  function viewWorldbook(){
+    var selected = '';
+    var editing = '';
+    var query = '';
+    function render(){
+      var books = worldbooks();
+      var book = books.find(function(b){return b.id===selected;});
+      if (!book){
+        selected = '';
+        var html = '<div class="room-intro"><p class="lead">像整理笔记一样，一本一本收好设定。支持导入 Tavern / SillyTavern 导出的 JSON 世界书，内容保存在这台设备。</p><div class="room-stat"><strong>'+books.length+'</strong><span>本世界书</span></div></div>' +
+          '<div class="worldbook-tools"><button class="ghost solid" id="wbNew" type="button">＋ 新建世界书</button><label class="ghost" for="wbImport">导入 JSON<input id="wbImport" type="file" accept=".json,application/json" hidden></label></div>';
+        if(!books.length) html += '<div class="blank">这里还没有世界书。可以新建一本，或导入酒馆 JSON。</div>';
+        else html += '<div class="worldbook-list">'+books.map(function(b){
+          return '<button class="worldbook-card" type="button" data-wb-open="'+esc(b.id)+'"><span class="worldbook-card-top"><strong>'+esc(b.name)+'</strong><small>'+b.entries.length+' 个条目</small></span><span class="worldbook-card-bottom"><span>'+(b.enabled?'已启用':'已停用')+'</span><span>打开笔记本　↗</span></span></button>';
+        }).join('')+'</div>';
+        openView('世界书','Worldbook',html);
+        var body=$('#viewBody');
+        body.onclick=function(ev){
+          var open=ev.target.closest('[data-wb-open]');
+          if(open){selected=open.getAttribute('data-wb-open');query='';editing='';render();return;}
+          if(ev.target.closest('#wbNew')){
+            var name=window.prompt('给这本世界书起个名字','新世界书');
+            if(name && name.trim()){
+              var all=worldbooks();var b={id:uid(),name:name.trim(),enabled:true,entries:[],createdAt:Date.now()};
+              all.push(b);if(saveWorldbooks(all)){selected=b.id;render();}
+            }return;
+          }
+        };
+        body.onchange=async function(ev){
+          if(ev.target.id!=='wbImport')return;
+          var file=ev.target.files&&ev.target.files[0];if(!file)return;
+          try{
+            var parsed=JSON.parse(await file.text());
+            var book=parseWorldbookJSON(parsed,file.name);
+            var all=worldbooks();all.push(book);
+            if(saveWorldbooks(all)){selected=book.id;render();toast('已导入 '+book.entries.length+' 个条目。');}
+          }catch(err){toast('导入失败：'+(err.message||'JSON 格式不正确'));}
+        };
+        return;
+      }
+      var shown=book.entries.filter(function(e){
+        return !query || [e.title,e.content].concat(e.keys,e.secondaryKeys).join(' ').toLowerCase().indexOf(query.toLowerCase())>=0;
+      });
+      var html = '<div class="worldbook-head"><button class="mini" id="wbBack" type="button">← 全部世界书</button><div class="worldbook-title-row"><div><h2>'+esc(book.name)+'</h2><p>'+book.entries.length+' 个条目 · 本机保存</p></div><label class="switch worldbook-switch"><span>整本启用</span><input id="wbBookEnabled" type="checkbox" '+(book.enabled?'checked':'')+'></label></div></div>' +
+        '<div class="worldbook-tools"><input id="wbSearch" type="search" placeholder="搜索条目、关键词或内容" value="'+esc(query)+'"><button class="ghost solid" id="wbAdd" type="button">＋ 新条目</button></div>' +
+        '<div class="worldbook-actions"><button class="mini" id="wbExport" type="button">导出 Tavern JSON</button><button class="mini" id="wbRename" type="button">重命名</button><button class="mini danger" id="wbDelete" type="button">删除整本</button></div>' +
+        '<form class="compose worldbook-compose" id="wbEntryForm" '+(editing?'':'hidden')+'><strong id="wbFormHeading">'+(editing?'编辑条目':'新建条目')+'</strong><input id="wbEntryTitle" maxlength="100" placeholder="条目名称"><input id="wbEntryKeys" placeholder="关键词，用逗号分隔"><input id="wbEntrySecondary" placeholder="次要关键词，用逗号分隔（可选）"><textarea id="wbEntryContent" rows="8" placeholder="写下需要注入聊天的设定内容"></textarea><div class="worldbook-flags"><label><input id="wbEntryEnabled" type="checkbox" checked> 启用</label><label><input id="wbEntryConstant" type="checkbox"> 常驻注入</label><label><input id="wbEntrySelective" type="checkbox" checked> 需要关键词匹配</label></div><label class="field"><span>次要关键词逻辑</span><select id="wbEntryLogic"><option value="and">全部匹配（AND）</option><option value="or">任一匹配（OR）</option></select></label><div class="row"><button class="ghost solid" type="submit">保存条目</button><button class="ghost" id="wbCancel" type="button">取消</button></div></form>';
+      if(!shown.length) html+='<div class="blank">'+(book.entries.length?'没有找到匹配的条目。':'这本笔记还没有条目。')+'</div>';
+      else html+='<div class="worldbook-entries">'+shown.map(function(e){
+        return '<article class="worldbook-entry"><div class="worldbook-entry-head"><div><h3>'+esc(e.title)+'</h3><small>'+esc(e.keys.join('、')||'无关键词')+'</small></div><label class="worldbook-toggle"><input type="checkbox" data-wb-toggle="'+esc(e.id)+'" '+(e.enabled?'checked':'')+'>启用</label></div><p>'+esc(e.content.slice(0,260))+(e.content.length>260?'…':'')+'</p><div class="worldbook-entry-actions"><button class="mini" type="button" data-wb-edit="'+esc(e.id)+'">编辑</button><button class="mini danger" type="button" data-wb-remove="'+esc(e.id)+'">删除</button><span class="tip">'+(e.constant?'常驻':e.selective?'关键词触发':'非关键词触发')+'</span></div></article>';
+      }).join('')+'</div>';
+      openView('世界书','Worldbook',html);
+      var body=$('#viewBody');
+      body.onclick=function(ev){
+        if(ev.target.closest('#wbBack')){selected='';editing='';query='';render();return;}
+        if(ev.target.closest('#wbAdd')){editing='';render();$('#wbEntryForm').hidden=false;$('#wbEntryTitle').focus();return;}
+        if(ev.target.closest('#wbCancel')){editing='';render();return;}
+        if(ev.target.closest('#wbRename')){var name=window.prompt('修改世界书名称',book.name);if(name&&name.trim()){book.name=name.trim();saveWorldbooks(books);render();}return;}
+        if(ev.target.closest('#wbDelete')){if(window.confirm('删除整本世界书及其中所有条目？此操作无法撤销。')){saveWorldbooks(books.filter(function(b){return b.id!==book.id;}));selected='';render();}return;}
+        if(ev.target.closest('#wbExport')){downloadJSON((book.name||'worldbook')+'.json',worldbookExport(book));return;}
+        var edit=ev.target.closest('[data-wb-edit]');
+        if(edit){editing=edit.getAttribute('data-wb-edit');var e=book.entries.find(function(x){return x.id===editing;});if(!e)return;render();$('#wbEntryForm').hidden=false;$('#wbEntryTitle').value=e.title;$('#wbEntryKeys').value=e.keys.join(', ');$('#wbEntrySecondary').value=e.secondaryKeys.join(', ');$('#wbEntryContent').value=e.content;$('#wbEntryEnabled').checked=e.enabled;$('#wbEntryConstant').checked=e.constant;$('#wbEntrySelective').checked=e.selective;$('#wbEntryLogic').value=e.selectiveLogic;return;}
+        var del=ev.target.closest('[data-wb-remove]');
+        if(del){if(window.confirm('删除这个条目？')){book.entries=book.entries.filter(function(x){return x.id!==del.getAttribute('data-wb-remove');});saveWorldbooks(books);render();}return;}
+      };
+      body.onchange=function(ev){
+        if(ev.target.id==='wbBookEnabled'){book.enabled=ev.target.checked;saveWorldbooks(books);toast(book.enabled?'整本世界书已启用':'整本世界书已停用');return;}
+        var toggle=ev.target.closest('[data-wb-toggle]');
+        if(toggle){var e=book.entries.find(function(x){return x.id===toggle.getAttribute('data-wb-toggle');});if(e){e.enabled=toggle.checked;saveWorldbooks(books);toast('条目状态已保存');}}
+      };
+      body.onsubmit=function(ev){
+        if(ev.target.id!=='wbEntryForm')return;
+        ev.preventDefault();
+        var title=$('#wbEntryTitle').value.trim(),content=$('#wbEntryContent').value.trim();
+        if(!title||!content){toast('请填写条目名称和内容。');return;}
+        var entry={
+          id:editing||uid(),title:title,
+          keys:$('#wbEntryKeys').value.split(/[,，\n]/).map(function(x){return x.trim();}).filter(Boolean),
+          secondaryKeys:$('#wbEntrySecondary').value.split(/[,，\n]/).map(function(x){return x.trim();}).filter(Boolean),
+          content:content,enabled:$('#wbEntryEnabled').checked,
+          constant:$('#wbEntryConstant').checked,selective:$('#wbEntrySelective').checked,
+          selectiveLogic:$('#wbEntryLogic').value,caseSensitive:false,depth:4,
+          position:0,insertionOrder:100
+        };
+        if(editing){var at=book.entries.findIndex(function(x){return x.id===editing;});if(at>=0)book.entries[at]=entry;}
+        else book.entries.push(entry);
+        if(saveWorldbooks(books)){editing='';render();toast('条目已保存。');}
+      };
+      $('#wbSearch').addEventListener('input',function(){
+        var pos=this.selectionStart;query=this.value;render();var next=$('#wbSearch');next.focus();try{next.setSelectionRange(pos,pos);}catch(_){}
+      });
+    }
+    render();
+  }
+  function activeWorldbookContext(messages){
+    var books=worldbooks().filter(function(b){return b.enabled!==false;});
+    if(!books.length)return '';
+    var scan=(messages||[]).filter(function(m){return m.role==='user'||m.role==='assistant';}).slice(-12).map(function(m){return String(m.content||'');}).join('\n');
+    var matched=[];
+    books.forEach(function(book){
+      (book.entries||[]).forEach(function(e){
+        if(!e.enabled||!e.content)return;
+        var text=scan;
+        function has(list){return (list||[]).some(function(k){if(!k)return false;var source=String(k);return e.caseSensitive?text.indexOf(source)>=0:text.toLowerCase().indexOf(source.toLowerCase())>=0;});}
+        var primary=has(e.keys),secondary=has(e.secondaryKeys);
+        var triggered=e.constant||!e.selective||(primary&&(!(e.secondaryKeys||[]).length|| (e.selectiveLogic==='or'?primary||secondary:secondary)));
+        if(triggered)matched.push({book:book.name,title:e.title,content:e.content,order:Number(e.insertionOrder)||100});
+      });
+    });
+    matched.sort(function(a,b){return a.order-b.order;});
+    if(!matched.length)return '';
+    return '\n\n【世界书设定注入】\n'+matched.map(function(e){return '《'+e.book+' / '+e.title+'》\n'+e.content;}).join('\n\n')+'\n【世界书设定结束】';
   }
 
   function viewMemory(){
