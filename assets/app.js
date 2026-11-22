@@ -59,6 +59,7 @@
   var K_DB = 'liwu.v3';
   var K_CFG = 'liwu.cfg3';
   var K_DIARY = 'liwu.diary';
+  var K_ALBUM = 'liwu.album.local';
   var K_SINCE = 'liwu.since';
 
   var DEFAULT_SYS = [
@@ -754,76 +755,167 @@
   }
 
   function viewDiary(){
-    var items = diaryItems();
-    var html = '<p class="lead">写下来的只留在这台手机里。要留住，喊我一声，我挪进 data.js。</p>' +
-      '<button class="ghost" id="dNew" type="button">写一篇</button>' +
-      '<form class="compose" id="dForm" hidden>' +
-        '<input id="dTitle" placeholder="标题" maxlength="40">' +
-        '<textarea id="dBody" rows="6" placeholder="今天……"></textarea>' +
-        '<div class="row"><button class="ghost solid" type="submit">收好</button><button class="ghost" type="button" id="dCancel">算了</button></div>' +
-      '</form>';
-
-    if (!items.length){
-      html += '<div class="blank">还没有日记。 今天要不要写一句。</div>';
-    } else {
-      html += items.map(function(it){
-        return '<div class="item">' +
-          '<div class="k"><h4>' + esc(it.title || '无题') + '</h4><time>' + esc(it.date) + '</time></div>' +
-          (it.body ? '<p>' + esc(it.body) + '</p>' : '') +
-          (it.local ? '<div class="row"><button class="mini" data-deldiary="' + it.id + '">删掉</button></div>' : '') +
-        '</div>';
-      }).join('');
-    }
-
-    openView('日记', 'Diary', html);
-    var body = $('#viewBody');
-
-    body.onclick = function(ev){
-      if (ev.target.id === 'dNew'){ $('#dForm').hidden = false; $('#dTitle').focus(); }
-      if (ev.target.id === 'dCancel'){ $('#dForm').hidden = true; $('#dTitle').value = ''; $('#dBody').value = ''; }
-      var del = ev.target.closest('[data-deldiary]');
-      if (del){
-        var arr = LS.get(K_DIARY, []);
-        arr.splice(parseInt(del.getAttribute('data-deldiary'), 10), 1);
-        LS.set(K_DIARY, arr);
-        viewDiary();
+    var editing = -1;
+    var query = '';
+    function render(){
+      var items = diaryItems();
+      var shown = items.filter(function(it){
+        var hay = [it.title, it.body, it.date].join(' ').toLowerCase();
+        return !query || hay.indexOf(query.toLowerCase()) >= 0;
+      });
+      var html = '<div class="room-intro"><p class="lead">把今天留下来。日记只保存在这台设备里，可以随时修改或删除。</p><div class="room-stat"><strong>' + items.length + '</strong><span>篇日记</span></div></div>' +
+        '<div class="diary-tools"><input id="dSearch" type="search" placeholder="搜索标题、内容或日期" value="' + esc(query) + '">' +
+        '<button class="ghost solid" id="dNew" type="button">＋ 写日记</button></div>' +
+        '<form class="compose diary-compose" id="dForm" hidden>' +
+          '<div class="diary-compose-head"><strong id="dFormTitle">写下今天</strong><span>仅自己可见</span></div>' +
+          '<input id="dTitle" placeholder="给这篇日记一个标题" maxlength="60">' +
+          '<input id="dDate" type="date" value="' + today() + '">' +
+          '<textarea id="dBody" rows="7" placeholder="今天发生了什么？此刻在想什么？"></textarea>' +
+          '<div class="row"><button class="ghost solid" type="submit">保存日记</button><button class="ghost" type="button" id="dCancel">取消</button></div>' +
+        '</form>';
+      if (!shown.length){
+        html += '<div class="blank diary-empty">' + (items.length ? '没有找到相关日记。换个词试试。' : '这里还空着。等第一段日常落下来。') + '</div>';
+      } else {
+        html += '<div class="diary-list">' + shown.map(function(it){
+          var body = esc(it.body || '');
+          return '<article class="item diary-entry">' +
+            '<div class="k"><h4>' + esc(it.title || '无题') + '</h4><time>' + esc(it.date) + '</time></div>' +
+            (body ? '<p>' + body + '</p>' : '') +
+            (it.local ? '<div class="diary-actions"><button class="mini" type="button" data-editdiary="' + it.id + '">编辑</button><button class="mini" type="button" data-deldiary="' + it.id + '">删除</button></div>' : '<span class="diary-source">初始日记</span>') +
+          '</article>';
+        }).join('') + '</div>';
       }
-    };
-    body.onsubmit = function(ev){
-      if (ev.target.id !== 'dForm') return;
-      ev.preventDefault();
-      var t = $('#dTitle').value.trim();
-      var b = $('#dBody').value.trim();
-      if (!t && !b) return;
-      var arr = LS.get(K_DIARY, []);
-      arr.push({ date: today(), title: t || '无题', body: b });
-      LS.set(K_DIARY, arr);
-      viewDiary();
-    };
+      openView('日记', 'Diary', html);
+      var body = $('#viewBody');
+      body.onclick = function(ev){
+        if (ev.target.id === 'dNew'){
+          editing = -1;
+          $('#dFormTitle').textContent = '写下今天';
+          $('#dTitle').value = '';
+          $('#dDate').value = today();
+          $('#dBody').value = '';
+          $('#dForm').hidden = false;
+          $('#dTitle').focus();
+        }
+        if (ev.target.id === 'dCancel'){ $('#dForm').hidden = true; editing = -1; }
+        var edit = ev.target.closest('[data-editdiary]');
+        if (edit){
+          editing = parseInt(edit.getAttribute('data-editdiary'),10);
+          var item = LS.get(K_DIARY, [])[editing];
+          if (!item) return;
+          $('#dFormTitle').textContent = '修改日记';
+          $('#dTitle').value = item.title || '';
+          $('#dDate').value = item.date || today();
+          $('#dBody').value = item.body || '';
+          $('#dForm').hidden = false;
+          $('#dTitle').focus();
+          $('#dForm').scrollIntoView({behavior:'smooth',block:'nearest'});
+        }
+        var del = ev.target.closest('[data-deldiary]');
+        if (del){
+          var index = parseInt(del.getAttribute('data-deldiary'),10);
+          if (!window.confirm('删除这篇日记？')) return;
+          var arr = LS.get(K_DIARY, []);
+          arr.splice(index,1);
+          if (LS.set(K_DIARY,arr)) { editing=-1; render(); toast('日记已删除。'); }
+        }
+      };
+      body.onsubmit = function(ev){
+        if (ev.target.id !== 'dForm') return;
+        ev.preventDefault();
+        var title = $('#dTitle').value.trim();
+        var content = $('#dBody').value.trim();
+        if (!title && !content){ toast('先写一点内容再保存吧。'); return; }
+        var arr = LS.get(K_DIARY, []);
+        var entry = {date:$('#dDate').value || today(),title:title || '无题',body:content,updatedAt:Date.now()};
+        if (editing >= 0 && arr[editing]) arr[editing] = Object.assign({},arr[editing],entry);
+        else arr.push(Object.assign({createdAt:Date.now()},entry));
+        if (LS.set(K_DIARY,arr)){ query=''; editing=-1; render(); toast('日记收好了。'); }
+      };
+      var search = $('#dSearch');
+      search.addEventListener('input',function(){
+        var pos=search.selectionStart; query=search.value; render();
+        var next=$('#dSearch');next.focus();try{next.setSelectionRange(pos,pos);}catch(_){}
+      });
+    }
+    render();
   }
 
   function viewAlbum(){
-    var items = D.album || [];
-    var head = '<p class="lead">图放进 images/，在 data.js 的 album 里加一行，它就挂上墙了。</p>';
-    if (!items.length){
-      openView('相册', 'Album', head + '<div class="blank">还没有照片。</div>');
-      return;
+    var localKey = K_ALBUM;
+    function items(){ return (D.album || []).map(function(it){return Object.assign({local:false},it);}).concat(LS.get(localKey,[]).map(function(it,i){return Object.assign({local:true,id:i},it);})); }
+    function render(){
+      var all=items();
+      var html='<div class="room-intro"><p class="lead">把照片放进来，留住一起生活的片刻。图片会压缩后保存在这台设备里。</p><div class="room-stat"><strong>'+all.length+'</strong><span>张照片</span></div></div>' +
+        '<div class="album-toolbar"><label class="ghost solid album-add">＋ 添加照片<input id="albumFiles" type="file" accept="image/*" multiple hidden></label><span class="tip">支持一次选择多张图片</span></div>';
+      if(!all.length) html+='<div class="blank album-empty">相册还空着。挑几张喜欢的照片放进来吧。</div>';
+      else html+='<div class="album-grid">'+all.map(function(it){return '<figure class="album-tile"><button class="album-image" type="button" data-album-open="'+(it.local?'local-':'seed-')+it.id+'"><img src="'+esc(it.src)+'" alt="'+esc(it.caption||'照片')+'" loading="lazy"></button><figcaption><span>'+esc(it.caption||'未命名照片')+'</span>'+(it.local?'<button class="mini" type="button" data-album-delete="'+it.id+'">删除</button>':'')+'</figcaption></figure>';}).join('')+'</div>';
+      openView('相册','Album',html);
+      var body=$('#viewBody');
+      body.onchange=async function(ev){
+        if(ev.target.id!=='albumFiles') return;
+        var files=Array.from(ev.target.files||[]).filter(function(f){return f.type.indexOf('image/')===0;});
+        if(!files.length) return;
+        var current=LS.get(localKey,[]);
+        var added=0;
+        for(var file of files){
+          try{
+            var data=await compressAlbumImage(file);
+            current.push({src:data,caption:file.name.replace(/\.[^.]+$/,''),date:today(),createdAt:Date.now()});
+            added++;
+          }catch(e){toast('有一张图片处理失败，已跳过。');}
+        }
+        if(added && LS.set(localKey,current)){render();toast('已添加 '+added+' 张照片。');}
+      };
+      body.onclick=function(ev){
+        var open=ev.target.closest('[data-album-open]');
+        if(open){
+          var key=open.getAttribute('data-album-open');
+          var it=all.find(function(x){return (x.local?'local-':'seed-')+x.id===key;});
+          if(!it)return;
+          var lb=document.createElement('div');lb.className='lightbox';
+          var wrap=document.createElement('div');wrap.className='lightbox-content';
+          var img=document.createElement('img');img.src=it.src;img.alt=it.caption||'照片';
+          var caption=document.createElement('span');caption.textContent=it.caption||'';
+          wrap.appendChild(img);wrap.appendChild(caption);lb.appendChild(wrap);
+          lb.addEventListener('click',function(){lb.remove();});document.body.appendChild(lb);return;
+        }
+        var del=ev.target.closest('[data-album-delete]');
+        if(del){
+          if(!window.confirm('从相册删除这张照片？'))return;
+          var list=LS.get(localKey,[]);list.splice(parseInt(del.getAttribute('data-album-delete'),10),1);
+          if(LS.set(localKey,list)){render();toast('照片已删除。');}
+        }
+      };
     }
-    var grid = '<div class="grid">' + items.map(function(it){
-      return '<img src="' + esc(it.src) + '" alt="' + esc(it.caption || '') + '" loading="lazy" data-src="' + esc(it.src) + '">';
-    }).join('') + '</div>';
-    openView('相册', 'Album', head + grid);
-    $('#viewBody').onclick = function(ev){
-      var src = ev.target.getAttribute && ev.target.getAttribute('data-src');
-      if (!src) return;
-      var lb = document.createElement('div');
-      lb.className = 'lightbox';
-      var img = document.createElement('img');
-      img.src = src;
-      lb.appendChild(img);
-      lb.addEventListener('click', function(){ lb.remove(); });
-      document.body.appendChild(lb);
-    };
+    render();
+  }
+
+  function compressAlbumImage(file){
+    return new Promise(function(resolve,reject){
+      var reader=new FileReader();
+      reader.onerror=reject;
+      reader.onload=function(){
+        var img=new Image();
+        img.onerror=reject;
+        img.onload=function(){
+          var max=1440,scale=Math.min(1,max/Math.max(img.width,img.height));
+          var canvas=document.createElement('canvas');
+          canvas.width=Math.max(1,Math.round(img.width*scale));
+          canvas.height=Math.max(1,Math.round(img.height*scale));
+          var ctx=canvas.getContext('2d');
+          if(!ctx){reject(new Error('canvas unavailable'));return;}
+          ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
+          ctx.drawImage(img,0,0,canvas.width,canvas.height);
+          var quality=.82,data=canvas.toDataURL('image/jpeg',quality);
+          while(data.length>900000 && quality>.48){quality-=.08;data=canvas.toDataURL('image/jpeg',quality);}
+          if(data.length>1400000){reject(new Error('image too large'));return;}
+          resolve(data);
+        };
+        img.src=String(reader.result);
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   function viewMemory(){
@@ -965,7 +1057,7 @@
         });
       }
       if (ev.target.id === 'cExport'){
-        var data = { v: 3, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []) };
+        var data = { v: 3, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []) };
         var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -988,6 +1080,7 @@
               if (obj.cfg){ cfg = Object.assign(cfg, obj.cfg); saveCfg(); }
               if (obj.since) LS.set(K_SINCE, obj.since);
               if (obj.diary) LS.set(K_DIARY, obj.diary);
+              if (obj.album) LS.set(K_ALBUM, obj.album);
               applyTheme();
               renderAll();
               toast('导进来了。');
