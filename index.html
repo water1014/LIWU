@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=45">
+<link rel="stylesheet" href="assets/style.css?v=46">
 </head>
 <body data-theme="paper">
 
@@ -19,13 +19,71 @@
 
 <!-- App —— 与原有结构完全一致 -->
 <section class="home-screen" id="homeScreen" aria-label="里屋首页">
-  <header class="home-top"><button class="icon" id="homeMenuBtn" type="button" aria-label="打开导航">≡</button><span class="home-brand">里屋</span><span class="home-day" id="homeDays"></span></header>
+  <div class="home-scene" aria-hidden="true"></div>
+  <header class="home-top">
+    <button class="home-menu icon" id="homeMenuBtn" type="button" aria-label="打开导航">☰</button>
+    <span class="home-brand">里屋</span>
+    <span class="home-day" id="homeDays"></span>
+  </header>
   <main class="home-content" id="homeContent">
-    <section class="home-portrait"><div class="home-kicker">只属于我们的日常</div><div class="home-identity"><div class="home-avatar home-avatar-you">我</div><span class="home-heart">和</span><div class="home-avatar home-avatar-him">祁</div></div><h1>你和宋祁</h1><p class="home-quote" id="homeHero"></p><div class="home-count"><strong id="homeCount">—</strong><span>相伴的日子</span></div></section>
-    <section class="home-feature-row"><button class="home-chat" type="button" data-home-go="chat"><span class="home-feature-kicker">现在就去</span><strong>和宋祁说说话</strong><span class="home-feature-arrow">↗</span></button><button class="home-photo" type="button" data-home-go="album"><span class="home-feature-kicker">一起留下</span><strong>我们的相册</strong><span class="home-photo-mark">◌</span></button></section>
-    <section class="home-lower"><div class="home-section"><div class="home-section-head"><span>共同生活</span><button type="button" data-home-go="diary">打开日记 ↗</button></div><div class="home-diary" id="homeDiary"></div></div><div class="home-section home-memory-section"><div class="home-section-head"><span>记得的事</span><button type="button" data-home-go="memory">更多记忆 ↗</button></div><div class="home-memory" id="homeMemory"></div></div></section>
+    <div class="home-grid">
+      <section class="home-hero">
+        <div class="home-kicker">只属于我们的生活空间</div>
+        <div class="home-portraits">
+          <div class="home-portrait home-portrait-you"><span>我</span></div>
+          <span class="home-heart">♡</span>
+          <div class="home-portrait home-portrait-him"><span>祁</span></div>
+        </div>
+        <h1>你与宋祁</h1>
+        <p class="home-quote" id="homeHero">把日子过成我们自己的故事。</p>
+        <div class="home-stats">
+          <div class="home-stat"><strong id="homeCount">—</strong><span>相伴天数</span></div>
+          <div class="home-stat"><strong>02</strong><span>专属角色</span></div>
+        </div>
+        <div class="home-anniversary"><span>▦</span><span id="homeSinceLabel">我们的纪念日</span></div>
+      </section>
+      <section class="home-features">
+        <article class="home-surface home-music">
+          <div class="home-surface-head"><span>共同收藏</span><button type="button" class="home-round" data-home-go="music" aria-label="打开音乐">↗</button></div>
+          <div class="home-music-title">留一首歌给今天</div>
+          <p>把喜欢的旋律，放进我们的日常。</p>
+          <div class="home-music-foot"><span>音乐收藏</span><button type="button" data-home-go="music">去看看　↗</button></div>
+        </article>
+        <article class="home-surface home-photo">
+          <div class="home-surface-head"><span>我们的照片</span><button type="button" class="home-round" id="homePhotoPick" aria-label="选择照片">＋</button></div>
+          <input type="file" id="homePhotoFile" accept="image/*" hidden>
+          <div class="home-photo-window" id="homePhotoWindow">
+            <img id="homePhotoImg" alt="我们选择的照片">
+            <div class="home-photo-placeholder"><strong>留一张照片在这里</strong><small>选择一张属于你们的照片</small></div>
+          </div>
+          <button class="home-photo-link" type="button" data-home-go="album">打开相册　↗</button>
+        </article>
+      </section>
+    </div>
+    <button class="home-chat-link" type="button" data-home-go="chat">
+      <span><small>我们的日常</small><strong>去和宋祁说说话</strong><em>继续上一段对话</em></span><b>↗</b>
+    </button>
+    <section class="home-lower">
+      <article class="home-agenda">
+        <div class="home-section-title">今天的安排 <span>日常</span></div>
+        <div class="home-agenda-content" id="homeAgenda"><p>给今天留一点空白，也留一点期待。</p></div>
+      </article>
+      <article class="home-memory-card">
+        <div class="home-section-title">一段共同记忆 <button type="button" data-home-go="memory">继续翻阅　↗</button></div>
+        <div id="homeMemory" class="home-memory-content"></div>
+      </article>
+    </section>
+    <section class="home-diary-strip">
+      <div class="home-section-title">共同生活 <button type="button" data-home-go="diary">打开日记　↗</button></div>
+      <div id="homeDiary" class="home-diary-content"></div>
+    </section>
   </main>
-  <nav class="home-tabbar" aria-label="首页快捷导航"><button class="home-tab active" type="button" data-home-tab="home"><span>⌂</span><small>首页</small></button><button class="home-tab" type="button" data-home-tab="chat"><span>◌</span><small>聊天</small></button><button class="home-tab" type="button" data-home-tab="diary"><span>▤</span><small>日常</small></button><button class="home-tab" type="button" data-home-tab="settings"><span>⌘</span><small>设置</small></button></nav>
+  <nav class="home-tabbar" aria-label="首页快捷导航">
+    <button class="home-tab active" type="button" data-home-tab="home"><span>⌂</span><small>首页</small></button>
+    <button class="home-tab" type="button" data-home-tab="chat"><span>◌</span><small>聊天</small></button>
+    <button class="home-tab" type="button" data-home-tab="diary"><span>▤</span><small>日常</small></button>
+    <button class="home-tab" type="button" data-home-tab="settings"><span>⌘</span><small>设置</small></button>
+  </nav>
 </section>
 <div id="app" hidden>
   <header class="top">
