@@ -21,9 +21,6 @@
     var d = new Date();
     return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
   }
-  function stamp(d){
-    return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + p2(d.getHours()) + ':' + p2(d.getMinutes());
-  }
 
   var LS = {
     get: function(k, fallback){
@@ -68,16 +65,6 @@
   var pEn = $('#pEn');
   var pBody = $('#pBody');
 
-  function closePanel(){
-    panel.hidden = true;
-    if (chat && chat.detached) {}</n  }
-
-  $('#pClose').addEventListener('click', function(){
-    if (streaming) stopStream();
-    panel.hidden = true;
-    setDockActive(null);
-  });
-
   var ROOMS = [
     { key: 'hall', title: '门厅', en: 'Hall', draw: drawHall },
     { key: 'days', title: '这些天', en: 'Days', draw: drawDays },
@@ -101,10 +88,17 @@
     pBody.innerHTML = '';
     room.draw(pBody);
     panel.hidden = false;
-    panel.querySelector('.panel-in').scrollTop = 0;
+    var inner = panel.querySelector('.panel-in');
+    if (inner) inner.scrollTop = 0;
     setDockActive(key);
   }
   window.openPanel = openPanel;
+
+  $('#pClose').addEventListener('click', function(){
+    if (streaming) stopStream();
+    panel.hidden = true;
+    setDockActive(null);
+  });
 
   /* ---------- 底部那排 ---------- */
 
@@ -133,9 +127,8 @@
     wrap.appendChild(el('span', 'num', c ? c : '—'));
     wrap.appendChild(el('span', 'unit', '天'));
     box.appendChild(wrap);
-    var line = el('p', 'tip', sinceValue() ? ('自 ' + sinceValue() + ' 起') : '起算日还没填。去「这些天」里点一下就行。');
-    box.appendChild(line);
-    box.appendChild(el('p', 'tip', '屋子里的东西都能点：桌上的书是日记，墙上的相框是相册，书架是记忆，桌上那台机器是说话，窗外是这些天。'));
+    box.appendChild(el('p', 'tip', sinceValue() ? ('自 ' + sinceValue() + ' 起') : '起算日还没填。去「这些天」里点一下就行。'));
+    box.appendChild(el('p', 'tip', '屋子里的东西都能点。桌上的书是日记，墙上的相框是相册，书架是记忆，桌上那台机器是说话，窗外是这些天。'));
   }
 
   /* ---------- 这些天 ---------- */
@@ -209,14 +202,21 @@
     var compose = el('form', 'compose');
     compose.hidden = true;
     var ti = document.createElement('input');
-    ti.placeholder = '标题'; ti.maxLength = 40;
+    ti.placeholder = '标题';
+    ti.maxLength = 40;
     var ta = document.createElement('textarea');
-    ta.rows = 6; ta.placeholder = '今天……';
+    ta.rows = 6;
+    ta.placeholder = '今天……';
     var row = el('div', 'row');
-    var save = el('button', 'ghost solid', '收好'); save.type = 'submit';
-    var cancel = el('button', 'ghost', '算了'); cancel.type = 'button';
-    row.appendChild(save); row.appendChild(cancel);
-    compose.appendChild(ti); compose.appendChild(ta); compose.appendChild(row);
+    var save = el('button', 'ghost solid', '收好');
+    save.type = 'submit';
+    var cancel = el('button', 'ghost', '算了');
+    cancel.type = 'button';
+    row.appendChild(save);
+    row.appendChild(cancel);
+    compose.appendChild(ti);
+    compose.appendChild(ta);
+    compose.appendChild(row);
     box.appendChild(compose);
 
     var list = el('div');
@@ -259,7 +259,8 @@
     });
     cancel.addEventListener('click', function(){
       compose.hidden = true;
-      ti.value = ''; ta.value = '';
+      ti.value = '';
+      ta.value = '';
     });
     compose.addEventListener('submit', function(ev){
       ev.preventDefault();
@@ -269,7 +270,8 @@
       var arr = LS.get(K_DIARY, []);
       arr.push({ date: today(), title: t || '无题', body: b });
       LS.set(K_DIARY, arr);
-      ti.value = ''; ta.value = '';
+      ti.value = '';
+      ta.value = '';
       compose.hidden = true;
       render();
     });
@@ -412,10 +414,7 @@
     var text = sayInput.value.trim();
     if (!text) return;
 
-    if (!wired()){
-      openSheet();
-      return;
-    }
+    if (!wired()){ openSheet(); return; }
 
     var list = messages();
     list.push({ role: 'user', content: text, at: Date.now() });
@@ -527,25 +526,25 @@
     sayInput.rows = 1;
     sayInput.placeholder = '说一句';
 
-    var btn = el('button', 'ghost solid', '说');
-    btn.type = 'submit';
-    btn.id = 'sayBtn';
+    var btn2 = el('button', 'ghost solid', '说');
+    btn2.type = 'submit';
+    btn2.id = 'sayBtn';
 
-    var stopBtn = el('button', 'ghost', '停');
-    stopBtn.type = 'button';
-    stopBtn.id = 'stopBtn';
-    stopBtn.hidden = true;
+    var stopBtn2 = el('button', 'ghost', '停');
+    stopBtn2.type = 'button';
+    stopBtn2.id = 'stopBtn';
+    stopBtn2.hidden = true;
 
     form.appendChild(sayInput);
-    form.appendChild(btn);
-    form.appendChild(stopBtn);
+    form.appendChild(btn2);
+    form.appendChild(stopBtn2);
     box.appendChild(form);
 
     chatTip = el('p', 'tip', '');
     box.appendChild(chatTip);
 
     form.addEventListener('submit', function(ev){ ev.preventDefault(); send(); });
-    stopBtn.addEventListener('click', stopStream);
+    stopBtn2.addEventListener('click', stopStream);
     sayInput.addEventListener('input', function(){
       sayInput.style.height = 'auto';
       sayInput.style.height = Math.min(sayInput.scrollHeight, 120) + 'px';
