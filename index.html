@@ -18,7 +18,16 @@
 
 
 <!-- App —— 与原有结构完全一致 -->
-<div id="app">
+<section class="home-screen" id="homeScreen" aria-label="里屋首页">
+  <header class="home-top"><button class="icon" id="homeMenuBtn" type="button" aria-label="打开导航">≡</button><span class="home-brand">里屋</span><span class="home-day" id="homeDays"></span></header>
+  <main class="home-content" id="homeContent">
+    <section class="home-portrait"><div class="home-kicker">只属于我们的日常</div><div class="home-identity"><div class="home-avatar home-avatar-you">我</div><span class="home-heart">和</span><div class="home-avatar home-avatar-him">祁</div></div><h1>你和宋祁</h1><p class="home-quote" id="homeHero"></p><div class="home-count"><strong id="homeCount">—</strong><span>相伴的日子</span></div></section>
+    <section class="home-feature-row"><button class="home-chat" type="button" data-home-go="chat"><span class="home-feature-kicker">现在就去</span><strong>和宋祁说说话</strong><span class="home-feature-arrow">↗</span></button><button class="home-photo" type="button" data-home-go="album"><span class="home-feature-kicker">一起留下</span><strong>我们的相册</strong><span class="home-photo-mark">◌</span></button></section>
+    <section class="home-lower"><div class="home-section"><div class="home-section-head"><span>共同生活</span><button type="button" data-home-go="diary">打开日记 ↗</button></div><div class="home-diary" id="homeDiary"></div></div><div class="home-section home-memory-section"><div class="home-section-head"><span>记得的事</span><button type="button" data-home-go="memory">更多记忆 ↗</button></div><div class="home-memory" id="homeMemory"></div></div></section>
+  </main>
+  <nav class="home-tabbar" aria-label="首页快捷导航"><button class="home-tab active" type="button" data-home-tab="home"><span>⌂</span><small>首页</small></button><button class="home-tab" type="button" data-home-tab="chat"><span>◌</span><small>聊天</small></button><button class="home-tab" type="button" data-home-tab="diary"><span>▤</span><small>日常</small></button><button class="home-tab" type="button" data-home-tab="settings"><span>⌘</span><small>设置</small></button></nav>
+</section>
+<div id="app" hidden>
   <header class="top">
     <button class="icon" id="menuBtn" type="button" aria-label="打开导航">≡</button>
     <div class="top-mid"><span class="top-title" id="topTitle">里屋</span><span class="top-sub" id="topSub"></span></div>
