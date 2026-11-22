@@ -1426,7 +1426,7 @@
       '如果可以收藏今天的一个瞬间，你会选哪一刻？','你更想一起看海、看山，还是逛一条陌生的街？','最近最想听到的一句话是什么？',
       '如果一起做一道菜，会选什么？','你觉得家里最有安全感的角落在哪里？','下一次小小约会想安排什么？'
     ];
-    function record(type,value){var list=manageList(K_GAMES);list.unshift({id:uid(),type:type,value:value,date:today(),createdAt:Date.now()});manageSave(K_GAMES,list.slice(0,50));}
+    function record(type,value){var list=manageList(K_GAMES);list.unshift({id:uid(),type:type,value:value,date:today(),createdAt:Date.now()});history=list.slice(0,50);manageSave(K_GAMES,history);}
     function render(){
       var html='<div class="planner-intro"><p class="lead">没有输赢压力的小玩法。随手掷一次、抛一次硬币，或者抽一道只属于你们的问题。</p><div class="planner-stat"><strong>'+history.length+'</strong><span>次游戏记录</span></div></div>'+
         '<div class="game-grid"><button class="game-tile" type="button" data-game="dice"><span class="game-symbol">⚄</span><strong>掷骰子</strong><small>看看今天的数字</small></button><button class="game-tile" type="button" data-game="coin"><span class="game-symbol">◐</span><strong>抛硬币</strong><small>让小决定交给运气</small></button><button class="game-tile" type="button" data-game="question"><span class="game-symbol">?</span><strong>默契问答</strong><small>抽一道问题聊聊</small></button></div>'+
