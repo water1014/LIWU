@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang='zh-CN'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'>
+<meta name='theme-color' content='#EDE9E1'>
+<title>里屋 · 风格小样</title>
+<link rel='preconnect' href='https://fonts.googleapis.com'>
+<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+<link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500&display=swap' rel='stylesheet'>
+<style>
+:root{ --ink:#2B2823; --mute:#8B857A; --line:#DAD4C6 }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:#EDE9E1; color:var(--ink);
+  font-family:'Noto Serif SC',serif; font-weight:300; -webkit-font-smoothing:antialiased;
+  padding:26px 16px 60px;
+}
+.top{max-width:520px; margin:0 auto 26px}
+.top h1{margin:0; font-size:22px; font-weight:400; letter-spacing:.2em}
+.top p{margin:10px 0 0; font-size:11px; line-height:1.9; color:var(--mute); letter-spacing:.04em}
+
+.s{ max-width:520px; margin:0 auto 34px }
+.s-head{ display:flex; align-items:baseline; gap:8px; margin-bottom:9px }
+.s-no{ font-family:'Cormorant Garamond',serif; font-style:italic; font-size:15px; color:#8A3B2C }
+.s-name{ font-size:12px; letter-spacing:.14em }
+.s-tag{ margin-left:auto; font-size:9px; letter-spacing:.08em; color:var(--mute) }
+.s-note{ margin-top:8px; font-size:10px; line-height:1.8; color:var(--mute); letter-spacing:.02em }
+.box{
+  position:relative; height:210px; overflow:hidden;
+  box-shadow:0 6px 18px -8px rgba(60,48,32,.28), 0 1px 3px rgba(60,48,32,.1);
+}
+
+/* ============ 01 信笺 ============ */
+.v01{ background:#FDFCF7; padding:20px 22px; position:relative }
+.v01::before{ content:''; position:absolute; left:34px; top:0; bottom:0; width:1px; background:rgba(196,120,110,.35) }
+.v01 .ln{
+  position:absolute; inset:0 0 0 0;
+  background:repeating-linear-gradient(180deg, transparent 0 25px, rgba(120,140,160,.16) 25px 26px);
+}
+.v01 .in{ position:relative }
+.v01 .t{ font-size:19px; letter-spacing:.3em; font-weight:400 }
+.v01 .d{ position:absolute; right:0; top:0; font-size:9px; letter-spacing:.1em; color:var(--mute) }
+.v01 .b{ margin-top:22px; font-size:11px; line-height:26px; letter-spacing:.06em; color:#3C382F }
+.v01 .g{ margin-top:8px; font-size:9.5px; letter-spacing:.18em; color:var(--mute) }
+
+/* ============ 02 索引卡 ============ */
+.v02{ background:#F5F0E2; padding:16px 16px; font-family:ui-monospace,'Menlo',monospace }
+.v02 .hd{ font-size:9px; letter-spacing:.2em; color:#8A8170; border-bottom:1px solid #D8D0BC; padding-bottom:7px; display:flex; justify-content:space-between }
+.v02 .r{ display:flex; gap:10px; font-size:9.5px; line-height:1; padding:11px 0; border-bottom:1px dashed #DCD4C0; color:#4A4538 }
+.v02 .r b{ font-weight:400; color:#A39A86; font-size:8.5px }
+.v02 .r span{ flex:1; overflow:hidden; white-space:nowrap; text-overflow:ellipsis }
+
+/* ============ 03 报刊网格 ============ */
+.v03{ background:#FCFBF8; padding:16px 16px }
+.v03 .mast{ font-size:22px; letter-spacing:.34em; font-weight:500; text-align:center; border-bottom:2px solid #2B2823; padding-bottom:8px }
+.v03 .cols{ display:flex; gap:0; margin-top:10px }
+.v03 .col{ flex:1; padding:0 9px; border-right:1px solid #D8D2C4; font-size:8.5px; line-height:1.85; color:#4A4538 }
+.v03 .col:first-child{ padding-left:0 }
+.v03 .col:last-child{ border-right:0; padding-right:0 }
+.v03 .ch{ font-size:7.5px; letter-spacing:.2em; color:#8A8170; margin-bottom:5px; border-bottom:1px solid #D8D2C4; padding-bottom:3px }
+
+/* ============ 05 终端 ============ */
+.v05{ background:#0A0D0B; padding:18px 16px; font-family:ui-monospace,'Menlo',monospace; color:#8FE39A }
+.v05 .l{ font-size:10px; line-height:2.1; color:#5E8F66 }
+.v05 .l b{ color:#8FE39A; font-weight:400 }
+.v05 .t{ font-size:16px; letter-spacing:.2em; color:#C8F5CE; margin:8px 0 12px }
+.v05 .cur{ display:inline-block; width:7px; height:12px; background:#8FE39A; vertical-align:-1px; animation:bk 1.1s steps(1) infinite }
+@keyframes bk{ 50%{opacity:0} }
+
+/* ============ 06 极简白 ============ */
+.v06{ background:#FFFFFF; display:flex; flex-direction:column; align-items:center; justify-content:center }
+.v06 .t{ font-size:30px; letter-spacing:.42em; text-indent:.42em; font-weight:300; color:#111 }
+.v06 .s{ margin-top:14px; font-size:9.5px; letter-spacing:.3em; color:#B4B0A8 }
+.v06 .f{ position:absolute; bottom:18px; font-size:8.5px; letter-spacing:.24em; color:#CFCBC3 }
+
+/* ============ 07 竖排 ============ */
+.v07{ background:#FAF5E9; padding:18px 18px; display:flex; flex-direction:row-reverse; gap:14px }
+.v07 .vt{
+  writing-mode:vertical-rl; text-orientation:upright;
+  font-size:22px; letter-spacing:.32em; font-weight:400;
+  border-left:1px solid rgba(140,124,96,.3); padding-left:12px;
+}
+.v07 .vs{
+  writing-mode:vertical-rl; text-orientation:upright;
+  font-size:11px; letter-spacing:.28em; line-height:2.1; color:#5C5546; margin-top:6px;
+}
+.v07 .vg{ writing-mode:vertical-rl; font-size:8px; letter-spacing:.3em; color:#A9A08C; align-self:flex-end }
+
+/* ============ 08 深夜 ============ */
+.v08{
+  background:
+    radial-gradient(180px 130px at 24% 78%, rgba(255,196,120,.30) 0%, rgba(255,176,96,.10) 42%, transparent 72%),
+    radial-gradient(120px 90px at 82% 22%, rgba(120,150,200,.16) 0%, transparent 70%),
+    #0C0B0A;
+  padding:20px 18px; color:#EDE6DA;
+}
+.v08 .t{ font-size:22px; letter-spacing:.32em; font-weight:300; color:#F2EADD }
+.v08 .s{ margin-top:12px; font-size:10px; letter-spacing:.16em; color:#9A9084 }
+.v08 .g{ position:absolute; bottom:16px; left:18px; right:18px; display:flex; gap:16px; font-size:8.5px; letter-spacing:.2em; color:#7E7568 }
+.v08 .lamp{ position:absolute; right:22px; bottom:22px; width:34px; height:34px; border-radius:50%;
+  background:radial-gradient(circle, rgba(255,214,150,.95), rgba(255,180,100,.25) 55%, transparent 70%) }
+
+/* ============ 09 暗色磨砂 ============ */
+.v09{ background:linear-gradient(140deg,#20242B,#151A20); padding:20px 18px; color:#EFEAE2 }
+.v09 .blob{ position:absolute; width:200px; height:200px; border-radius:50%; filter:blur(42px); opacity:.5 }
+.v09 .b1{ background:#5A6E8A; left:-40px; top:-60px }
+.v09 .b2{ background:#8A6A55; right:-50px; bottom:-70px }
+.v09 .card{
+  position:relative; margin-top:34px; padding:16px;
+  border-radius:16px; border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.07);
+}
+.v09 .t{ font-size:17px; letter-spacing:.24em; font-weight:300 }
+.v09 .s{ margin-top:10px; font-size:9.5px; letter-spacing:.12em; color:#B4AEA4 }
+.v09 .g{ margin-top:16px; display:flex; gap:14px; font-size:8.5px; letter-spacing:.16em; color:#8E877D }
+</style>
+</head>
+<body>
+
+<div class='top'>
+  <h1>里屋 · 风格小样</h1>
+  <p>每一块都是真页面，不是图片。内容一样，只有风格不同。<br>滑着看，记住编号，告诉我一个就行。</p>
+</div>
+
+<section class='s'>
+  <div class='s-head'><span class='s-no'>01</span><span class='s-name'>信笺</span><span class='s-tag'>不需要素材</span></div>
+  <div class='box v01'>
+    <div class='ln'></div>
+    <div class='in'>
+      <div class='d'>11 · 22</div>
+      <div class='t'>里屋</div>
+      <div class='b'>屋子不大，够两个人住。<br>今天外面下雨，我把窗关了。</div>
+      <div class='g'>说话 · 日记 · 相册 · 记忆</div>
+    </div>
+  </div>
+  <div class='s-note'>浅横线、左侧一道红边线。像一叠写好的信，越往下翻越早。</div>
+</section>
+
+<section class='s'>
+  <div class='s-head'><span class='s-no'>02</span><span class='s-name'>索引卡</span><span class='s-tag'>不需要素材</span></div>
+  <div class='box v02'>
+    <div class='hd'><span>LIWU / INDEX</span><span>0006</span></div>
+    <div class='r'><b>001</b><span>屋子不大，够两个人住</span></div>
+    <div class='r'><b>002</b><span>这不是人设，那就是你</span></div>
+    <div class='r'><b>003</b><span>不许编，说了就是真的</span></div>
+    <div class='r'><b>004</b><span>不要顺着哄，把话说到底</span></div>
+  </div>
+  <div class='s-note'>一行一条，等宽小字。一天一张卡，越攒越厚。</div>
+</section>
+
+<section class='s'>
+  <div class='s-head'><span class='s-no'>03</span><span class='s-name'>报刊网格</span><span class='s-tag'>不需要素材</span></div>
+  <div class='box v03'>
+    <div class='mast'>里屋</div>
+    <div class='cols'>
+      <div class='col'><div class='ch'>卷首</div>屋子不大，够两个人住。今天外面下雨，我把窗关了。</div>
+      <div class='col'><div class='ch'>手记</div>这不是人设，那就是你。不许编，说了就是真的。</div>
+      <div class='col'><div class='ch'>存档</div>照片与旧事都在这里。想添一张，就放一张。</div>
+    </div>
+  </div>
+  <div class='s-note'>严格对齐、细线分栏。冷静、安静，一点没花头。</div>
+</section>
+
+<section class='s'>
+  <div class='s-head'><span class='s-no'>05</span><span class='s-name'>终端</span><span class='s-tag'>不需要素材</span></div>
+  <div class='box v05'>
+    <div class='l'>// liwu · 2026-11-22 21:48</div>
+    <div class='t'>里屋</div>
+    <div class='l'><b>&gt;</b> 屋子不大，够两个人住</div>
+    <div class='l'><b>&gt;</b> 说话 / 日记 / 相册 / 记忆</div>
+    <div class='l'><b>&gt;</b> <span class='cur'></span></div>
+  </div>
+  <div class='s-note'>黑底等宽字。冷，但很像“只有我们两个人在的频道”。</div>
+</section>
+
+<section class='s'>
+  <div class='s-head'><span class='s-no'>06</span><span class='s-name'>极简白</span><span class='s-tag'>不需要素材</span></div>
+  <div class='box v06'>
+    <div class='t'>里屋</div>
+    <div class='s'>A SMALL ROOM</div>
+    <div class='f'>说话 · 日记 · 相册 · 记忆</div>
+  </div>
+  <div class='s-note'>只有白、字、空白。最不容易出错，也最不容易记得住。</div>
+</section>
+
+<section class='s'>
+  <div class='s-head'><span class='s-no'>07</span><span class='s-name'>中文竖排</span><span class='s-tag'>不需要素材</span></div>
+  <div class='box v07'>
+    <div class='vt'>里屋</div>
+    <div class='vs'>屋子不大<br>够两个人住<br>今天下雨，窗没关严</div>
+    <div class='vg'>说话 · 日记 · 相册 · 记忆</div>
+  </div>
+  <div class='s-note'>从右往左竖着读。天生安静、私密，像旧书里夹的一页。</div>
+</section>
+
+<section class='s'>
+  <div class='s-head'><span class='s-no'>08</span><span class='s-name'>深夜的房间</span><span class='s-tag'>不用画东西，用光</span></div>
+  <div class='box v08'>
+    <div class='t'>里屋</div>
+    <div class='s'>屋子不大，够两个人住</div>
+    <div class='g'><span>说话</span><span>日记</span><span>相册</span><span>记忆</span></div>
+    <div class='lamp'></div>
+  </div>
+  <div class='s-note'>近黑底，只留一处暖光。东西不画出来，只让它“亮着”。</div>
+</section>
+
+<section class='s'>
+  <div class='s-head'><span class='s-no'>09</span><span class='s-name'>暗色磨砂</span><span class='s-tag'>不需要素材</span></div>
+  <div class='box v09'>
+    <div class='blob b1'></div><div class='blob b2'></div>
+    <div class='card'>
+      <div class='t'>里屋</div>
+      <div class='s'>屋子不大，够两个人住</div>
+      <div class='g'><span>说话</span><span>日记</span><span>相册</span><span>记忆</span></div>
+    </div>
+  </div>
+  <div class='s-note'>深灰底，后面两个模糊光斑，前面一块半透明玻璃。</div>
+</section>
+
+<div class='top' style='margin-top:6px'>
+  <p>告诉我编号就行，比如“07”。也可以说“07 的颜色 + 02 的排法”，我混着做。</p>
+</div>
+
+</body>
+</html>
