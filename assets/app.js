@@ -719,7 +719,7 @@
     $('#viewBody').scrollTop = 0;
   }
 
-  $('.drawer-nav button').forEach(function(b){
+  $$('.drawer-nav button').forEach(function(b){
     b.addEventListener('click', function(){
       var v = b.getAttribute('data-view');
       if (v === 'home'){ showHome(); return; }
