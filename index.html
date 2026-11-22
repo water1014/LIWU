@@ -10,6 +10,7 @@
 <link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23EFE9DC%27/%3E%3Crect x=%2715.2%27 y=%277%27 width=%271.4%27 height=%2718%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
 <link rel='preconnect' href='https://fonts.googleapis.com'>
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
+<link rel='preconnect' href='https://unpkg.com' crossorigin>
 <link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@300;400;500&display=swap' rel='stylesheet'>
 <link rel='stylesheet' href='assets/style.css'>
 <link rel='stylesheet' href='assets/desk.css'>
@@ -17,69 +18,18 @@
 <body data-theme='paper' class='home'>
 
 <div id='desk-wrap'>
-  <div class='desk' id='desk'>
-    <div class='plane' id='plane'>
+  <canvas id='stage'></canvas>
 
-      <div class='hud'>
-        <button class='hud-btn' id='hudMenu' type='button' aria-label='会话'>≡</button>
-        <div class='clock'>
-          <span class='t' id='hudTime'>--:--</span>
-          <span class='d' id='hudDate'></span>
-        </div>
-        <button class='pill' id='hudMode' type='button'>预览：白天</button>
-      </div>
-
-      <section class='thing paper'>
-        <div class='paper-head'>
-          <h1>里屋早报</h1>
-          <span>THE LIWU MORNING POST</span>
-        </div>
-        <div class='paper-body'>
-          <div class='memo' data-open='memory'>
-            <h4>备忘 <em>NOTES</em></h4>
-            <ul id='memoList'></ul>
-          </div>
-          <div class='feature' data-open='album'>
-            <h4>今天 <em>TODAY</em></h4>
-            <div class='shot' id='featureShot'><span>把照片放进来<br>它就贴在这儿</span></div>
-            <p class='cap' id='featureCap'>还没有照片</p>
-          </div>
-        </div>
-        <div class='paper-foot'>
-          <span class='temp' id='hudTemp'>—</span>
-          <span class='weather' id='hudWeather'></span>
-          <span class='sep'></span>
-          <span class='days' id='deskDays'>第 — 天</span>
-        </div>
-      </section>
-
-      <div class='thing polaroid' data-open='album'>
-        <div class='tape'></div>
-        <div class='ph' id='ph1'></div>
-        <span class='hand'>our room</span>
-      </div>
-
-      <div class='thing note' data-open='diary'>
-        <span class='note-head'>今天想说的话</span>
-        <span class='note-rule'></span>
-        <span class='note-rule'></span>
-        <span class='note-foot'>写一句 →</span>
-      </div>
-
-      <div class='thing vinyl-wrap' data-open='chat'>
-        <div class='deck'></div>
-        <div class='vinyl'><span class='label'></span></div>
-        <span class='arm'></span>
-        <span class='vinyl-cap'>点它，说话</span>
-      </div>
-
-      <div class='thing tag' data-open='settings'>
-        <span class='clip'></span>
-        <span class='tag-face'>里屋<em>LIWU</em></span>
-      </div>
-
+  <div class='hud'>
+    <button class='hud-btn' id='hudMenu' type='button' aria-label='会话'>≡</button>
+    <div class='clock'>
+      <span class='t' id='hudTime'>--:--</span>
+      <span class='d' id='hudDate'></span>
     </div>
+    <button class='pill' id='hudMode' type='button'>预览：白天</button>
   </div>
+
+  <div class='boot' id='boot'>正在铺桌子……</div>
 
   <div class='desk-dock' id='deskDock'></div>
 </div>
@@ -148,11 +98,13 @@
 window.addEventListener('error', function(e){
   var h = document.getElementById('hint');
   if (h) h.textContent = '出了点问题：' + (e.message || '未知') + (e.lineno ? '（第 ' + e.lineno + ' 行）' : '');
+  var b = document.getElementById('boot');
+  if (b) b.textContent = '出了点问题：' + (e.message || '未知');
 });
 </script>
 
 <script src='data.js'></script>
 <script src='assets/app.js'></script>
-<script src='assets/desk.js'></script>
+<script type='module' src='assets/desk3d.js'></script>
 </body>
 </html>
