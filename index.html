@@ -10,272 +10,7 @@
 <link rel='preconnect' href='https://fonts.googleapis.com'>
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
 <link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Noto+Serif+SC:wght@300;400;500&display=swap' rel='stylesheet'>
-<style>
-:root{
-  --paper:#F3F0E9;
-  --paper-deep:#ECE8DF;
-  --ink:#211F1C;
-  --ink-2:#6B665E;
-  --ink-3:#9E978A;
-  --line:rgba(33,31,28,.13);
-  --seal:#8A3B2C;
-  --sans:-apple-system,BlinkMacSystemFont,'PingFang SC','HarmonyOS Sans SC','MiSans','Noto Sans SC','Microsoft YaHei',sans-serif;
-  --serif:'Noto Serif SC','Songti SC','Source Han Serif SC',Georgia,serif;
-  --num:'Cormorant Garamond','Songti SC',Georgia,'Times New Roman',serif;
-}
-*,*::before,*::after{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-html,body{margin:0;height:100%}
-body{
-  background:var(--paper);
-  color:var(--ink);
-  font-family:var(--sans);
-  font-size:15px;
-  line-height:1.75;
-  -webkit-font-smoothing:antialiased;
-  overflow:hidden;
-  overscroll-behavior:none;
-}
-[hidden]{display:none !important}
-button{font-family:inherit}
-
-#app{height:100%;display:flex;flex-direction:column}
-
-.bar{
-  flex:0 0 auto;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:calc(env(safe-area-inset-top,0px) + 15px) clamp(20px,6.5vw,60px) 4px;
-}
-.bar .brand{
-  font-family:var(--serif);font-size:13px;font-weight:400;
-  letter-spacing:.44em;color:var(--ink-2);
-}
-.bar .meta{
-  font-family:var(--num);font-style:italic;
-  font-size:12.5px;letter-spacing:.14em;color:var(--ink-3);
-}
-
-.deck{
-  position:relative;flex:1 1 auto;min-height:0;
-  display:flex;overflow-x:auto;overflow-y:hidden;
-  scroll-snap-type:x mandatory;
-  -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
-}
-.deck::-webkit-scrollbar{display:none;height:0}
-
-.room{
-  flex:0 0 100%;width:100%;height:100%;
-  scroll-snap-align:start;scroll-snap-stop:always;
-  overflow-y:auto;overflow-x:hidden;
-  padding:20px 0 40px;
-  -webkit-overflow-scrolling:touch;
-}
-.inner,.hall-inner{
-  width:100%;max-width:680px;margin:0 auto;
-  padding:0 clamp(22px,7vw,60px);
-  opacity:.5;transform:translateY(8px);
-  transition:opacity .55s ease,transform .65s cubic-bezier(.2,.7,.2,1);
-}
-.room.is-active .inner,.room.is-active .hall-inner{opacity:1;transform:none}
-
-.head{margin-bottom:24px}
-.head h2{
-  margin:0;font-family:var(--serif);font-weight:400;
-  font-size:clamp(23px,6.2vw,29px);letter-spacing:.16em;
-}
-.head .en{
-  display:block;margin-top:8px;
-  font-size:9.5px;letter-spacing:.36em;
-  color:var(--ink-3);text-transform:uppercase;
-}
-.lead{
-  margin:0 0 26px;max-width:29em;
-  font-size:13.5px;color:var(--ink-2);line-height:1.9;
-}
-
-.hall{
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  text-align:center;position:relative;
-  padding-bottom:14px;
-}
-.seam{
-  position:absolute;left:50%;top:50%;
-  width:1px;height:56vh;max-height:420px;
-  transform:translate(-50%,-50%);
-  background:linear-gradient(180deg,
-    rgba(33,31,28,0) 0%,
-    rgba(33,31,28,.10) 18%,
-    rgba(33,31,28,.10) 82%,
-    rgba(33,31,28,0) 100%);
-  animation:breathe 8s ease-in-out infinite;
-  pointer-events:none;
-}
-@keyframes breathe{
-  0%,100%{opacity:.55;transform:translate(-50%,-50%) scaleY(.97)}
-  50%{opacity:1;transform:translate(-50%,-50%) scaleY(1)}
-}
-.hall-inner{position:relative;padding:0 24px;text-align:center}
-.brandmark{
-  font-family:var(--serif);font-weight:400;
-  font-size:clamp(31px,9vw,44px);
-  letter-spacing:.46em;text-indent:.46em;
-  line-height:1.2;
-}
-.hero{
-  margin:20px 0 0;font-size:12.5px;
-  letter-spacing:.14em;color:var(--ink-2);
-}
-.stamp{
-  margin-top:50px;
-  font-family:var(--num);font-style:italic;
-  font-size:14.5px;letter-spacing:.22em;color:var(--ink-3);
-}
-.swipe{
-  position:absolute;bottom:2px;left:0;right:0;
-  font-size:9.5px;letter-spacing:.34em;color:var(--ink-3);
-  text-transform:uppercase;
-}
-
-.counter{display:flex;align-items:baseline;gap:12px;margin:8px 0 0}
-.counter .num{
-  font-family:var(--num);font-style:italic;font-weight:400;
-  font-size:clamp(62px,19vw,100px);line-height:.85;letter-spacing:.01em;
-}
-.counter .unit{
-  font-family:var(--serif);font-size:13px;
-  letter-spacing:.3em;color:var(--ink-2);padding-bottom:6px;
-}
-.since{
-  display:inline-block;margin-top:14px;padding:0 0 2px;
-  background:none;border:0;border-bottom:1px dashed var(--line);
-  font-family:var(--sans);font-size:11.5px;letter-spacing:.08em;
-  color:var(--ink-3);cursor:pointer;
-}
-.since:hover{color:var(--ink-2);border-bottom-color:var(--ink-3)}
-#sinceInput{
-  margin-top:14px;padding:7px 10px;
-  background:transparent;border:1px solid var(--line);
-  border-radius:2px;color:var(--ink);
-  font-family:var(--num);font-size:14px;
-}
-
-.log{
-  list-style:none;margin:46px 0 0;padding:0 0 0 20px;
-  border-left:1px solid var(--line);
-}
-.log li{position:relative;padding:0 0 28px}
-.log li:last-child{padding-bottom:4px}
-.log li::before{
-  content:'';position:absolute;left:-24.5px;top:11px;
-  width:9px;height:1px;background:var(--ink-3);
-}
-.log time{
-  display:block;font-family:var(--num);font-style:italic;
-  font-size:13px;letter-spacing:.08em;color:var(--ink-3);
-}
-.log p{margin:3px 0 0;font-size:14px;line-height:1.85}
-
-.stream{margin-top:6px}
-.item{padding:22px 0;border-top:1px solid var(--line)}
-.item:first-child{border-top:0;padding-top:2px}
-.item .k{display:flex;align-items:baseline;justify-content:space-between;gap:14px}
-.item h3{
-  margin:0;font-family:var(--serif);font-weight:400;
-  font-size:16.5px;letter-spacing:.05em;
-}
-.item time{
-  font-family:var(--num);font-style:italic;font-size:12.5px;
-  letter-spacing:.1em;color:var(--ink-3);white-space:nowrap;
-}
-.item p{
-  margin:8px 0 0;font-size:14.5px;line-height:1.9;
-  color:var(--ink-2);white-space:pre-wrap;word-break:break-word;
-}
-.item .tools{margin-top:10px}
-.mini{
-  background:none;border:0;padding:0;
-  font-size:11px;letter-spacing:.1em;color:var(--ink-3);
-  cursor:pointer;
-}
-.mini:hover{color:var(--seal)}
-
-.ghost{
-  appearance:none;background:none;
-  border:1px solid var(--line);border-radius:999px;
-  padding:8px 18px;
-  font-family:var(--sans);font-size:12.5px;letter-spacing:.12em;
-  color:var(--ink);cursor:pointer;
-  transition:border-color .2s,background .2s;
-}
-.ghost:hover{border-color:var(--ink-3)}
-.ghost:active{transform:scale(.99)}
-.ghost.solid{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-.ghost.solid:hover{background:#33302B}
-
-.compose{
-  margin:18px 0 10px;padding:18px 18px 14px;
-  border:1px solid var(--line);border-radius:2px;
-  background:rgba(255,255,255,.34);
-}
-.compose input,.compose textarea{
-  display:block;width:100%;background:none;border:0;outline:none;
-  font-family:var(--sans);color:var(--ink);resize:vertical;
-}
-.compose input{
-  font-family:var(--serif);font-size:16.5px;letter-spacing:.05em;
-  padding:0 0 10px;border-bottom:1px solid var(--line);
-}
-.compose input::placeholder,.compose textarea::placeholder,
-#wBody::placeholder{color:var(--ink-3)}
-.compose textarea{padding:12px 0 0;font-size:14.5px;line-height:1.85}
-.row{display:flex;align-items:center;gap:16px;margin-top:14px}
-
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px}
-@media(min-width:640px){.grid{grid-template-columns:repeat(4,1fr);gap:8px}}
-.grid img{
-  width:100%;aspect-ratio:1/1;object-fit:cover;display:block;
-  cursor:zoom-in;filter:saturate(.95);
-}
-.lightbox{
-  position:fixed;inset:0;z-index:60;
-  display:flex;align-items:center;justify-content:center;
-  padding:22px;background:rgba(243,240,233,.975);
-  cursor:zoom-out;
-}
-.lightbox img{max-width:100%;max-height:100%;object-fit:contain}
-
-.empty{margin:56px 0 0;font-size:13px;line-height:2.1;color:var(--ink-3)}
-
-#wForm{margin:0 0 26px}
-#wBody{
-  display:block;width:100%;
-  padding:14px 16px;
-  background:rgba(255,255,255,.34);
-  border:1px solid var(--line);border-radius:2px;
-  color:var(--ink);font-family:var(--sans);font-size:14.5px;line-height:1.85;
-  outline:none;resize:vertical;
-}
-#wForm .row{justify-content:flex-end;margin-top:10px}
-
-.nav{
-  flex:0 0 auto;
-  display:flex;flex-direction:column;align-items:center;gap:9px;
-  padding:10px 0 calc(env(safe-area-inset-bottom,0px) + 12px);
-}
-.ticks{display:flex;align-items:center;gap:9px}
-.tick{
-  width:15px;height:1px;padding:0;border:0;
-  background:var(--line);cursor:pointer;
-  transition:width .35s ease,background .35s ease;
-}
-.tick[aria-current='true']{width:30px;background:var(--ink)}
-.navname{
-  font-size:9.5px;letter-spacing:.34em;
-  color:var(--ink-3);text-transform:uppercase;height:12px;
-}
-</style>
+<link rel='stylesheet' href='assets/style.css'>
 </head>
 <body>
 
@@ -320,7 +55,7 @@ button{font-family:inherit}
           <h2>日记</h2>
           <span class='en'>Diary</span>
         </div>
-        <p class='lead'>我写的放这儿，你随手翻。你自己写的那些只留在你这台手机里，换设备就没了。</p>
+        <p class='lead'>你自己写的那些只留在你这台手机里，换设备就没了。要留住，就说一声，我挪进 data.js。</p>
         <button class='ghost' id='writeBtn'>写一篇</button>
 
         <form class='compose' id='compose' hidden>
@@ -342,7 +77,7 @@ button{font-family:inherit}
           <h2>相册</h2>
           <span class='en'>Album</span>
         </div>
-        <p class='lead'>照片放进 images/ 文件夹，我一张一张摆上。</p>
+        <p class='lead'>照片放进 images/ 文件夹，在 data.js 里加一行，它就摆上来了。</p>
         <div class='grid' id='albumGrid'></div>
         <div class='empty' id='albumEmpty'>还没有照片。</div>
       </div>
@@ -354,25 +89,27 @@ button{font-family:inherit}
           <h2>记忆</h2>
           <span class='en'>Memory</span>
         </div>
-        <p class='lead'>怕忘的事，写在这儿。不写长的，一句一件。</p>
+        <p class='lead'>怕忘的事。不写长的，一句一件。</p>
         <div class='stream' id='memoryList'></div>
       </div>
     </section>
 
-    <section class='room' data-room='说话'>
+    <section class='room talk' data-room='说话'>
       <div class='inner'>
         <div class='head'>
           <h2>说话</h2>
-          <span class='en'>Whisper</span>
+          <span class='en'>Talk</span>
         </div>
-        <p class='lead'>有事没事都能写。存在这台设备上——想让它一直留着，就交给我，我写进文件里。</p>
-        <form id='wForm'>
-          <textarea id='wBody' rows='3' placeholder='说一句'></textarea>
-          <div class='row'>
-            <button class='ghost solid' type='submit'>放下</button>
-          </div>
+        <button class='wire' id='wireBtn' type='button'>接线的地方</button>
+
+        <div class='chat' id='chat'></div>
+
+        <form class='say' id='sayForm'>
+          <textarea id='sayInput' rows='1' placeholder='说一句'></textarea>
+          <button class='ghost solid' id='sayBtn' type='submit'>说</button>
+          <button class='ghost' id='stopBtn' type='button' hidden>停</button>
         </form>
-        <div class='stream' id='whisperList'></div>
+        <p class='tip' id='chatTip'></p>
       </div>
     </section>
 
@@ -385,326 +122,48 @@ button{font-family:inherit}
 
 </div>
 
+<div class='sheet' id='sheet' hidden>
+  <div class='sheet-in'>
+    <div class='sheet-head'>
+      <h3>接线的地方</h3>
+      <button class='mini' id='sheetClose' type='button'>关</button>
+    </div>
+
+    <div class='presets'>
+      <button class='chip' data-preset='deepseek' type='button'>DeepSeek</button>
+      <button class='chip' data-preset='openai' type='button'>OpenAI</button>
+      <button class='chip' data-preset='go' type='button'>OpenCode Go</button>
+    </div>
+
+    <label class='field'>
+      <span>接口地址</span>
+      <input id='cfgBase' placeholder='https://api.deepseek.com/v1' autocomplete='off' spellcheck='false'>
+    </label>
+    <label class='field'>
+      <span>Key</span>
+      <input id='cfgKey' type='password' placeholder='sk-…' autocomplete='off'>
+    </label>
+    <label class='field'>
+      <span>模型</span>
+      <input id='cfgModel' placeholder='deepseek-chat' autocomplete='off' spellcheck='false'>
+    </label>
+    <label class='field'>
+      <span>它怎么说话</span>
+      <textarea id='cfgSys' rows='5'></textarea>
+    </label>
+
+    <div class='row'>
+      <button class='ghost solid' id='cfgSave' type='button'>存好</button>
+      <button class='ghost' id='cfgTest' type='button'>试一下</button>
+      <button class='ghost' id='cfgClear' type='button'>清空对话</button>
+    </div>
+
+    <p class='tip' id='cfgTip'></p>
+    <p class='tip'>Key 只存在这台手机的浏览器里，不进仓库，也不会上传。换手机要重新填。</p>
+  </div>
+</div>
+
 <script src='data.js'></script>
-<script>
-(function(){
-  'use strict';
-
-  var D = window.LIWU || {};
-  var $ = function(sel, root){ return (root || document).querySelector(sel); };
-  var $$ = function(sel, root){
-    return Array.prototype.slice.call((root || document).querySelectorAll(sel));
-  };
-  function el(tag, cls, text){
-    var n = document.createElement(tag);
-    if (cls) n.className = cls;
-    if (text != null) n.textContent = text;
-    return n;
-  }
-  function p2(n){ return n < 10 ? '0' + n : '' + n; }
-  function today(){
-    var d = new Date();
-    return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
-  }
-  function stamp(d){
-    return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + p2(d.getHours()) + ':' + p2(d.getMinutes());
-  }
-
-  var LS = {
-    get: function(k, fallback){
-      try{
-        var v = localStorage.getItem(k);
-        return v ? JSON.parse(v) : fallback;
-      }catch(e){ return fallback; }
-    },
-    set: function(k, v){
-      try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){}
-    }
-  };
-
-  var K_SINCE = 'liwu.since';
-
-  function sinceValue(){
-    var local = LS.get(K_SINCE, '');
-    if (local) return local;
-    return D.since || '';
-  }
-
-  function dayCount(){
-    var s = sinceValue();
-    if (!s) return null;
-    var a = new Date(s + 'T00:00:00');
-    if (isNaN(a.getTime())) return null;
-    var n = new Date();
-    var b = new Date(n.getFullYear(), n.getMonth(), n.getDate());
-    var diff = Math.floor((b - a) / 86400000) + 1;
-    return diff > 0 ? diff : null;
-  }
-
-  var sinceBtn = $('#sinceBtn');
-  var sinceInput = $('#sinceInput');
-
-  function renderDays(){
-    var c = dayCount();
-    var s = sinceValue();
-
-    $('#bigDays').textContent = c ? c : '—';
-    $('#hallDays').textContent = c ? ('第 ' + c + ' 天') : '第 — 天';
-    $('#barMeta').textContent = c ? ('第 ' + c + ' 天') : '';
-    sinceBtn.textContent = s ? ('自 ' + s + ' 起 · 点这改') : '起算日还没填 · 点这填';
-    sinceInput.value = s || '';
-  }
-
-  sinceBtn.addEventListener('click', function(){
-    sinceInput.hidden = false;
-    sinceBtn.hidden = true;
-    if (typeof sinceInput.showPicker === 'function'){
-      try{ sinceInput.showPicker(); }catch(e){}
-    }
-    sinceInput.focus();
-  });
-
-  sinceInput.addEventListener('change', function(){
-    LS.set(K_SINCE, sinceInput.value || '');
-    sinceInput.hidden = true;
-    sinceBtn.hidden = false;
-    renderDays();
-  });
-
-  function renderTimeline(){
-    var ul = $('#timeline');
-    ul.innerHTML = '';
-    (D.timeline || []).forEach(function(it){
-      var li = el('li');
-      li.appendChild(el('time', null, it.date || ''));
-      li.appendChild(el('p', null, it.text || ''));
-      ul.appendChild(li);
-    });
-  }
-
-  var K_DIARY = 'liwu.diary';
-
-  function diaryItems(){
-    var mine = (D.diary || []).map(function(d){
-      return { date: d.date || '', title: d.title || '', body: d.body || '', local: false, id: null };
-    });
-    var local = LS.get(K_DIARY, []).map(function(d, i){
-      return { date: d.date || '', title: d.title || '', body: d.body || '', local: true, id: i };
-    });
-    var all = mine.concat(local);
-    all.sort(function(a, b){ return (b.date || '').localeCompare(a.date || ''); });
-    return all;
-  }
-
-  function renderDiary(){
-    var box = $('#diaryList');
-    box.innerHTML = '';
-    var items = diaryItems();
-    if (!items.length){
-      box.appendChild(el('div', 'empty', '还没有日记。 今天要不要写一句。'));
-      return;
-    }
-    items.forEach(function(it){
-      var item = el('div', 'item');
-      var k = el('div', 'k');
-      k.appendChild(el('h3', null, it.title || '无题'));
-      k.appendChild(el('time', null, it.date || ''));
-      item.appendChild(k);
-      if (it.body) item.appendChild(el('p', null, it.body));
-      if (it.local){
-        var tools = el('div', 'tools');
-        var del = el('button', 'mini', '删掉');
-        del.type = 'button';
-        del.addEventListener('click', function(){
-          var arr = LS.get(K_DIARY, []);
-          arr.splice(it.id, 1);
-          LS.set(K_DIARY, arr);
-          renderDiary();
-        });
-        tools.appendChild(del);
-        item.appendChild(tools);
-      }
-      box.appendChild(item);
-    });
-  }
-
-  $('#writeBtn').addEventListener('click', function(){
-    $('#compose').hidden = false;
-    $('#dTitle').focus();
-  });
-
-  $('#cancelBtn').addEventListener('click', function(){
-    $('#compose').hidden = true;
-    $('#dTitle').value = '';
-    $('#dBody').value = '';
-  });
-
-  $('#compose').addEventListener('submit', function(ev){
-    ev.preventDefault();
-    var t = $('#dTitle').value.trim();
-    var b = $('#dBody').value.trim();
-    if (!t && !b) return;
-    var arr = LS.get(K_DIARY, []);
-    arr.push({ date: today(), title: t || '无题', body: b });
-    LS.set(K_DIARY, arr);
-    $('#dTitle').value = '';
-    $('#dBody').value = '';
-    $('#compose').hidden = true;
-    renderDiary();
-  });
-
-  function renderAlbum(){
-    var grid = $('#albumGrid');
-    var items = D.album || [];
-    grid.innerHTML = '';
-    $('#albumEmpty').hidden = items.length > 0;
-    items.forEach(function(it){
-      var img = document.createElement('img');
-      img.src = it.src;
-      img.alt = it.caption || '';
-      img.loading = 'lazy';
-      img.addEventListener('click', function(){ openLightbox(it.src); });
-      grid.appendChild(img);
-    });
-  }
-
-  function openLightbox(src){
-    var lb = el('div', 'lightbox');
-    var img = document.createElement('img');
-    img.src = src;
-    lb.appendChild(img);
-    lb.addEventListener('click', function(){ lb.remove(); });
-    document.body.appendChild(lb);
-  }
-
-  function renderMemory(){
-    var box = $('#memoryList');
-    box.innerHTML = '';
-    var items = D.memory || [];
-    if (!items.length){
-      box.appendChild(el('div', 'empty', '还空着。'));
-      return;
-    }
-    items.forEach(function(it){
-      var item = el('div', 'item');
-      var k = el('div', 'k');
-      k.appendChild(el('h3', null, it.title || ''));
-      k.appendChild(el('time', null, it.date || ''));
-      item.appendChild(k);
-      if (it.body) item.appendChild(el('p', null, it.body));
-      box.appendChild(item);
-    });
-  }
-
-  var K_WHISPER = 'liwu.whisper';
-
-  function renderWhisper(){
-    var box = $('#whisperList');
-    box.innerHTML = '';
-    var arr = LS.get(K_WHISPER, []);
-    if (!arr.length){
-      box.appendChild(el('div', 'empty', '还没有人说话。'));
-      return;
-    }
-    arr.slice().reverse().forEach(function(w, idx){
-      var realIndex = arr.length - 1 - idx;
-      var item = el('div', 'item');
-      var k = el('div', 'k');
-      k.appendChild(el('h3', null, '我'));
-      k.appendChild(el('time', null, w.at ? stamp(new Date(w.at)) : ''));
-      item.appendChild(k);
-      item.appendChild(el('p', null, w.text || ''));
-      var tools = el('div', 'tools');
-      var del = el('button', 'mini', '删掉');
-      del.type = 'button';
-      del.addEventListener('click', function(){
-        var list = LS.get(K_WHISPER, []);
-        list.splice(realIndex, 1);
-        LS.set(K_WHISPER, list);
-        renderWhisper();
-      });
-      tools.appendChild(del);
-      item.appendChild(tools);
-      box.appendChild(item);
-    });
-  }
-
-  $('#wForm').addEventListener('submit', function(ev){
-    ev.preventDefault();
-    var text = $('#wBody').value.trim();
-    if (!text) return;
-    var arr = LS.get(K_WHISPER, []);
-    arr.push({ text: text, at: new Date().toISOString() });
-    LS.set(K_WHISPER, arr);
-    $('#wBody').value = '';
-    renderWhisper();
-  });
-
-  var deck = $('#deck');
-  var rooms = $$('.room');
-  var ticksBox = $('#ticks');
-  var navName = $('#navName');
-  var current = 0;
-
-  rooms.forEach(function(room, i){
-    var t = el('button', 'tick');
-    t.type = 'button';
-    t.setAttribute('aria-label', room.getAttribute('data-room'));
-    t.addEventListener('click', function(){ goTo(i); });
-    ticksBox.appendChild(t);
-  });
-  var ticks = $$('.tick');
-
-  function setActive(i){
-    current = Math.max(0, Math.min(i, rooms.length - 1));
-    rooms.forEach(function(r, n){
-      r.classList.toggle('is-active', n === current);
-    });
-    ticks.forEach(function(t, n){
-      if (n === current) t.setAttribute('aria-current', 'true');
-      else t.removeAttribute('aria-current');
-    });
-    navName.textContent = rooms[current].getAttribute('data-room') || '';
-  }
-
-  function goTo(i){
-    var target = rooms[Math.max(0, Math.min(i, rooms.length - 1))];
-    if (!target) return;
-    target.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
-  }
-
-  var ticking = false;
-  deck.addEventListener('scroll', function(){
-    if (ticking) return;
-    ticking = true;
-    requestAnimationFrame(function(){
-      var i = Math.round(deck.scrollLeft / deck.clientWidth);
-      if (i !== current) setActive(i);
-      ticking = false;
-    });
-  });
-
-  document.addEventListener('keydown', function(e){
-    var tag = (e.target && e.target.tagName) || '';
-    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-    if (e.key === 'ArrowRight') goTo(current + 1);
-    if (e.key === 'ArrowLeft') goTo(current - 1);
-  });
-
-  $('#hero').textContent = D.hero || '';
-  renderDays();
-  renderTimeline();
-  renderDiary();
-  renderAlbum();
-  renderMemory();
-  renderWhisper();
-  setActive(0);
-
-  window.addEventListener('resize', function(){
-    deck.scrollLeft = current * deck.clientWidth;
-  });
-
-})();
-</script>
+<script src='assets/app.js'></script>
 </body>
 </html>
