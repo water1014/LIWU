@@ -1862,3 +1862,12 @@ body.room-open{overscroll-behavior:none}
  .music-row .planner-item-actions{margin-left:36px}
  .window-scene{min-height:215px;padding:18px}
 }
+
+/* Persistent home wallpaper */
+.wallpaper-preview{position:relative;display:grid;place-items:center;min-height:210px;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:var(--bg-2)}
+.wallpaper-preview img{display:block;width:100%;max-height:420px;object-fit:cover}
+.wallpaper-preview>div{display:grid;gap:7px;padding:34px;text-align:center}
+.wallpaper-preview>div strong{font:500 20px var(--serif)}
+.wallpaper-preview>div small{color:var(--ink-3);font-size:11px}
+.wallpaper-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}
+.wallpaper-actions label{cursor:pointer}
