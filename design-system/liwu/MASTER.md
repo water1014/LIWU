@@ -27,21 +27,21 @@ Do not combine every visual effect from these styles. Apple-like clarity is the 
 
 ## 3. Visual tokens
 
-The existing paper theme is being refined into a neutral monochrome baseline with restrained blue-grey details. Do not use cream, brown, purple-dominant gradients, or generic SaaS indigo.
+Paper is the default and primary theme: a cool near-white canvas (#F7F8FA), white elevated surfaces, soft cool-grey separators, and restrained blue-grey details. Night is optional. Do not use cream, brown, purple-dominant gradients, or generic SaaS indigo.
 
 ### Color roles
 
 | Token | Value | Use |
 |---|---|---|
-| Background | #F5F6F8 | Main light canvas |
+| Background | #F7F8FA | Main light canvas |
 | Background elevated | #FFFFFF | Sheets, panels, composer |
-| Background muted | #EBEEF2 | Pressed/quiet surfaces |
-| Primary text | #20252D | Main text and primary actions |
-| Secondary text | #626D7B | Supporting text |
-| Tertiary text | #8792A0 | Metadata only, never essential instructions |
-| Separator | rgba(35,47,63,.12) | Dividers and subtle outlines |
-| Accent | #71849C | Restrained blue-grey emphasis and selected states |
-| Shadow | rgba(24,37,54,.09) | Low-elevation separation |
+| Background muted | #EEF1F5 | Pressed/quiet surfaces |
+| Primary text | #252B34 | Main text and primary actions |
+| Secondary text | #657181 | Supporting text |
+| Tertiary text | #8C97A5 | Metadata only, never essential instructions |
+| Separator | rgba(35,47,63,.10) | Dividers and subtle outlines |
+| Accent | #7B8FA8 | Restrained blue-grey emphasis and selected states |
+| Shadow | rgba(24,37,54,.07) | Low-elevation separation |
 
 Night theme: background #111419, elevated #191E25, muted #242B34, primary text #F1F3F6, secondary #B1BAC5, tertiary #85909D, accent #91A4BC. Preserve the same semantic roles and test contrast independently.
 
