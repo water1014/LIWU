@@ -517,7 +517,7 @@
 
   function openDrawer(){ drawer.hidden = false; scrim.hidden = false; renderSessions(); }
   function closeDrawer(){ drawer.hidden = true; scrim.hidden = true; }
-  function closeView(){ view.hidden = true; }
+  function closeView(){ view.hidden = true; view.removeAttribute('aria-modal'); document.body.classList.remove('room-open'); }
 
   var homeScreen = $('#homeScreen');
   function paintHome(){
@@ -560,6 +560,7 @@
     if (target === 'chat'){ showChat(); $('#input').focus(); return; }
     if (['diary','album','memory','settings'].indexOf(target) < 0) return;
     viewReturnTarget = 'home';
+    setDrawerCurrent(target);
     homeScreen.hidden = true; $('#app').hidden = true;
     if (target === 'diary') viewDiary();
     else if (target === 'album') viewAlbum();
@@ -585,7 +586,7 @@
   $('#menuBtn').addEventListener('click', openDrawer);
   scrim.addEventListener('click', closeDrawer);
   $('#newBtn').addEventListener('click', newSession);
-  $('#newChat').addEventListener('click', function(){ newSession(); closeDrawer(); });
+  $('#newChat').addEventListener('click', function(){ newSession(); closeDrawer(); showChat(); $('#input').focus(); });
   $('#search').addEventListener('input', renderSessions);
   $('#viewBack').addEventListener('click', backFromView);
 
@@ -619,6 +620,7 @@
     save();
     renderAll();
     closeDrawer();
+    if (!homeScreen.hidden) showChat();
   });
 
   /* ================= 消息操作 ================= */
@@ -716,7 +718,12 @@
     $('#viewEn').textContent = en;
     $('#viewBody').innerHTML = '<div class="view-inner">' + html + '</div>';
     view.hidden = false;
+    view.setAttribute('role', 'dialog');
+    view.setAttribute('aria-modal', 'true');
+    view.setAttribute('aria-label', title + '页面');
+    document.body.classList.add('room-open');
     $('#viewBody').scrollTop = 0;
+    $('#viewBack').focus({ preventScroll: true });
   }
 
   $$('.drawer-nav button').forEach(function(b){
@@ -726,6 +733,7 @@
       if (v === 'chat'){ showChat(); $('#input').focus(); return; }
       if (['diary','album','memory','settings'].indexOf(v) < 0) return;
       viewReturnTarget = homeScreen.hidden && !$('#app').hidden ? 'chat' : 'home';
+      setDrawerCurrent(v);
       closeDrawer();
       homeScreen.hidden = true; $('#app').hidden = true;
       if (v === 'diary') viewDiary();
