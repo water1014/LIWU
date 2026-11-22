@@ -809,16 +809,16 @@ button,a{-webkit-touch-callout:none}
   --radius-control:13px;--radius-panel:20px;
 }
 body[data-theme='paper']{
-  --bg:#F5F6F8;
+  --bg:#F7F8FA;
   --bg-2:#FFFFFF;
-  --bg-3:#EBEEF2;
-  --ink:#20252D;
-  --ink-2:#626D7B;
-  --ink-3:#8792A0;
-  --line:rgba(35,47,63,.12);
+  --bg-3:#EEF1F5;
+  --ink:#252B34;
+  --ink-2:#657181;
+  --ink-3:#8C97A5;
+  --line:rgba(35,47,63,.10);
   --solid:rgba(255,255,255,.88);
-  --seal:#71849C;
-  --shadow:rgba(24,37,54,.09);
+  --seal:#7B8FA8;
+  --shadow:rgba(24,37,54,.07);
 }
 body[data-theme='night']{
   --bg:#111419;
