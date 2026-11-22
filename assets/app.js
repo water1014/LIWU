@@ -581,6 +581,9 @@
     else if (target === 'period') viewPeriod();
     else if (target === 'study') viewStudy();
     else if (target === 'class') viewClass();
+    else if (target === 'music') viewMusic();
+    else if (target === 'game') viewGame();
+    else if (target === 'window') viewWindow();
     else if (target === 'moments') viewMoments();
     else if (target === 'quotes') viewQuotes();
     else if (target === 'favorite') viewFavorites();
@@ -785,6 +788,9 @@
       else if (v === 'period') viewPeriod();
       else if (v === 'study') viewStudy();
       else if (v === 'class') viewClass();
+      else if (v === 'music') viewMusic();
+      else if (v === 'game') viewGame();
+      else if (v === 'window') viewWindow();
       else if (v === 'moments') viewMoments();
       else if (v === 'quotes') viewQuotes();
       else if (v === 'favorite') viewFavorites();
@@ -1387,6 +1393,82 @@
     render();
   }
 
+
+  /* ================= 休闲空间 · 音乐 / 游戏 / 窗廊 ================= */
+  var K_MUSIC='liwu.music',K_GAMES='liwu.games',K_WINDOW='liwu.window',K_WINDOW_NOTES='liwu.window.notes';
+  function viewMusic(){
+    var editing='',active='';
+    function render(){
+      var all=manageList(K_MUSIC),current=all.find(function(x){return x.id===editing;}),playing=all.find(function(x){return x.id===active;});
+      var html='<div class="planner-intro"><p class="lead">把想一起听的歌收在这里。添加可直接播放的音频链接，播放由浏览器原生播放器完成。</p><div class="planner-stat"><strong>'+all.length+'</strong><span>首收藏</span></div></div>'+
+        '<div class="planner-toolbar"><button class="ghost solid" type="button" id="musicNew">＋ 添加音乐</button></div>'+
+        '<form class="planner-form" id="musicForm" '+(editing?'':'hidden')+'><strong>'+(editing?'修改音乐':'添加一首歌')+'</strong><input id="musicTitle" maxlength="100" required value="'+esc(current?current.title:'')+'" placeholder="歌曲名称"><input id="musicArtist" maxlength="80" value="'+esc(current?current.artist:'')+'" placeholder="歌手 / 演奏者"><label class="field"><span>音频直链</span><input id="musicUrl" type="url" required value="'+esc(current?current.url:'')+'" placeholder="https://…/track.mp3"><em class="sub">填写浏览器可直接播放的音频文件地址，不是网页或视频页面链接。</em></label><textarea id="musicNote" rows="2" placeholder="想把这首歌留给哪个时刻？">'+esc(current?current.note:'')+'</textarea><div class="planner-form-actions"><button class="ghost solid" type="submit">保存歌曲</button><button class="ghost" type="button" id="musicCancel">取消</button></div></form>'+
+        (playing?'<section class="music-now"><small>NOW PLAYING</small><strong>'+esc(playing.title)+'</strong><span>'+esc(playing.artist||'')+'</span><audio id="musicAudio" controls preload="none" src="'+esc(playing.url)+'"></audio></section>':'')+
+        (all.length?'<div class="music-list">'+all.map(function(x,i){return '<article class="music-row"><span class="music-index">'+String(i+1).padStart(2,'0')+'</span><div class="music-copy"><strong>'+esc(x.title)+'</strong><small>'+esc(x.artist||'未填写歌手')+'</small>'+(x.note?'<p>'+esc(x.note)+'</p>':'')+'</div><div class="planner-item-actions"><button class="mini" type="button" data-music-play="'+esc(x.id)+'">播放</button><button class="mini" type="button" data-music-edit="'+esc(x.id)+'">编辑</button><button class="mini danger" type="button" data-music-delete="'+esc(x.id)+'">删除</button></div></article>';}).join('')+'</div>':'<div class="blank">播放列表还空着。先收下一首你喜欢的歌。</div>');
+      openView('音乐','Music',html);var body=$('#viewBody');
+      body.onclick=function(ev){
+        if(ev.target.id==='musicNew'){editing='';render();$('#musicForm').hidden=false;$('#musicTitle').focus();return;}
+        if(ev.target.id==='musicCancel'){editing='';render();return;}
+        var play=ev.target.closest('[data-music-play]');if(play){active=play.getAttribute('data-music-play');render();var audio=$('#musicAudio');if(audio){var promise=audio.play();if(promise&&promise.catch)promise.catch(function(){toast('这条音频链接暂时无法播放，请检查地址或格式。');});}return;}
+        var edit=ev.target.closest('[data-music-edit]');if(edit){editing=edit.getAttribute('data-music-edit');render();$('#musicForm').hidden=false;return;}
+        var del=ev.target.closest('[data-music-delete]');if(del&&confirm('从播放列表移除这首歌？')){manageSave(K_MUSIC,manageList(K_MUSIC).filter(function(x){return x.id!==del.getAttribute('data-music-delete');}));if(active===del.getAttribute('data-music-delete'))active='';editing='';render();}
+      };
+      body.onsubmit=function(ev){if(ev.target.id!=='musicForm')return;ev.preventDefault();var title=$('#musicTitle').value.trim(),url=$('#musicUrl').value.trim();if(!title||!/^https?:\/\//i.test(url)){toast('请填写歌曲名称和有效的音频直链。');return;}var list=manageList(K_MUSIC),item={id:editing||uid(),title:title,artist:$('#musicArtist').value.trim(),url:url,note:$('#musicNote').value.trim(),createdAt:current?current.createdAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=item;else list.push(item);if(manageSave(K_MUSIC,list)){editing='';render();toast('已加入播放列表。');}};
+    }
+    render();
+  }
+
+  function viewGame(){
+    var history=manageList(K_GAMES),result='',questions=[
+      '如果今天可以一起去一个地方，你想去哪里？','最近哪件小事让你觉得被理解？','如果把我们的日常拍成电影，今天会是什么镜头？',
+      '你最想和对方一起学会什么？','最近想重复体验的一天是哪一天？','如果今晚只留一小时给彼此，你想怎么过？',
+      '你觉得两个人最默契的一件小事是什么？','给下个月的我们留一句话吧。','最近有什么想做却一直没开始的小事？',
+      '如果可以收藏今天的一个瞬间，你会选哪一刻？','你更想一起看海、看山，还是逛一条陌生的街？','最近最想听到的一句话是什么？',
+      '如果一起做一道菜，会选什么？','你觉得家里最有安全感的角落在哪里？','下一次小小约会想安排什么？'
+    ];
+    function record(type,value){var list=manageList(K_GAMES);list.unshift({id:uid(),type:type,value:value,date:today(),createdAt:Date.now()});manageSave(K_GAMES,list.slice(0,50));}
+    function render(){
+      var html='<div class="planner-intro"><p class="lead">没有输赢压力的小玩法。随手掷一次、抛一次硬币，或者抽一道只属于你们的问题。</p><div class="planner-stat"><strong>'+history.length+'</strong><span>次游戏记录</span></div></div>'+
+        '<div class="game-grid"><button class="game-tile" type="button" data-game="dice"><span class="game-symbol">⚄</span><strong>掷骰子</strong><small>看看今天的数字</small></button><button class="game-tile" type="button" data-game="coin"><span class="game-symbol">◐</span><strong>抛硬币</strong><small>让小决定交给运气</small></button><button class="game-tile" type="button" data-game="question"><span class="game-symbol">?</span><strong>默契问答</strong><small>抽一道问题聊聊</small></button></div>'+
+        '<section class="game-result"><small>THIS ROUND</small><div id="gameResult">'+(result?esc(result):'选一个小游戏，开始这一回合。')+'</div><button class="ghost" type="button" id="gameAgain" '+(result?'':'hidden')+'>再来一次</button></section>'+
+        (history.length?'<div class="game-history"><div class="planner-section-head"><div><small>RECENT</small><h3>最近玩过</h3></div><button class="mini danger" id="gameClear" type="button">清空记录</button></div>'+history.slice(0,12).map(function(x){return '<div class="game-history-row"><time>'+esc(x.date)+'</time><span>'+esc(x.type)+'</span><strong>'+esc(x.value)+'</strong></div>';}).join('')+'</div>':'');
+      openView('游戏','Games',html);var body=$('#viewBody');
+      body.onclick=function(ev){
+        var play=ev.target.closest('[data-game]');if(play){var type=play.getAttribute('data-game'),value='';if(type==='dice')value='掷出了 '+(Math.floor(Math.random()*6)+1)+' 点';if(type==='coin')value=Math.random()<.5?'正面':'反面';if(type==='question')value=questions[Math.floor(Math.random()*questions.length)];result=value;record(type==='dice'?'掷骰子':type==='coin'?'抛硬币':'默契问答',value);render();return;}
+        if(ev.target.id==='gameAgain'){var btn=$('[data-game="'+(history[0]&&history[0].type==='掷骰子'?'dice':history[0]&&history[0].type==='抛硬币'?'coin':'question')+'"]');if(btn)btn.click();return;}
+        if(ev.target.id==='gameClear'&&confirm('清空游戏记录？')){history=[];manageSave(K_GAMES,history);result='';render();}
+      };
+    }
+    render();
+  }
+
+  function viewWindow(){
+    var scene=Object.assign({title:'窗边',description:'给今天留一扇窗。',image:''},LS.get(K_WINDOW,{}));
+    var notes=manageList(K_WINDOW_NOTES),query='';
+    function render(){
+      var shown=notes.filter(function(x){return !query||[x.text,x.date].join(' ').toLowerCase().indexOf(query.toLowerCase())>=0;});
+      var html='<div class="window-scene" '+(scene.image?'style="background-image:linear-gradient(180deg,rgba(20,30,42,.08),rgba(20,30,42,.48)),url('+JSON.stringify(scene.image)+')"':'')+'><div class="window-scene-copy"><small>THE WINDOW</small><h2>'+esc(scene.title)+'</h2><p>'+esc(scene.description)+'</p></div></div>'+
+        '<form class="planner-form" id="windowSceneForm"><strong>窗外与窗边</strong><input id="windowTitle" maxlength="60" value="'+esc(scene.title)+'" placeholder="窗边标题"><textarea id="windowDescription" rows="2" placeholder="窗外是什么样子？">'+esc(scene.description)+'</textarea><label class="field"><span>窗外图片（可选）</span><input id="windowImage" type="file" accept="image/*"><em class="sub">图片会压缩后保存在本机，建议选择清晰但尺寸适中的照片。</em></label><div class="planner-form-actions"><button class="ghost solid" type="submit">保存窗景</button><button class="ghost" id="windowClearImage" type="button">移除图片</button></div></form>'+
+        '<div class="collection-toolbar"><input id="windowSearch" type="search" placeholder="搜索窗边留言" value="'+esc(query)+'"><button class="ghost solid" id="windowNew" type="button">＋ 留一句话</button></div>'+
+        '<form class="planner-form" id="windowNoteForm" hidden><strong>留在窗边的话</strong><input id="windowNoteDate" type="date" value="'+today()+'"><textarea id="windowNoteText" rows="3" placeholder="想在这里留下什么？"></textarea><div class="planner-form-actions"><button class="ghost solid" type="submit">保存留言</button><button class="ghost" id="windowNoteCancel" type="button">取消</button></div></form>'+
+        (shown.length?'<div class="window-notes">'+shown.map(function(x){return '<article class="window-note"><time>'+esc(x.date)+'</time><p>'+esc(x.text)+'</p><button class="mini danger" type="button" data-window-delete="'+esc(x.id)+'">删除</button></article>';}).join('')+'</div>':'<div class="blank">窗边还没有留言。天气、心事或一句闲话，都可以放在这里。</div>');
+      openView('窗廊','Window',html);var body=$('#viewBody');
+      body.onclick=function(ev){
+        if(ev.target.id==='windowClearImage'&&confirm('移除窗外图片？')){scene.image='';LS.set(K_WINDOW,scene);render();return;}
+        if(ev.target.id==='windowNew'){$('#windowNoteForm').hidden=false;$('#windowNoteText').focus();return;}
+        if(ev.target.id==='windowNoteCancel'){$('#windowNoteForm').hidden=true;return;}
+        var del=ev.target.closest('[data-window-delete]');if(del&&confirm('删除这句留言？')){notes=notes.filter(function(x){return x.id!==del.getAttribute('data-window-delete');});manageSave(K_WINDOW_NOTES,notes);render();}
+      };
+      body.oninput=function(ev){if(ev.target.id==='windowSearch'){var pos=ev.target.selectionStart;query=ev.target.value;render();var el=$('#windowSearch');el.focus();try{el.setSelectionRange(pos,pos);}catch(_){}}};
+      body.onchange=async function(ev){if(ev.target.id!=='windowImage')return;var file=ev.target.files&&ev.target.files[0];if(!file)return;try{scene.image=await compressAlbumImage(file);LS.set(K_WINDOW,scene);render();toast('窗外图片已更新。');}catch(e){toast('图片没能保存，请换一张小一些的图片。');}};
+      body.onsubmit=function(ev){
+        if(ev.target.id==='windowSceneForm'){ev.preventDefault();scene.title=$('#windowTitle').value.trim()||'窗边';scene.description=$('#windowDescription').value.trim();if(LS.set(K_WINDOW,scene)){render();toast('窗景已保存。');}return;}
+        if(ev.target.id==='windowNoteForm'){ev.preventDefault();var text=$('#windowNoteText').value.trim();if(!text){toast('先写一句话吧。');return;}notes.unshift({id:uid(),date:$('#windowNoteDate').value||today(),text:text,createdAt:Date.now()});if(manageSave(K_WINDOW_NOTES,notes)){render();toast('留言留在窗边了。');}}
+      };
+    }
+    render();
+  }
+
   /* ================= 世界书 · 笔记本与条目 ================= */
   var K_WORLDBOOKS = 'liwu.worldbooks';
   function worldbooks(){ return LS.get(K_WORLDBOOKS, []); }
@@ -1717,7 +1799,7 @@
         });
       }
       if (ev.target.id === 'cExport'){
-        var data = { v: 10, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), memory: LS.get(K_MEMORY, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites'), profile: LS.get(K_PROFILE, {}), notices: LS.get(K_NOTICES, []), noticeRead: LS.get(K_NOTICE_READ, []), ledger: manageList(K_LEDGER), health: manageList(K_HEALTH), period: LS.get(K_PERIOD, {cycleLength:28,periodLength:5,lastStart:'',starts:[]}), study: manageList(K_STUDY), classes: manageList(K_CLASS) };
+        var data = { v: 11, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), memory: LS.get(K_MEMORY, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites'), profile: LS.get(K_PROFILE, {}), notices: LS.get(K_NOTICES, []), noticeRead: LS.get(K_NOTICE_READ, []), ledger: manageList(K_LEDGER), health: manageList(K_HEALTH), period: LS.get(K_PERIOD, {cycleLength:28,periodLength:5,lastStart:'',starts:[]}), study: manageList(K_STUDY), classes: manageList(K_CLASS), music: manageList(K_MUSIC), games: manageList(K_GAMES), window: LS.get(K_WINDOW, {title:'窗边',description:'给今天留一扇窗。',image:''}), windowNotes: manageList(K_WINDOW_NOTES) };
         var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -1759,6 +1841,10 @@
               if (obj.period && typeof obj.period === 'object') LS.set(K_PERIOD, obj.period);
               if (Array.isArray(obj.study)) LS.set(K_STUDY, obj.study);
               if (Array.isArray(obj.classes)) LS.set(K_CLASS, obj.classes);
+              if (Array.isArray(obj.music)) LS.set(K_MUSIC, obj.music);
+              if (Array.isArray(obj.games)) LS.set(K_GAMES, obj.games);
+              if (obj.window && typeof obj.window === 'object') LS.set(K_WINDOW, obj.window);
+              if (Array.isArray(obj.windowNotes)) LS.set(K_WINDOW_NOTES, obj.windowNotes);
               applyTheme();
               renderAll();
               toast('导进来了。');
