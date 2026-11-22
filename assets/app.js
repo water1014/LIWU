@@ -564,7 +564,8 @@
     viewReturnTarget = 'home';
     setDrawerCurrent(target);
     homeScreen.hidden = true; $('#app').hidden = true;
-    if (target === 'diary') viewDiary();
+    if (target === 'calendar' || target === 'schedule' || target === 'todo') viewPlanner(target);
+    else if (target === 'diary') viewDiary();
     else if (target === 'album') viewAlbum();
     else if (target === 'memory') viewMemory();
     else if (target === 'settings') viewSettings();
@@ -740,7 +741,8 @@
       setDrawerCurrent(v);
       closeDrawer();
       homeScreen.hidden = true; $('#app').hidden = true;
-      if (v === 'diary') viewDiary();
+      if (v === 'calendar' || v === 'schedule' || v === 'todo') viewPlanner(v);
+      else if (v === 'diary') viewDiary();
       else if (v === 'album') viewAlbum();
       else if (v === 'memory') viewMemory();
       else if (v === 'settings') viewSettings();
@@ -966,6 +968,84 @@
     openView(meta.title,meta.en,html);
   }
 
+
+
+  /* ================= 共同生活 · 日历 / 安排 / 待办 ================= */
+  var PLANNER_KEYS = { calendar:'liwu.calendar', schedule:'liwu.schedule', todo:'liwu.todo' };
+  function plannerItems(key){ var v=LS.get(PLANNER_KEYS[key],[]);return Array.isArray(v)?v:[]; }
+  function plannerSave(key,items){ return LS.set(PLANNER_KEYS[key],items); }
+  function plannerDateLabel(value){
+    if(!value)return '未设日期';
+    var d=new Date(value+'T12:00:00');
+    return d.getFullYear()+'年'+(d.getMonth()+1)+'月'+d.getDate()+'日';
+  }
+  function plannerEscDate(value){ return /^\\d{4}-\\d{2}-\\d{2}$/.test(value||'')?value:today(); }
+  function viewPlanner(key){
+    var meta={calendar:{title:'日历',en:'Calendar'},schedule:{title:'安排',en:'Schedule'},todo:{title:'待办',en:'To-do'}}[key];
+    if(!meta)return;
+    var selected=today(),monthCursor=new Date();monthCursor.setDate(1);
+    var editing='';
+    function render(){
+      var items=plannerItems(key);
+      var html='';
+      if(key==='calendar'){
+        var year=monthCursor.getFullYear(),month=monthCursor.getMonth();
+        var first=new Date(year,month,1),offset=(first.getDay()+6)%7,days=new Date(year,month+1,0).getDate();
+        var marks={};items.forEach(function(it){marks[it.date]=(marks[it.date]||0)+1;});
+        html='<div class="planner-intro"><p class="lead">把重要的日子放在这里。点选日期，就能查看当天的纪念日和约定。</p><div class="planner-stat"><strong>'+items.length+'</strong><span>个日期记录</span></div></div>'+
+          '<section class="calendar-panel"><div class="calendar-month"><button class="mini" id="calPrev" type="button" aria-label="上个月">‹</button><strong>'+year+'年 '+(month+1)+'月</strong><button class="mini" id="calNext" type="button" aria-label="下个月">›</button><button class="mini" id="calToday" type="button">今天</button></div>'+
+          '<div class="calendar-grid calendar-week">'+['一','二','三','四','五','六','日'].map(function(x){return '<span>'+x+'</span>';}).join('')+'</div><div class="calendar-grid">'+
+          Array.from({length:offset},function(){return '<span class="calendar-blank"></span>';}).join('')+
+          Array.from({length:days},function(_,i){var date=year+'-'+p2(month+1)+'-'+p2(i+1);return '<button type="button" class="calendar-day '+(date===selected?'selected ':'')+(date===today()?'is-today':'')+'" data-cal-day="'+date+'"><span>'+(i+1)+'</span>'+(marks[date]?'<i>'+marks[date]+'</i>':'')+'</button>';}).join('')+
+          '</div></section><div class="planner-section-head"><div><small>SELECTED DATE</small><h3>'+plannerDateLabel(selected)+'</h3></div><button class="ghost solid" id="calAdd" type="button">＋ 添加日历记录</button></div>';
+        var dayItems=items.filter(function(it){return it.date===selected;}).sort(function(a,b){return (a.time||'').localeCompare(b.time||'');});
+        html+='<form class="planner-form" id="plannerForm" hidden><strong id="plannerFormTitle">添加日历记录</strong><input id="plTitle" maxlength="80" placeholder="这一天有什么特别的？"><input id="plDate" type="date" value="'+selected+'"><textarea id="plNote" rows="3" placeholder="补充一点备注（可选）"></textarea><div class="planner-form-actions"><button class="ghost solid" type="submit">保存</button><button class="ghost" type="button" id="plCancel">取消</button></div></form>';
+        html+=dayItems.length?'<div class="planner-list">'+dayItems.map(function(it){return '<article class="planner-item"><div class="planner-item-main"><strong>'+esc(it.title)+'</strong><p>'+esc(it.note||'')+'</p></div><div class="planner-item-actions"><button class="mini" type="button" data-pl-edit="'+esc(it.id)+'">编辑</button><button class="mini danger" type="button" data-pl-delete="'+esc(it.id)+'">删除</button></div></article>';}).join('')+'</div>':'<div class="blank planner-empty">这一天还没有记录。留一个值得记住的日子吧。</div>';
+      }else if(key==='schedule'){
+        var ordered=items.slice().sort(function(a,b){return (a.date+' '+(a.time||'')).localeCompare(b.date+' '+(b.time||''));});
+        html='<div class="planner-intro"><p class="lead">把两个人的约定、计划和想去的地方排进日程。每条安排都可以随时调整。</p><div class="planner-stat"><strong>'+items.length+'</strong><span>项安排</span></div></div>'+
+          '<div class="planner-toolbar"><button class="ghost solid" id="plNew" type="button">＋ 新增安排</button><span class="tip">按日期和时间排序</span></div>'+
+          '<form class="planner-form" id="plannerForm" hidden><strong id="plannerFormTitle">新增安排</strong><input id="plTitle" maxlength="80" placeholder="安排名称"><div class="planner-fields"><label>日期<input id="plDate" type="date" value="'+today()+'"></label><label>时间<input id="plTime" type="time"></label></div><input id="plPlace" maxlength="100" placeholder="地点（可选）"><textarea id="plNote" rows="3" placeholder="备注、准备事项或约定内容"></textarea><div class="planner-form-actions"><button class="ghost solid" type="submit">保存安排</button><button class="ghost" type="button" id="plCancel">取消</button></div></form>';
+        html+=ordered.length?'<div class="planner-list">'+ordered.map(function(it){return '<article class="planner-item schedule-item"><div class="planner-date-rail"><strong>'+esc((it.date||'').slice(8)||'--')+'</strong><small>'+esc((it.date||'').slice(0,7))+'</small></div><div class="planner-item-main"><strong>'+esc(it.title)+'</strong><p>'+esc([it.time,it.place].filter(Boolean).join(' · '))+'</p>'+(it.note?'<p>'+esc(it.note)+'</p>':'')+'</div><div class="planner-item-actions"><button class="mini" type="button" data-pl-edit="'+esc(it.id)+'">编辑</button><button class="mini danger" type="button" data-pl-delete="'+esc(it.id)+'">删除</button></div></article>';}).join('')+'</div>':'<div class="blank planner-empty">还没有安排。先把下一件期待的事写下来吧。</div>';
+      }else{
+        var done=items.filter(function(it){return it.done;}).length;
+        var filter='all';
+        html='<div class="planner-intro"><p class="lead">先把想做的事放在这里。完成一件，就轻轻勾掉一件。</p><div class="planner-stat"><strong>'+done+'/'+items.length+'</strong><span>已完成</span></div></div>'+
+          '<form class="todo-quick" id="todoQuick"><input id="todoQuickTitle" maxlength="100" placeholder="添加一件待办…"><button class="ghost solid" type="submit">添加</button></form>'+
+          '<div class="todo-filters"><button type="button" class="active" data-todo-filter="all">全部</button><button type="button" data-todo-filter="open">未完成</button><button type="button" data-todo-filter="done">已完成</button></div>'+
+          '<form class="planner-form" id="plannerForm" hidden><strong id="plannerFormTitle">编辑待办</strong><input id="plTitle" maxlength="100" placeholder="要做什么？"><div class="planner-fields"><label>截止日期<input id="plDate" type="date"></label><label>优先级<select id="plPriority"><option value="normal">普通</option><option value="high">重要</option><option value="low">有空再做</option></select></label></div><textarea id="plNote" rows="2" placeholder="备注（可选）"></textarea><div class="planner-form-actions"><button class="ghost solid" type="submit">保存</button><button class="ghost" type="button" id="plCancel">取消</button></div></form>';
+        html+='<div class="planner-list todo-list">'+items.slice().sort(function(a,b){return Number(a.done)-Number(b.done)||(a.date||'9999').localeCompare(b.date||'9999')||b.createdAt-a.createdAt;}).map(function(it){return '<article class="planner-item todo-item '+(it.done?'is-done':'')+'" data-todo-row="'+esc(it.id)+'"><label class="todo-check"><input type="checkbox" data-todo-check="'+esc(it.id)+'" '+(it.done?'checked':'')+'><span></span></label><div class="planner-item-main"><strong>'+esc(it.title)+'</strong><p>'+esc(it.date?('截止 '+plannerDateLabel(it.date)):'未设截止日期')+(it.priority==='high'?' · 重要':it.priority==='low'?' · 有空再做':'')+'</p>'+(it.note?'<p>'+esc(it.note)+'</p>':'')+'</div><div class="planner-item-actions"><button class="mini" type="button" data-pl-edit="'+esc(it.id)+'">编辑</button><button class="mini danger" type="button" data-pl-delete="'+esc(it.id)+'">删除</button></div></article>';}).join('')+'</div>';
+        if(!items.length)html+='<div class="blank planner-empty">清单还空着。第一件小事从这里开始。</div>';
+      }
+      openView(meta.title,meta.en,html);
+      var body=$('#viewBody');
+      body.onclick=function(ev){
+        if(ev.target.id==='calPrev'){monthCursor.setMonth(monthCursor.getMonth()-1);render();return;}
+        if(ev.target.id==='calNext'){monthCursor.setMonth(monthCursor.getMonth()+1);render();return;}
+        if(ev.target.id==='calToday'){selected=today();monthCursor=new Date();monthCursor.setDate(1);render();return;}
+        var day=ev.target.closest('[data-cal-day]');if(day){selected=day.getAttribute('data-cal-day');render();return;}
+        if(ev.target.id==='calAdd'||ev.target.id==='plNew'){editing='';$('#plannerForm').hidden=false;$('#plannerFormTitle').textContent=key==='calendar'?'添加日历记录':'新增安排';$('#plTitle').value='';$('#plDate').value=selected||today();if($('#plTime'))$('#plTime').value='';if($('#plPlace'))$('#plPlace').value='';if($('#plNote'))$('#plNote').value='';if($('#plPriority'))$('#plPriority').value='normal';$('#plTitle').focus();return;}
+        if(ev.target.id==='plCancel'){$('#plannerForm').hidden=true;editing='';return;}
+        var edit=ev.target.closest('[data-pl-edit]');if(edit){var it=items.find(function(x){return x.id===edit.getAttribute('data-pl-edit');});if(!it)return;editing=it.id;$('#plannerForm').hidden=false;$('#plannerFormTitle').textContent='修改'+(key==='calendar'?'日历记录':key==='schedule'?'安排':'待办');$('#plTitle').value=it.title||'';$('#plDate').value=it.date||today();if($('#plTime'))$('#plTime').value=it.time||'';if($('#plPlace'))$('#plPlace').value=it.place||'';if($('#plNote'))$('#plNote').value=it.note||'';if($('#plPriority'))$('#plPriority').value=it.priority||'normal';$('#plannerForm').scrollIntoView({behavior:'smooth',block:'nearest'});return;}
+        var del=ev.target.closest('[data-pl-delete]');if(del){if(!confirm('确定删除这条记录？'))return;plannerSave(key,items.filter(function(x){return x.id!==del.getAttribute('data-pl-delete');}));render();toast('已删除。');return;}
+        var filterBtn=ev.target.closest('[data-todo-filter]');if(filterBtn){$('[data-todo-filter]').forEach(function(b){b.classList.toggle('active',b===filterBtn);});var mode=filterBtn.getAttribute('data-todo-filter');$('[data-todo-row]').forEach(function(row){var item=items.find(function(x){return x.id===row.getAttribute('data-todo-row');});row.hidden=mode==='done'?!item.done:mode==='open'?!!item.done:false;});return;}
+      };
+      body.onchange=function(ev){var check=ev.target.closest('[data-todo-check]');if(!check)return;var list=plannerItems('todo'),it=list.find(function(x){return x.id===check.getAttribute('data-todo-check');});if(it){it.done=check.checked;it.completedAt=it.done?Date.now():0;if(plannerSave('todo',list)){render();toast(it.done?'完成啦。':'已恢复到待办。');}}};
+      body.onsubmit=function(ev){
+        if(ev.target.id==='todoQuick'){ev.preventDefault();var title=$('#todoQuickTitle').value.trim();if(!title)return;var list=plannerItems('todo');list.push({id:uid(),title:title,date:'',priority:'normal',note:'',done:false,createdAt:Date.now()});if(plannerSave('todo',list)){render();toast('已加入待办。');}return;}
+        if(ev.target.id!=='plannerForm')return;ev.preventDefault();
+        var title=$('#plTitle').value.trim();if(!title){toast('先写下标题吧。');return;}
+        var list=plannerItems(key),existing=list.find(function(x){return x.id===editing;});
+        var record={id:editing||uid(),title:title,date:plannerEscDate($('#plDate').value),note:$('#plNote').value.trim(),updatedAt:Date.now()};
+        if(key==='schedule'){record.time=$('#plTime').value;record.place=$('#plPlace').value.trim();}
+        if(key==='todo'){record.priority=$('#plPriority').value;record.done=existing?!!existing.done:false;record.createdAt=existing?existing.createdAt:Date.now();}
+        if(key==='calendar')record.date=$('#plDate').value||selected;
+        if(existing)list=list.map(function(x){return x.id===editing?Object.assign({},x,record):x;});else list.push(Object.assign({createdAt:Date.now()},record));
+        if(plannerSave(key,list)){if(key==='calendar')selected=record.date;editing='';render();toast('已保存。');}
+      };
+    }
+    render();
+  }
 
   /* ================= 世界书 · 笔记本与条目 ================= */
   var K_WORLDBOOKS = 'liwu.worldbooks';
