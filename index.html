@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<meta name="theme-color" content="#eef3fb">
+<meta name="theme-color" content="#F5F6F8">
 <meta name="description" content="里屋 · 雨夜书房。屋子不大，够两个人住。">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>里屋</title>
@@ -11,20 +11,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/style.css?v=41">
+<link rel="stylesheet" href="assets/style.css?v=42">
 </head>
 <body data-theme="paper">
 
-<div class="s">正在布置雨夜书房……</div>
-</div>
 
-<div class="en">Rainy Night Study</div>
-</div>
 
 <!-- App —— 与原有结构完全一致 -->
 <div id="app">
   <header class="top">
-    <button class="icon" id="menuBtn" type="button" aria-label="会话列表">≡</button>
+    <button class="icon" id="menuBtn" type="button" aria-label="打开导航">≡</button>
     <div class="top-mid"><span class="top-title" id="topTitle">里屋</span><span class="top-sub" id="topSub"></span></div>
     <div class="top-right"><span class="days" id="topDays"></span><button class="icon" id="newBtn" type="button" aria-label="新的一段">＋</button></div>
   </header>
@@ -43,17 +39,22 @@
 
 <aside class="drawer" id="drawer" hidden>
   <div class="drawer-in">
-    <div class="drawer-top"><span class="brandmark">里屋</span><span class="drawer-days" id="drawerDays"></span></div>
+    <div class="drawer-top"><div><span class="brandmark">里屋</span><span class="drawer-caption">LIWU · PRIVATE SPACE</span></div><span class="drawer-days" id="drawerDays"></span></div>
+    <div class="drawer-presence"><span class="presence-mark" aria-hidden="true"></span><div><strong>两个人的空间</strong><small>只在这里，慢慢生活</small></div></div>
     <button class="newchat" id="newChat" type="button">新的一段</button>
     <input class="search" id="search" placeholder="找一段话" autocomplete="off" aria-label="搜索会话">
     <div class="sessions" id="sessions"></div>
-    <nav class="drawer-nav">
-      <button type="button" data-view="home">回桌子</button>
-      <button type="button" data-view="diary">日记</button>
-      <button type="button" data-view="album">相册</button>
-      <button type="button" data-view="memory">记忆</button>
-      <button type="button" data-view="settings">设置</button>
+    <div class="drawer-section-label">相处</div>
+    <nav class="drawer-nav" aria-label="空间导航">
+      <button type="button" data-view="chat" class="nav-current"><span class="nav-index">01</span><span class="nav-copy"><strong>聊天</strong><small>继续说话</small></span><span class="nav-arrow" aria-hidden="true">↗</span></button>
+      <div class="drawer-section-label nav-subhead">共同生活</div>
+      <button type="button" data-view="diary"><span class="nav-index">02</span><span class="nav-copy"><strong>日记</strong><small>写下今天</small></span><span class="nav-arrow" aria-hidden="true">↗</span></button>
+      <button type="button" data-view="album"><span class="nav-index">03</span><span class="nav-copy"><strong>相册</strong><small>留下照片</small></span><span class="nav-arrow" aria-hidden="true">↗</span></button>
+      <button type="button" data-view="memory"><span class="nav-index">04</span><span class="nav-copy"><strong>记忆</strong><small>重要的事</small></span><span class="nav-arrow" aria-hidden="true">↗</span></button>
+      <div class="drawer-section-label nav-subhead">空间管理</div>
+      <button type="button" data-view="settings"><span class="nav-index">05</span><span class="nav-copy"><strong>设置</strong><small>连接与外观</small></span><span class="nav-arrow" aria-hidden="true">↗</span></button>
     </nav>
+    <div class="drawer-foot">A SMALL SPACE FOR TWO</div>
   </div>
 </aside>
 
@@ -75,6 +76,6 @@ window.addEventListener('unhandledrejection', function(e){
 </script>
 <script src="data.js?v=39"></script>
 
-<script src="assets/app.js?v=40"></script>
+<script src="assets/app.js?v=41"></script>
 </body>
 </html>
