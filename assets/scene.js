@@ -1,6 +1,6 @@
 /* 里屋 · 窗台接线
    场景是 windowsill/index.html（同域 iframe）。这里做三件事：
-   1. 把它自带的控制栏藏掉，只留场景
+   1. 把它自带的季节/天气/灵动岛藏掉，只留场景（点东西弹出的卡片保留，那是它的玩法）
    2. 用它的 fuyue 口子把我们的话喂进去
    3. 抬头、底部导航、主题、开面板 */
 
@@ -124,9 +124,7 @@
 
   /* ---------- 和场景对话 ---------- */
 
-  var ready = false;
-
-  var HIDE = ['side', 'wxp', 'cWx', 'cLab', 'island', 'homebar', 'back', 'card', 'toast', 'cView'];
+  var HIDE = ['side', 'wxp', 'cWx', 'cLab', 'island', 'homebar', 'cView'];
 
   function cleanUI(){
     try{
@@ -147,9 +145,9 @@
 
   function pushNight(night){
     var w = inner();
-    if (!w || !w.fuyue) return;
+    if (!w) return;
     try{
-      if (w.fuyue.setAuto) w.fuyue.setAuto(false);
+      if (w.fuyue && w.fuyue.setAuto) w.fuyue.setAuto(false);
       if (w.__fy && w.__fy.set) w.__fy.set({ tod: night ? 'night' : 'day' });
     }catch(e){}
   }
@@ -184,20 +182,19 @@
   function waitScene(tries){
     cleanUI();
     if (feed()){
-      ready = true;
       if (boot){ boot.style.opacity = '0'; setTimeout(function(){ if (boot) boot.textContent = ''; }, 800); }
       return;
     }
     if (tries <= 0){
-      if (boot) boot.textContent = '窗台没加载完。底部那排一样能用。';
+      if (boot) boot.textContent = '窗台还在下载。底部那排一样能用。';
       return;
     }
     setTimeout(function(){ waitScene(tries - 1); }, 500);
   }
 
   if (scene){
-    scene.addEventListener('load', function(){ setTimeout(function(){ waitScene(24); }, 300); });
-    setTimeout(function(){ waitScene(24); }, 1500);
+    scene.addEventListener('load', function(){ setTimeout(function(){ waitScene(30); }, 300); });
+    setTimeout(function(){ waitScene(30); }, 1500);
   }
 
   if (lookUp){
