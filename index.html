@@ -74,6 +74,13 @@
   <div class='view-body' id='viewBody'></div>
 </section>
 
+<script>
+window.addEventListener('error', function(e){
+  var h = document.getElementById('hint');
+  if (h) h.textContent = '出了点问题：' + (e.message || '未知') + (e.lineno ? '（第 ' + e.lineno + ' 行）' : '');
+});
+</script>
+
 <script src='data.js'></script>
 <script src='assets/app.js'></script>
 </body>
