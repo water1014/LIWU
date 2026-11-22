@@ -1072,7 +1072,7 @@ body{
 .msg-head .meta{margin:0}
 .msg-more{
   appearance:none;display:inline-flex;align-items:center;justify-content:center;
-  width:40px;height:40px;min-width:40px;min-height:40px;
+  width:44px;height:44px;min-width:44px;min-height:44px;
   border:0;border-radius:12px;background:transparent;
   color:var(--ink-3);font-size:19px;letter-spacing:1px;cursor:pointer;
 }
