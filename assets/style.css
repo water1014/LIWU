@@ -1346,3 +1346,80 @@ body{
  .home-lower{grid-template-columns:1fr;gap:10px}
 }
 @media(prefers-reduced-motion:reduce){.home-screen *{transition:none!important}}
+
+
+/* ---------- 全站主题联动：让首页跟随外观与材质设置 ---------- */
+body[data-theme='paper']{
+  --home-ink:#33445d;
+  --home-muted:#6f8098;
+  --home-soft:rgba(255,255,255,.76);
+  --home-panel:rgba(255,255,255,.48);
+  --home-panel-strong:rgba(255,255,255,.68);
+  --home-edge:rgba(74,94,126,.22);
+  --home-shadow:rgba(53,72,104,.12);
+  --home-scene:radial-gradient(ellipse at 12% 10%,rgba(255,255,255,.95),transparent 42%),radial-gradient(ellipse at 88% 76%,rgba(198,211,230,.58),transparent 38%),linear-gradient(135deg,#e7edf5 0%,#dce5f0 48%,#cbd6e4 100%);
+  --home-scene-shade:rgba(255,255,255,.06);
+}
+body[data-theme='night']{
+  --home-ink:#e7edf5;
+  --home-muted:#aab6c8;
+  --home-soft:rgba(255,255,255,.76);
+  --home-panel:rgba(23,31,43,.56);
+  --home-panel-strong:rgba(28,38,52,.76);
+  --home-edge:rgba(208,221,241,.22);
+  --home-shadow:rgba(0,0,0,.28);
+  --home-scene:radial-gradient(ellipse at 15% 8%,rgba(91,112,145,.28),transparent 42%),radial-gradient(ellipse at 88% 78%,rgba(61,78,105,.3),transparent 38%),linear-gradient(135deg,#1a2432 0%,#202c3d 48%,#151d29 100%);
+  --home-scene-shade:rgba(5,10,18,.14);
+}
+.home-screen{background:var(--bg);color:var(--home-ink)}
+.home-scene{background:var(--home-scene)}
+.home-scene:after{background:var(--home-scene-shade)}
+.home-top{color:var(--home-ink)}
+.home-menu{border-color:var(--home-edge);background:var(--home-panel);color:var(--home-ink)}
+.home-brand{color:var(--home-ink);text-shadow:none}
+.home-day{color:var(--home-muted)}
+.home-kicker{color:var(--home-muted)}
+.home-portrait{border-color:var(--home-edge);box-shadow:0 10px 30px var(--home-shadow)}
+.home-portrait-you{background:linear-gradient(145deg,#fff,#dce5f0);color:#596b84}
+.home-portrait-him{background:linear-gradient(145deg,#dce6f2,#a7b8ce);color:#40536e}
+.home-heart,.home-hero h1{color:var(--home-ink);text-shadow:none}
+.home-quote{color:var(--home-muted)}
+.home-stat strong{color:var(--home-ink)}
+.home-stat span{color:var(--home-muted)}
+.home-anniversary,.home-surface,.home-chat-link{
+  color:var(--home-ink);
+  border-color:var(--home-edge);
+  background:color-mix(in srgb,var(--home-panel) var(--glass-opacity),transparent);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(135%);
+  backdrop-filter:blur(var(--glass-blur)) saturate(135%);
+  border-radius:var(--glass-radius);
+  box-shadow:0 14px 36px color-mix(in srgb,var(--home-shadow) calc(var(--glass-shadow)*100%),transparent);
+}
+.home-anniversary{background:var(--home-panel)}
+.home-surface{background:color-mix(in srgb,var(--home-panel) var(--glass-opacity),transparent)}
+.home-surface-head,.home-music p,.home-music-foot{color:var(--home-muted)}
+.home-round{border-color:var(--home-edge);background:var(--home-panel-strong);color:var(--home-ink)}
+.home-music-foot{border-top-color:var(--home-edge)}
+.home-music-foot button,.home-photo-link{color:var(--home-ink)}
+.home-photo-window{background:var(--home-panel-strong);border-color:var(--home-edge)}
+.home-photo-placeholder,.home-photo-placeholder small{color:var(--home-muted)}
+.home-chat-link small,.home-chat-link em,.home-chat-link>b{color:var(--home-muted)}
+.home-section-title,.home-agenda,.home-memory-card,.home-diary-strip{color:var(--home-ink)}
+.home-agenda,.home-memory-card,.home-diary-strip{border-top-color:var(--home-edge)}
+.home-section-title span,.home-section-title button{color:var(--home-muted)}
+.home-agenda-content,.home-memory-content,.home-diary-content{color:var(--home-muted)}
+.home-diary-content time,.home-memory-content time{color:var(--home-muted)}
+.home-tabbar{
+  color:var(--home-ink);
+  background:color-mix(in srgb,var(--bg-2) var(--glass-opacity),transparent);
+  border-top-color:var(--home-edge);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(145%);
+  backdrop-filter:blur(var(--glass-blur)) saturate(145%);
+}
+.home-tab{color:var(--home-muted)}
+.home-tab.active{color:var(--home-ink);background:var(--bg-3)}
+.home-round-static{display:grid;place-items:center;cursor:default}
+@media(max-width:780px){
+  .home-content{padding-top:12px}
+  .home-top{padding-left:14px;padding-right:14px}
+}
