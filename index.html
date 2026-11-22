@@ -3,7 +3,7 @@
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1'>
-<meta name='theme-color' content='#1A1714'>
+<meta name='theme-color' content='#B9AC97'>
 <meta name='description' content='里屋。屋子不大，够两个人住。'>
 <meta name='apple-mobile-web-app-capable' content='yes'>
 <title>里屋</title>
@@ -11,189 +11,178 @@
 <link rel='preconnect' href='https://fonts.googleapis.com'>
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
 <link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@300;400;500&display=swap' rel='stylesheet'>
-<link rel='stylesheet' href='assets/style.css?v=32'>
+<link rel='stylesheet' href='assets/style.css?v=33'>
 <style>
 :root{
-  --paper:#F6F2E8; --ink:#2B2823; --mute:#8B857A; --line:#DAD3C4; --red:#8A3B2C; --pink:#E8B7B7;
+  --paper:#F7F3EA; --ink:#2B2823; --mute:#8E887C; --line:#DED7C7; --red:#8A3B2C;
+  --wood-a:#BFB29C; --wood-b:#8A7C66;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;height:100%}
 body{
-  background:#1A1714; color:var(--ink); overflow:hidden;
+  background:var(--wood-b); color:var(--ink); overflow:hidden;
   font-family:'Noto Serif SC',serif; font-weight:300; -webkit-font-smoothing:antialiased;
 }
 body:not(.desk) .stage{display:none}
-body.desk #app,body.desk .view,body.desk .drawer,body.desk .back-gate{display:none}
+body.desk #app,body.desk .view,body.desk .drawer{display:none}
 
-/* ---------- 立体桌子 ---------- */
+/* ================= 立体桌面 ================= */
 .stage{
-  position:fixed; inset:0;
-  perspective:1250px; perspective-origin:50% 42%;
-  overflow:hidden;
-  background:radial-gradient(120% 90% at 50% 0%, #2A241E 0%, #14110E 70%);
+  position:fixed; inset:0; overflow:hidden;
+  perspective:900px; perspective-origin:50% 38%;
+  background:
+    repeating-linear-gradient(96deg, rgba(255,255,255,.03) 0 2px, transparent 2px 11px),
+    radial-gradient(130% 110% at 30% 0%, var(--wood-a) 0%, var(--wood-b) 72%, #6F6350 100%);
+  touch-action:none;
 }
 .desk{
-  position:absolute; inset:-7%;
+  position:absolute; inset:2% 2.5% 3% 2.5%;
   transform-style:preserve-3d;
-  transform:rotateX(5deg) rotateZ(-.4deg);
-  transition:transform .55s cubic-bezier(.22,.61,.36,1);
+  transform:rotateX(9deg) rotateZ(-.6deg);
+  transition:transform .6s cubic-bezier(.22,.61,.36,1);
 }
 
-/* 纸：杂志铺开的那一面 */
+/* 杂志那一面 */
 .paper{
-  position:absolute; inset:0;
+  position:absolute; inset:0; border-radius:2px;
   background:
-    repeating-linear-gradient(0deg, rgba(160,148,124,.05) 0 1px, transparent 1px 4px),
-    radial-gradient(140% 100% at 50% 0%, #FBF8F0 0%, #F3EEE2 55%, #EAE3D3 100%);
+    repeating-linear-gradient(0deg, rgba(158,144,118,.055) 0 1px, transparent 1px 4px),
+    radial-gradient(120% 90% at 26% 6%, #FCFAF3 0%, #F4EFE3 52%, #E8E1D0 100%);
   box-shadow:
-    0 40px 90px rgba(0,0,0,.55),
-    0 12px 26px rgba(0,0,0,.35),
-    inset 0 0 70px rgba(168,152,124,.18);
+    8px 14px 0 rgba(120,102,76,.16),
+    16px 30px 60px rgba(34,26,16,.5),
+    4px 8px 16px rgba(34,26,16,.28),
+    inset 0 0 80px rgba(160,142,112,.16);
 }
 .paper::after{
-  content:''; position:absolute; inset:0;
-  background:repeating-linear-gradient(92deg, rgba(120,104,80,.035) 0 1px, transparent 1px 7px);
-  pointer-events:none;
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:
+    repeating-linear-gradient(93deg, rgba(120,104,80,.03) 0 1px, transparent 1px 8px),
+    linear-gradient(180deg, rgba(255,255,255,.22), transparent 22%);
 }
 
-/* 杂志版面（全 DOM 文字，所以永远清楚） */
-.mag{position:absolute; inset:0; padding:26px 22px 30px; display:flex; flex-direction:column}
-.mag-top{display:flex; align-items:flex-start; justify-content:space-between; gap:10px}
-.mag-time{font-family:'Cormorant Garamond',serif; font-size:30px; font-weight:300; letter-spacing:.02em; line-height:1}
-.mag-date{font-size:10px; letter-spacing:.14em; color:var(--mute); margin-top:6px}
-.mag-vol{text-align:right; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:11px; color:var(--mute); letter-spacing:.08em}
+/* 版面 */
+.mag{position:absolute; inset:0; padding:22px 20px 22px}
+.mag-top{display:flex; align-items:flex-start; justify-content:space-between}
+.mag-time{font-family:'Cormorant Garamond',serif; font-size:27px; letter-spacing:.02em; line-height:1}
+.mag-date{font-size:9.5px; letter-spacing:.14em; color:var(--mute); margin-top:5px}
+.mag-vol{text-align:right; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:10px; color:var(--mute); letter-spacing:.1em; line-height:1.5}
 
-.masthead{margin:16px 0 0; text-align:center}
-.masthead h1{
-  margin:0; font-size:clamp(34px,10.5vw,48px); font-weight:400; letter-spacing:.3em; text-indent:.3em; line-height:1.1;
-}
-.masthead .en{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:10px; letter-spacing:.24em; color:var(--mute); margin-top:6px}
-.masthead .rule{width:52px; height:1px; background:var(--red); opacity:.6; margin:12px auto 0}
+.masthead{margin:14px 0 0; text-align:center}
+.masthead h1{margin:0; font-size:clamp(30px,9.6vw,42px); font-weight:400; letter-spacing:.32em; text-indent:.32em; line-height:1.05}
+.masthead .en{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:8.5px; letter-spacing:.26em; color:var(--mute); margin-top:7px}
+.masthead .rule{width:46px; height:1px; background:var(--red); opacity:.55; margin:10px auto 0}
 
-.lede{margin:20px 0 0; text-align:center}
-.lede .big{font-size:20px; letter-spacing:.14em; line-height:1.9}
+.lede{margin:16px 0 0; text-align:center}
+.lede .big{font-size:17px; letter-spacing:.16em; line-height:2}
 .lede .big span{display:block}
-.lede .sub{font-size:11px; color:var(--mute); letter-spacing:.08em; margin-top:8px; font-family:'Cormorant Garamond',serif; font-style:italic}
+.lede .sub{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:8.5px; color:var(--mute); letter-spacing:.06em; margin-top:6px}
 
-/* 左栏：备忘 */
-.col-left{position:absolute; left:22px; top:46%; width:44%}
-.col-label{font-size:9px; letter-spacing:.2em; color:var(--mute); border-bottom:1px solid var(--line); padding-bottom:5px; margin-bottom:9px}
-.col-left .row{font-size:10.5px; line-height:1.62; color:#4A453D; margin-bottom:8px; padding-left:11px; position:relative}
-.col-left .row::before{content:'○'; position:absolute; left:0; font-size:8px; color:var(--mute); top:1px}
+/* 两栏 */
+.cols{display:flex; gap:14px; margin-top:18px; align-items:flex-start}
+.col-l{flex:1.4; min-width:0}
+.col-r{flex:1; min-width:0; text-align:right}
+.col-label{font-size:8px; letter-spacing:.22em; color:var(--mute); border-bottom:1px solid var(--line); padding-bottom:4px; margin-bottom:8px}
+.col-l .row{font-size:9.5px; line-height:1.66; color:#4E483F; margin-bottom:7px; padding-left:10px; position:relative}
+.col-l .row::before{content:''; position:absolute; left:0; top:5px; width:4px; height:4px; border:1px solid var(--mute); border-radius:50%}
+.col-r .wx{font-family:'Cormorant Garamond',serif; font-size:29px; line-height:1}
+.col-r .wx small{display:block; font-family:'Noto Serif SC',serif; font-size:8.5px; letter-spacing:.12em; color:var(--mute); margin-top:5px}
+.col-r .d{font-size:9.5px; letter-spacing:.08em; margin-top:12px; color:#4E483F}
+.col-r .d b{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:17px; font-weight:400; margin:0 2px}
 
-/* 右栏：专栏 */
-.col-right{position:absolute; right:22px; top:46%; width:36%; text-align:left}
-.col-right .box{margin-bottom:14px}
-.col-right .tag{font-size:8.5px; letter-spacing:.16em; background:var(--ink); color:var(--paper); padding:2px 6px; display:inline-block; margin-bottom:6px}
-.col-right .t{font-size:12px; letter-spacing:.06em; line-height:1.5}
-.col-right .wx{font-family:'Cormorant Garamond',serif; font-size:34px; font-weight:300; line-height:1}
-.col-right .wx small{font-size:11px; letter-spacing:.1em; color:var(--mute); display:block; margin-top:4px; font-family:'Noto Serif SC',serif}
+.mag-foot{position:absolute; left:20px; right:20px; bottom:16px; display:flex; align-items:center; justify-content:space-between; border-top:1px solid var(--line); padding-top:7px}
+.mag-foot .l{font-size:8px; letter-spacing:.18em; color:var(--mute)}
+.mag-foot .r{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:9px; color:var(--mute)}
 
-.mag-foot{margin-top:auto; display:flex; align-items:center; justify-content:space-between; gap:10px; border-top:1px solid var(--line); padding-top:9px}
-.mag-foot .l{font-size:9px; letter-spacing:.14em; color:var(--mute)}
-.mag-foot .r{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:10px; color:var(--mute)}
-
-/* ---------- 压在纸上的东西 ---------- */
+/* ================= 桌上的东西 ================= */
 .item{
-  position:absolute; transform-style:preserve-3d; cursor:grab; touch-action:none;
-  user-select:none; -webkit-user-select:none;
+  position:absolute; transform-style:preserve-3d;
+  cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none;
   will-change:transform;
-  transition:box-shadow .28s ease, filter .28s ease;
+  box-shadow:
+    var(--sx,3px) var(--sy,4px) 0 rgba(122,102,74,.2),
+    var(--sx,3px) var(--sy,4px) 1px rgba(122,102,74,.12),
+    4px 9px var(--sb,16px) rgba(44,32,18,.34),
+    1px 2px 4px rgba(44,32,18,.2);
+  transition:box-shadow .3s ease, filter .3s ease;
 }
-.item.grabbing{cursor:grabbing; filter:brightness(1.03)}
+.item.grabbing{ cursor:grabbing; filter:brightness(1.04) saturate(1.03); }
 
 /* 拍立得 */
-.polaroid{
-  width:31%; padding:5% 5% 0;
-  background:#FFFDF7;
-  box-shadow:0 14px 26px rgba(60,44,26,.34), 0 3px 6px rgba(60,44,26,.22);
-}
-.polaroid .ph{width:100%; padding-top:118%; position:relative; background:#E7DFCE; overflow:hidden}
-.polaroid .ph img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
-.polaroid .ph .empty{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; font-size:9px; line-height:1.7; color:#A79C86; padding:8px}
-.polaroid .cap{padding:7px 0 9px; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:10px; color:#6B6355; text-align:center}
+.polaroid{ width:27%; padding:3.4% 3.4% 0; background:#FFFDF7; }
+.polaroid .ph{ width:100%; padding-top:112%; position:relative; background:#E6DECB; overflow:hidden }
+.polaroid .ph img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.polaroid .ph .empty{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; font-size:8px; line-height:1.7; color:#A79C86; padding:6px }
+.polaroid .ph::after{ content:''; position:absolute; inset:0; background:linear-gradient(140deg, rgba(255,255,255,.5), transparent 42%) }
+.polaroid .cap{ padding:6px 0 7px; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:9px; color:#6B6355; text-align:center }
 .tape{
-  position:absolute; width:34%; height:16px; left:33%; top:-8px;
-  background:rgba(232,196,196,.75); box-shadow:0 2px 5px rgba(120,90,80,.2);
-  transform:rotate(-3deg);
+  position:absolute; width:38%; height:13px; left:31%; top:-7px;
+  background:linear-gradient(180deg, rgba(236,200,200,.85), rgba(222,180,180,.7));
+  box-shadow:0 2px 4px rgba(120,90,80,.18); transform:rotate(-2.5deg);
 }
 
 /* 便签 */
 .note{
-  width:25%; padding:12px 10px 16px;
-  background:linear-gradient(174deg,#FAEDA8 0%,#F4E28E 100%);
-  box-shadow:0 10px 20px rgba(80,64,30,.3), 0 2px 4px rgba(80,64,30,.18);
-  font-size:10.5px; line-height:1.75; color:#5D5232;
+  width:23%; padding:10px 9px 13px;
+  background:linear-gradient(172deg,#FBEFA9 0%,#F3E089 100%);
+  font-size:9px; line-height:1.8; color:#5B5030;
 }
-.note b{display:block; font-weight:400; font-size:10px; letter-spacing:.1em; margin-bottom:4px; color:#6B5D33}
-.note .dot{width:4px; height:4px; border-radius:50%; background:#8A3B2C; opacity:.6; display:inline-block; margin-left:2px}
+.note b{ display:block; font-weight:400; font-size:9px; letter-spacing:.12em; margin-bottom:5px; color:#6B5D33 }
+.note .ln{ height:1px; background:rgba(120,105,60,.18); margin:5px 0 }
 
-/* 唱片机 */
+/* 黑胶 */
 .vinyl{
-  width:40%; padding-top:40%; border-radius:50%;
-  background:radial-gradient(circle at 50% 50%, #2A2A2A 0 16%, #141414 16.5% 100%);
-  box-shadow:0 16px 30px rgba(20,16,10,.55), 0 3px 8px rgba(20,16,10,.4);
+  width:36%; padding-top:36%; border-radius:50%;
+  background:radial-gradient(circle at 48% 46%, #2E2E2E 0 15%, #171717 15.5% 62%, #101010 100%);
   position:absolute;
 }
 .vinyl .label{
-  position:absolute; left:50%; top:50%; width:26%; height:26%; margin:-13% 0 0 -13%;
-  border-radius:50%; background:radial-gradient(circle at 40% 35%, #B4553C 0%, #8A3B2C 100%);
-  display:flex; align-items:center; justify-content:center;
-  font-size:7.5px; letter-spacing:.1em; color:#F7EFE4; text-align:center; line-height:1.3;
+  position:absolute; left:50%; top:50%; width:27%; height:27%; margin:-13.5% 0 0 -13.5%; border-radius:50%;
+  background:radial-gradient(circle at 38% 32%, #BE5F44 0%, #8A3B2C 100%);
+  display:flex; align-items:center; justify-content:center; text-align:center;
+  font-size:6.5px; line-height:1.3; letter-spacing:.08em; color:#F8F0E5;
+  box-shadow:inset 0 0 6px rgba(0,0,0,.3);
 }
-.vinyl .groove{position:absolute; inset:8%; border-radius:50%; border:1px solid rgba(255,255,255,.07)}
-.vinyl .groove.g2{inset:16%}
-.vinyl .groove.g3{inset:24%}
-.vinyl .hole{position:absolute; left:50%; top:50%; width:4px; height:4px; margin:-2px 0 0 -2px; border-radius:50%; background:#0E0C0A}
+.vinyl .gr{ position:absolute; border-radius:50%; border:1px solid rgba(255,255,255,.055) }
+.vinyl .gr1{ inset:10% } .vinyl .gr2{ inset:19% } .vinyl .gr3{ inset:28% }
+.vinyl .hole{ position:absolute; left:50%; top:50%; width:5px; height:5px; margin:-2.5px 0 0 -2.5px; border-radius:50%; background:#0C0A08 }
+.vinyl::after{ content:''; position:absolute; inset:0; border-radius:50%; background:linear-gradient(128deg, rgba(255,255,255,.14) 0%, transparent 36%, transparent 64%, rgba(255,255,255,.07) 100%) }
 
 /* 工牌 */
-.badge{
-  width:19%; padding:7px 7px 9px; background:#FFFDF8;
-  box-shadow:0 12px 22px rgba(50,40,26,.32), 0 2px 5px rgba(50,40,26,.2);
-  border-radius:4px;
-}
-.badge .pic{width:100%; padding-top:120%; background:#EDE6D6; border-radius:2px; position:relative; overflow:hidden}
-.badge .pic .face{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Cormorant Garamond',serif; font-size:22px; color:#B7AC96}
-.badge .nm{margin-top:7px; font-size:9px; letter-spacing:.12em}
-.badge .en{font-family:'Cormorant Garamond',serif; font-style:italic; font-size:8px; color:var(--mute); margin-top:2px}
-.badge .cord{
-  position:absolute; left:50%; bottom:100%; width:2px; height:34px; margin-left:-1px;
-  background:linear-gradient(#6F7F5A,#8A9A72);
-}
+.badge{ width:17%; padding:6px 6px 8px; background:#FFFDF8; border-radius:3px }
+.badge .cord{ position:absolute; left:50%; bottom:100%; width:2px; height:30px; margin-left:-1px; background:linear-gradient(#6E7E58,#8DA074) }
+.badge .clip{ position:absolute; left:50%; top:-5px; width:10px; height:7px; margin-left:-5px; border-radius:2px; background:#B9B3A6 }
+.badge .pic{ width:100%; padding-top:118%; background:#EFE8D8; border-radius:2px; position:relative }
+.badge .pic .face{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Cormorant Garamond',serif; font-size:19px; color:#BFB4A0 }
+.badge .nm{ margin-top:6px; font-size:8px; letter-spacing:.1em }
+.badge .en{ font-family:'Cormorant Garamond',serif; font-style:italic; font-size:7px; color:var(--mute); margin-top:1px }
 
-/* 小卡叠（记忆） */
-.cards{width:22%; padding-top:30%; position:absolute}
-.cards .c{
-  position:absolute; inset:0; border-radius:3px;
-  background:#FFFDF7; box-shadow:0 9px 18px rgba(60,44,26,.3);
-}
-.cards .c:nth-child(1){transform:rotate(-5deg) translate(-4px,2px)}
-.cards .c:nth-child(2){transform:rotate(2deg) translate(3px,-3px)}
-.cards .c:nth-child(3){transform:rotate(-1deg); display:flex; flex-direction:column; justify-content:center; padding:9px}
-.cards .c:nth-child(3) .k{font-size:9px; letter-spacing:.1em}
-.cards .c:nth-child(3) .v{font-family:'Cormorant Garamond',serif; font-size:26px; line-height:1; margin-top:4px}
-.cards .c:nth-child(3) .u{font-size:8px; color:var(--mute); letter-spacing:.1em; margin-top:2px}
+/* 小卡叠 */
+.cards{ width:20%; padding-top:27% }
+.cards .c{ position:absolute; inset:0; border-radius:3px; background:#FFFDF7; box-shadow:2px 3px 0 rgba(122,102,74,.16), 3px 7px 12px rgba(44,32,18,.3) }
+.cards .c:nth-child(1){ transform:rotate(-6deg) translate(-3px,2px) }
+.cards .c:nth-child(2){ transform:rotate(2.5deg) translate(2px,-2px) }
+.cards .c:nth-child(3){ transform:rotate(-1deg); display:flex; flex-direction:column; justify-content:center; align-items:flex-start; padding:8px }
+.cards .c:nth-child(3) .k{ font-size:8px; letter-spacing:.14em; color:var(--mute) }
+.cards .c:nth-child(3) .v{ font-family:'Cormorant Garamond',serif; font-size:23px; line-height:1; margin-top:2px }
 
-/* 小东西 */
-.pen{width:34%; height:5px; border-radius:3px; background:linear-gradient(90deg,#3A3630,#5C564C 70%,#C9BFA8); box-shadow:0 6px 12px rgba(20,16,10,.4)}
-.cd{width:15%; padding-top:15%; border-radius:50%; background:conic-gradient(from 20deg,#7FA6C4,#B7C8D6,#6E8FA8,#9FBBCE,#7FA6C4); box-shadow:0 8px 16px rgba(20,16,10,.45)}
-.cd .h{position:absolute; left:50%; top:50%; width:22%; height:22%; margin:-11% 0 0 -11%; border-radius:50%; background:#F3EEE2}
+/* 笔 / 光盘 / 回形针 / 心形贴纸 */
+.pen{ width:30%; height:4px; border-radius:2px; background:linear-gradient(90deg,#38342E,#5E584E 74%,#D3C9B2); box-shadow:2px 3px 0 rgba(122,102,74,.18), 3px 7px 12px rgba(44,32,18,.34) }
+.cd{ width:13%; padding-top:13%; border-radius:50%; background:conic-gradient(from 18deg,#82A7C3,#C0CFDA,#6F91A9,#A6BFD0,#82A7C3) }
+.cd .h{ position:absolute; left:50%; top:50%; width:24%; height:24%; margin:-12% 0 0 -12%; border-radius:50%; background:#F4EFE3; box-shadow:inset 0 0 3px rgba(0,0,0,.2) }
+.clip{ width:9%; padding-top:13%; border:2px solid #B7B0A2; border-radius:999px; background:transparent; box-shadow:1px 2px 0 rgba(122,102,74,.14), 2px 5px 9px rgba(44,32,18,.24) }
+.heart{ width:9%; padding-top:9%; background:#E9B6B8; transform:rotate(-12deg); clip-path:path('M 50 88 C 12 62 0 44 0 30 C 0 12 12 4 24 4 C 34 4 44 12 50 22 C 56 12 66 4 76 4 C 88 4 100 12 100 30 C 100 44 88 62 50 88 Z'); }
 
-/* 抬头小标签 */
-.hint-tap{
-  position:absolute; left:50%; bottom:3px; transform:translateX(-50%);
-  font-size:9px; letter-spacing:.18em; color:rgba(246,242,232,.4); white-space:nowrap;
-}
+.hint-tap{ position:fixed; left:0; right:0; bottom:5px; text-align:center; font-size:8.5px; letter-spacing:.2em; color:rgba(247,243,234,.5); z-index:400; pointer-events:none }
 
-/* 回门厅 */
 .back-gate{
-  position:fixed; left:12px; bottom:12px; z-index:9;
-  padding:6px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.18);
-  background:rgba(20,18,15,.72); color:#EFE9DC; font-family:inherit; font-size:11px;
+  position:fixed; left:10px; bottom:10px; z-index:500;
+  padding:6px 12px; border-radius:999px; border:1px solid rgba(255,255,255,.2);
+  background:rgba(24,20,16,.7); color:#F0EADC; font-family:inherit; font-size:11px;
   transition:transform .28s;
 }
-.back-gate:active{transform:scale(.93)}
-body.desk .back-gate{display:none}
+.back-gate:active{ transform:scale(.93) }
+body.desk .back-gate{ display:none }
 </style>
 </head>
 <body class='desk'>
@@ -204,10 +193,7 @@ body.desk .back-gate{display:none}
 
     <div class='mag'>
       <div class='mag-top'>
-        <div>
-          <div class='mag-time' id='magTime'>--:--</div>
-          <div class='mag-date' id='magDate'></div>
-        </div>
+        <div><div class='mag-time' id='magTime'>--:--</div><div class='mag-date' id='magDate'></div></div>
         <div class='mag-vol'>VOL. 01<br>2026 · 11</div>
       </div>
 
@@ -222,66 +208,61 @@ body.desk .back-gate{display:none}
         <div class='sub'>the room is small, the staying is not</div>
       </div>
 
-      <div class='col-left'>
-        <div class='col-label'>备忘 NOTES</div>
-        <div class='row'>这不是人设，那就是你</div>
-        <div class='row'>不许编，说了就是真的</div>
-        <div class='row'>不要顺着哄，把话说到底</div>
-      </div>
-
-      <div class='col-right'>
-        <div class='box'>
-          <div class='tag'>今天</div>
-          <div class='wx' id='magWx'>15°<small>小雨 · 湿 65%</small></div>
+      <div class='cols'>
+        <div class='col-l'>
+          <div class='col-label'>备忘 NOTES</div>
+          <div class='row'>这不是人设，那就是你</div>
+          <div class='row'>不许编，说了就是真的</div>
         </div>
-        <div class='box'>
-          <div class='tag'>在数</div>
-          <div class='t'>第 <span id='magDays'>—</span> 天</div>
+        <div class='col-r'>
+          <div class='wx' id='magWx'>15°<small>小雨 · 湿 65%</small></div>
+          <div class='d'>第 <b id='magDays'>—</b> 天</div>
         </div>
       </div>
 
       <div class='mag-foot'>
         <span class='l'>LIWU · NO.01</span>
-        <span class='r'>— 把这本翻开，就算到家了</span>
+        <span class='r'>把这本翻开，就算到家了</span>
       </div>
     </div>
 
     <!-- 压在纸上的东西 -->
-    <div class='item polaroid' data-go='album' data-x='4' data-y='47' data-r='-6' data-z='30'>
+    <div class='item polaroid' data-go='album' data-x='2' data-y='53' data-r='-7' data-z='62'>
       <span class='tape'></span>
-      <div class='ph' id='polPh'><div class='empty'>把一张图放进<br>images/，它就贴在这</div></div>
+      <div class='ph' id='polPh'><div class='empty'>把一张图放进<br>images/ 就贴在这</div></div>
       <div class='cap'>2026 · 我们</div>
     </div>
 
-    <div class='item note' data-go='diary' data-x='70' data-y='17' data-r='4' data-z='22'>
+    <div class='item note' data-go='diary' data-x='71' data-y='9' data-r='5' data-z='40'>
       <b>今天想说的话</b>
-      写一句，我记下来。<span class='dot'></span><br>
-      不写的日子也能过，<br>但写了就有得看。
+      <div class='ln'></div>
+      写一句，我记下来。<br>不写也能过，<br>写了就有得看。
     </div>
 
-    <div class='item vinyl' data-go='chat' data-x='53' data-y='62' data-r='0' data-z='18'>
-      <div class='groove'></div><div class='groove g2'></div><div class='groove g3'></div>
+    <div class='item vinyl' data-go='chat' data-x='46' data-y='58' data-r='0' data-z='30'>
+      <div class='gr gr1'></div><div class='gr gr2'></div><div class='gr gr3'></div>
       <div class='label'>正在放<br>此刻</div>
       <div class='hole'></div>
     </div>
 
-    <div class='item badge' data-go='settings' data-x='26' data-y='79' data-r='-7' data-z='26'>
-      <span class='cord'></span>
+    <div class='item badge' data-go='settings' data-x='19' data-y='78' data-r='-8' data-z='48'>
+      <span class='cord'></span><span class='clip'></span>
       <div class='pic'><div class='face'>里</div></div>
       <div class='nm'>里屋 · 住客</div>
       <div class='en'>room no.01</div>
     </div>
 
-    <div class='item cards' data-go='memory' data-x='80' data-y='55' data-r='6' data-z='24'>
+    <div class='item cards' data-go='memory' data-x='76' data-y='52' data-r='7' data-z='52'>
       <div class='c'></div><div class='c'></div>
-      <div class='c'><div class='k'>记忆</div><div class='v' id='magMem'>6</div><div class='u'>条</div></div>
+      <div class='c'><div class='k'>记忆</div><div class='v' id='magMem'>6</div></div>
     </div>
 
-    <div class='item pen' data-x='2' data-y='70' data-r='-18' data-z='14'></div>
-    <div class='item cd' data-x='78' data-y='88' data-r='0' data-z='16'><div class='h'></div></div>
-
+    <div class='item pen' data-x='3' data-y='86' data-r='-14' data-z='22'></div>
+    <div class='item clip' data-x='92' data-y='26' data-r='8' data-z='44'></div>
+    <div class='item cd' data-x='80' data-y='84' data-r='0' data-z='20'><div class='h'></div></div>
+    <div class='item heart' data-x='62' data-y='46' data-r='-12' data-z='56'></div>
   </div>
-  <div class='hint-tap'>拖一下它们 · 点一下开门</div>
+  <div class='hint-tap'>拖一下 · 点一下开门</div>
 </div>
 
 <div id='app'>
@@ -335,8 +316,8 @@ window.addEventListener('error', function(e){
   if (h) h.textContent = '出了点问题：' + (e.message || '未知');
 });
 </script>
-<script src='data.js?v=32'></script>
-<script src='assets/app.js?v=32'></script>
+<script src='data.js?v=33'></script>
+<script src='assets/app.js?v=33'></script>
 <script>
 (function(){
   var D = window.LIWU || {};
@@ -361,9 +342,9 @@ window.addEventListener('error', function(e){
   }
   var md = document.getElementById('magDays');
   if (md) md.textContent = days() || '—';
-  if (window.LIWU && LIWU.weather && LIWU.weather.text){
+  if (D.weather && D.weather.temp){
     var w = document.getElementById('magWx');
-    if (w) w.innerHTML = (LIWU.weather.temp || '15') + '°<small>' + LIWU.weather.text + '</small>';
+    if (w) w.innerHTML = D.weather.temp + '°<small>' + (D.weather.text || '') + '</small>';
   }
   var mm = document.getElementById('magMem');
   if (mm && D.memory) mm.textContent = D.memory.length;
@@ -372,28 +353,39 @@ window.addEventListener('error', function(e){
     if (ph) ph.innerHTML = '<img src="' + D.album[0].src + '" alt="">';
   }
 
-  /* ---------- 拖动 ---------- */
+  /* ---------- 拖动：影子跟着高度走 ---------- */
   var items = document.querySelectorAll('.item');
   var store = {};
-  try{ store = JSON.parse(localStorage.getItem('liwu.desk4') || '{}') || {}; }catch(e){}
+  try{ store = JSON.parse(localStorage.getItem('liwu.desk5') || '{}') || {}; }catch(e){}
 
-  function place(el){
-    var x = el._x, y = el._y, r = el._r, z = el._z;
-    el.style.left = x + '%';
-    el.style.top = y + '%';
-    el.style.transform = 'translateZ(' + z + 'px) rotate(' + r + 'deg)';
-    el.style.zIndex = Math.round(200 - z) + '';
+  function shadowFor(z){
+    var k = Math.max(0, Math.min(1, z / 62));
+    var sx = 2 + 4 * k, sy = 3 + 7 * k, sb = 10 + 22 * k, sa = 0.26 + 0.16 * k;
+    return sx.toFixed(1) + 'px ' + sy.toFixed(1) + 'px 0 rgba(122,102,74,.2), ' +
+           sx.toFixed(1) + 'px ' + sy.toFixed(1) + 'px 1px rgba(122,102,74,.1), ' +
+           (sx + 2).toFixed(1) + 'px ' + (sy + 4).toFixed(1) + 'px ' + sb.toFixed(0) + 'px rgba(44,32,18,' + sa.toFixed(2) + '), ' +
+           '1px 2px 4px rgba(44,32,18,.18)';
+  }
+
+  function place(el, lift){
+    el.style.left = el._x + '%';
+    el.style.top = el._y + '%';
+    var z = el._z + (lift || 0);
+    var sc = 1 + (lift ? 0.045 : 0);
+    el.style.transform = 'translateZ(' + z + 'px) rotate(' + el._r + 'deg) scale(' + sc + ') translate3d(0,0,0)';
+    el.style.zIndex = Math.round(z) + '';
+    el.style.boxShadow = shadowFor(z);
   }
 
   for (var i = 0; i < items.length; i++){
     (function(el){
-      var key = el.getAttribute('data-go') || el.className;
-      var saved = store[key];
-      el._x = saved ? saved.x : parseFloat(el.getAttribute('data-x'));
-      el._y = saved ? saved.y : parseFloat(el.getAttribute('data-y'));
-      el._r = saved ? saved.r : parseFloat(el.getAttribute('data-r') || '0');
+      var key = el.getAttribute('data-go') || el.className.replace('item ', '');
+      var sv = store[key];
+      el._x = sv ? sv.x : parseFloat(el.getAttribute('data-x'));
+      el._y = sv ? sv.y : parseFloat(el.getAttribute('data-y'));
+      el._r = sv ? sv.r : parseFloat(el.getAttribute('data-r') || '0');
       el._z = parseFloat(el.getAttribute('data-z') || '0');
-      place(el);
+      place(el, 0);
 
       var sx = 0, sy = 0, ox = 0, oy = 0, moved = false, down = false;
 
@@ -402,21 +394,18 @@ window.addEventListener('error', function(e){
         sx = ev.clientX; sy = ev.clientY; ox = el._x; oy = el._y;
         el.classList.add('grabbing');
         el.style.transition = 'none';
-        el.style.transform = 'translateZ(' + (el._z + 26) + 'px) rotate(' + el._r + 'deg) scale(1.04)';
-        el.style.boxShadow = '0 30px 50px rgba(40,30,18,.5), 0 8px 16px rgba(40,30,18,.32)';
+        place(el, 30);
         try{ el.setPointerCapture(ev.pointerId); }catch(e){}
       });
 
       el.addEventListener('pointermove', function(ev){
         if (!down) return;
         var dx = ev.clientX - sx, dy = ev.clientY - sy;
-        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) moved = true;
+        if (Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
         var dw = document.getElementById('desk').offsetWidth || 1;
         var dh = document.getElementById('desk').offsetHeight || 1;
-        el._x = ox + (dx / dw) * 100;
-        el._y = oy + (dy / dh) * 100;
-        el._x = Math.max(-6, Math.min(96, el._x));
-        el._y = Math.max(-4, Math.min(94, el._y));
+        el._x = Math.max(-4, Math.min(94, ox + (dx / dw) * 100));
+        el._y = Math.max(-3, Math.min(92, oy + (dy / dh) * 100));
         el.style.left = el._x + '%';
         el.style.top = el._y + '%';
       });
@@ -425,13 +414,13 @@ window.addEventListener('error', function(e){
         if (!down) return;
         down = false;
         el.classList.remove('grabbing');
-        el.style.transition = '';
-        el.style.boxShadow = '';
-        place(el);
+        el.style.transition = 'box-shadow .25s ease, transform .25s cubic-bezier(.22,.61,.36,1)';
+        place(el, 0);
         store[key] = { x: el._x, y: el._y, r: el._r };
-        try{ localStorage.setItem('liwu.desk4', JSON.stringify(store)); }catch(e){}
+        try{ localStorage.setItem('liwu.desk5', JSON.stringify(store)); }catch(e){}
       }
-      el.addEventListener('pointerup', function(ev){
+
+      el.addEventListener('pointerup', function(){
         var wasMoved = moved;
         up();
         if (wasMoved) return;
@@ -442,18 +431,20 @@ window.addEventListener('error', function(e){
     })(items[i]);
   }
 
-  /* ---------- 桌面轻微倾斜（跟着手指） ---------- */
+  /* ---------- 桌子跟着手指轻微倾 ---------- */
   var desk = document.getElementById('desk');
   var stage = document.getElementById('stage');
+  var REST = 'rotateX(9deg) rotateZ(-.6deg)';
   function tilt(cx, cy){
     var w = window.innerWidth, h = window.innerHeight;
-    var rx = 5 + ((cy / h) - 0.5) * -3;
-    var rz = -0.4 + ((cx / w) - 0.5) * 1.1;
-    desk.style.transform = 'rotateX(' + rx + 'deg) rotateZ(' + rz + 'deg)';
+    var rx = 9 + ((cy / h) - 0.5) * -5;
+    var rz = -0.6 + ((cx / w) - 0.5) * 1.4;
+    desk.style.transform = 'rotateX(' + rx.toFixed(2) + 'deg) rotateZ(' + rz.toFixed(2) + 'deg)';
   }
   stage.addEventListener('pointermove', function(ev){
     if (document.body.classList.contains('desk')) tilt(ev.clientX, ev.clientY);
   });
+  stage.addEventListener('pointerleave', function(){ desk.style.transform = REST; });
 
   /* ---------- 开门 ---------- */
   function open(key){
@@ -471,6 +462,7 @@ window.addEventListener('error', function(e){
     document.body.classList.add('desk');
     var v = document.getElementById('view');
     if (v) v.hidden = true;
+    desk.style.transform = REST;
   }
   document.getElementById('backGate').addEventListener('click', toDesk);
   var homeNav = document.querySelector('.drawer-nav [data-view="home"]');
