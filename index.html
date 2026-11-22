@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
-<meta name="theme-color" content="#0a0908">
+<meta name="theme-color" content="#eef3fb">
 <meta name="description" content="里屋 · 雨夜书房。屋子不大，够两个人住。">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>里屋</title>
@@ -16,7 +16,7 @@
 /* ===== 基础覆盖 ===== */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;height:100%}
-body{background:#0a0908;color:#e8e2d6;font-family:'Noto Serif SC',serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow:hidden}
+body{background:#eef3fb;color:#33445f;font-family:'Noto Serif SC',serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow:hidden}
 
 /* 3D 容器 */
 #scene-container{position:fixed;inset:0;z-index:1}
@@ -31,19 +31,19 @@ body.desk .view,
 body.desk .back-gate{display:none}
 
 /* 加载 */
-#loader{position:fixed;inset:0;z-index:200;background:#0a0908;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .8s}
-#loader .t{font-family:'Noto Serif SC',serif;font-size:20px;letter-spacing:.35em;color:#c9a84c}
+#loader{position:fixed;inset:0;z-index:200;background:#eef3fb;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .8s}
+#loader .t{font-family:'Noto Serif SC',serif;font-size:20px;letter-spacing:.35em;color:#a7a0dc}
 #loader .s{font-size:11px;color:#5a4e42;margin-top:14px;letter-spacing:.12em}
 #loader.done{opacity:0;pointer-events:none}
 
 /* 标题 */
 .room-title{position:fixed;left:50%;top:22px;transform:translateX(-50%);z-index:10;text-align:center;pointer-events:none;transition:opacity .6s;opacity:0;animation:fadeInTitle 1.5s 1.2s forwards}
-.room-title .cn{font-family:'Noto Serif SC',serif;font-size:22px;letter-spacing:.28em;color:rgba(245,240,230,.65)}
-.room-title .en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10px;letter-spacing:.18em;color:rgba(245,240,230,.35);margin-top:5px}
+.room-title .cn{font-family:'Noto Serif SC',serif;font-size:22px;letter-spacing:.28em;color:rgba(66,82,119,.78)}
+.room-title .en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10px;letter-spacing:.18em;color:rgba(93,110,147,.56);margin-top:5px}
 @keyframes fadeInTitle{to{opacity:1}}
 
 /* 提示 */
-.hint-3d{position:fixed;left:0;right:0;bottom:14px;text-align:center;font-size:10px;letter-spacing:.22em;color:rgba(245,240,230,.3);z-index:10;pointer-events:none;transition:opacity .6s;opacity:0;animation:fadeInHint 1.5s 2s forwards}
+.hint-3d{position:fixed;left:0;right:0;bottom:14px;text-align:center;font-size:10px;letter-spacing:.22em;color:rgba(82,101,139,.58);z-index:10;pointer-events:none;transition:opacity .6s;opacity:0;animation:fadeInHint 1.5s 2s forwards}
 @keyframes fadeInHint{to{opacity:1}}
 </style>
 <script type="importmap">
@@ -144,8 +144,8 @@ const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
 
 const container = document.getElementById('scene-container');
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a0908);
-scene.fog = new THREE.Fog(0x0a0908, 6, 18);
+scene.background = new THREE.Color(0xeef3fb);
+scene.fog = new THREE.Fog(0xeef3fb, 6, 18);
 
 const camera = new THREE.PerspectiveCamera(
   42, window.innerWidth / window.innerHeight, 0.1, 100
@@ -171,45 +171,45 @@ controls.minPolarAngle = 0.35;
 controls.enablePan = false;
 
 /* ---- 灯光 ---- */
-const ambientLight = new THREE.AmbientLight(0x2a2330, 0.4);
+const ambientLight = new THREE.AmbientLight(0xb8c7e4, 0.4);
 scene.add(ambientLight);
 
-const moonLight = new THREE.DirectionalLight(0x6688aa, 0.25);
+const moonLight = new THREE.DirectionalLight(0x9abce8, 0.25);
 moonLight.position.set(-8, 6, -4);
 moonLight.castShadow = true;
 moonLight.shadow.mapSize.set(512, 512);
 scene.add(moonLight);
 
-const lampLight = new THREE.PointLight(0xf5dca8, 2.8, 9, 1.8);
+const lampLight = new THREE.PointLight(0xd8c9f3, 2.8, 9, 1.8);
 lampLight.position.set(1.1, 1.55, -0.3);
 lampLight.castShadow = true;
 lampLight.shadow.mapSize.set(768, 768);
 lampLight.shadow.bias = -0.001;
 scene.add(lampLight);
 
-const lampBounce = new THREE.PointLight(0xd4b896, 0.4, 5, 2);
+const lampBounce = new THREE.PointLight(0xc3d5f3, 0.4, 5, 2);
 lampBounce.position.set(0, 2.5, 0);
 scene.add(lampBounce);
 
 /* ---- 材质 ---- */
 const mats = {
-  woodDark: new THREE.MeshStandardMaterial({ color: 0x2e2218, roughness: 0.92 }),
-  woodMid: new THREE.MeshStandardMaterial({ color: 0x4a3728, roughness: 0.88 }),
-  wall: new THREE.MeshStandardMaterial({ color: 0x15100c, roughness: 1.0 }),
-  wallSide: new THREE.MeshStandardMaterial({ color: 0x181410, roughness: 1.0 }),
-  metal: new THREE.MeshStandardMaterial({ color: 0x666666, metalness: 0.8, roughness: 0.3 }),
+  woodDark: new THREE.MeshStandardMaterial({ color: 0xb8a9a1, roughness: 0.92 }),
+  woodMid: new THREE.MeshStandardMaterial({ color: 0xd4c4bb, roughness: 0.88 }),
+  wall: new THREE.MeshStandardMaterial({ color: 0xe3eaf6, roughness: 1.0 }),
+  wallSide: new THREE.MeshStandardMaterial({ color: 0xe8eefa, roughness: 1.0 }),
+  metal: new THREE.MeshStandardMaterial({ color: 0x9ba8c4, metalness: 0.8, roughness: 0.3 }),
   paper: new THREE.MeshStandardMaterial({ color: 0xf5f0e6, roughness: 0.9 }),
-  leather: new THREE.MeshStandardMaterial({ color: 0x5c3d2e, roughness: 0.85 }),
-  glass: new THREE.MeshStandardMaterial({ color: 0xaaccdd, transparent: true, opacity: 0.35, roughness: 0.05, metalness: 0.15 }),
-  gold: new THREE.MeshStandardMaterial({ color: 0xb8a88a, metalness: 0.35, roughness: 0.5 }),
+  leather: new THREE.MeshStandardMaterial({ color: 0x9c8cae, roughness: 0.85 }),
+  glass: new THREE.MeshStandardMaterial({ color: 0xc6d9f3, transparent: true, opacity: 0.35, roughness: 0.05, metalness: 0.15 }),
+  gold: new THREE.MeshStandardMaterial({ color: 0xd4b6d5, metalness: 0.35, roughness: 0.5 }),
   ceramic: new THREE.MeshStandardMaterial({ color: 0xf5f0e6, roughness: 0.3 }),
-  plant: new THREE.MeshStandardMaterial({ color: 0x4a7c59, roughness: 0.8 }),
-  frameWood: new THREE.MeshStandardMaterial({ color: 0x3d3028, roughness: 0.9 }),
-  lampShade: new THREE.MeshStandardMaterial({ color: 0xf5e6c8, side: THREE.DoubleSide, transparent: true, opacity: 0.88 }),
-  lampBulb: new THREE.MeshBasicMaterial({ color: 0xfff8e7 }),
-  vinyl: new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.25, metalness: 0.15 }),
-  vinylLabel: new THREE.MeshStandardMaterial({ color: 0xc9a84c }),
-  outside: new THREE.MeshBasicMaterial({ color: 0x0d1620 }),
+  plant: new THREE.MeshStandardMaterial({ color: 0x9bb9b0, roughness: 0.8 }),
+  frameWood: new THREE.MeshStandardMaterial({ color: 0x9eabc4, roughness: 0.9 }),
+  lampShade: new THREE.MeshStandardMaterial({ color: 0xf5eaff, side: THREE.DoubleSide, transparent: true, opacity: 0.88 }),
+  lampBulb: new THREE.MeshBasicMaterial({ color: 0xffffff }),
+  vinyl: new THREE.MeshStandardMaterial({ color: 0x8d9ab7, roughness: 0.25, metalness: 0.15 }),
+  vinylLabel: new THREE.MeshStandardMaterial({ color: 0xd9b8d5 }),
+  outside: new THREE.MeshBasicMaterial({ color: 0x8fa8c9 }),
 };
 
 /* ---- 房间 ---- */
@@ -225,7 +225,7 @@ function buildRoom() {
   lw.position.set(-3.5, 5, 0); lw.rotation.y = Math.PI / 2; lw.receiveShadow = true; g.add(lw);
   const rw = new THREE.Mesh(new THREE.PlaneGeometry(20, 10), mats.wallSide);
   rw.position.set(3.5, 5, 0); rw.rotation.y = -Math.PI / 2; rw.receiveShadow = true; g.add(rw);
-  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: 0x0f0c0a, roughness: 1 }));
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: 0xe9eef8, roughness: 1 }));
   ceil.rotation.x = Math.PI / 2; ceil.position.y = 3.2; g.add(ceil);
   return g;
 }
@@ -413,7 +413,7 @@ for (let i = 0; i < rainCount; i++) {
   rainSpeed[i] = 0.04 + Math.random() * 0.04;
 }
 rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3));
-const rainMat = new THREE.PointsMaterial({ color: 0x99bbcc, size: 0.018, transparent: true, opacity: 0.5, sizeAttenuation: true });
+const rainMat = new THREE.PointsMaterial({ color: 0xb8c9ee, size: 0.018, transparent: true, opacity: 0.28, sizeAttenuation: true });
 const rainSystem = new THREE.Points(rainGeo, rainMat);
 scene.add(rainSystem);
 
@@ -426,7 +426,7 @@ let tooltipEl = null;
 function showTooltip(text, x, y) {
   if (!tooltipEl) {
     tooltipEl = document.createElement('div');
-    tooltipEl.style.cssText = 'position:fixed;z-index:20;padding:4px 10px;border-radius:4px;background:rgba(20,16,12,.8);color:#e8e2d6;font-size:11px;letter-spacing:.1em;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px);white-space:nowrap;';
+    tooltipEl.style.cssText = 'position:fixed;z-index:20;padding:4px 10px;border-radius:4px;background:rgba(20,16,12,.8);color:#33445f;font-size:11px;letter-spacing:.1em;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px);white-space:nowrap;';
     document.body.appendChild(tooltipEl);
   }
   tooltipEl.textContent = text;
