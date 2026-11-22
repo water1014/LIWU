@@ -3,110 +3,78 @@
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1'>
-<meta name='theme-color' content='#EFEBE2'>
-<meta name='description' content='里屋。屋子不大，够两个人住。'>
+<meta name='theme-color' content='#F3F0E9'>
+<meta name='description' content='里屋。一间能说话、能记事、能住人的屋子。'>
+<meta name='apple-mobile-web-app-capable' content='yes'>
 <title>里屋</title>
-<link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23EFEBE2%27/%3E%3Crect x=%2715.2%27 y=%277%27 width=%271.4%27 height=%2718%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
+<link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%23F3F0E9%27/%3E%3Crect x=%2715.2%27 y=%277%27 width=%271.4%27 height=%2718%27 fill=%27%238A3B2C%27/%3E%3C/svg%3E'>
 <link rel='preconnect' href='https://fonts.googleapis.com'>
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
-<link rel='preconnect' href='https://unpkg.com' crossorigin>
 <link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Serif+SC:wght@300;400;500&display=swap' rel='stylesheet'>
 <link rel='stylesheet' href='assets/style.css'>
 </head>
-<body>
+<body data-theme='paper'>
 
-<canvas id='stage'></canvas>
+<div id='app'>
 
-<div class='hud'>
-  <span class='brand'>里屋</span>
-  <span class='meta' id='hudDays'></span>
+  <header class='top'>
+    <button class='icon' id='menuBtn' type='button' aria-label='会话列表'>≡</button>
+    <div class='top-mid'>
+      <span class='top-title' id='topTitle'>里屋</span>
+      <span class='top-sub' id='topSub'></span>
+    </div>
+    <div class='top-right'>
+      <span class='days' id='topDays'></span>
+      <button class='icon' id='newBtn' type='button' aria-label='新的一段'>＋</button>
+    </div>
+  </header>
+
+  <main class='thread' id='thread'></main>
+
+  <footer class='composer'>
+    <form class='in-row' id='form'>
+      <textarea id='input' rows='1' placeholder='说一句' autocapitalize='off'></textarea>
+      <button class='send' id='sendBtn' type='submit' aria-label='发'>↑</button>
+      <button class='stop' id='stopBtn' type='button' aria-label='停' hidden>■</button>
+    </form>
+    <div class='hint' id='hint'></div>
+  </footer>
+
 </div>
 
-<div class='boot' id='boot'>正在开门……</div>
+<div class='scrim' id='scrim' hidden></div>
 
-<div class='dock' id='dock'></div>
-
-<div class='panel' id='panel' hidden>
-  <div class='panel-in'>
-    <div class='panel-head'>
-      <div>
-        <h2 id='pTitle'></h2>
-        <span class='en' id='pEn'></span>
-      </div>
-      <button class='mini' id='pClose' type='button'>关</button>
+<aside class='drawer' id='drawer' hidden>
+  <div class='drawer-in'>
+    <div class='drawer-top'>
+      <span class='brandmark'>里屋</span>
+      <span class='drawer-days' id='drawerDays'></span>
     </div>
-    <div class='panel-body' id='pBody'></div>
+
+    <button class='newchat' id='newChat' type='button'>新的一段</button>
+    <input class='search' id='search' placeholder='找一段话' autocomplete='off'>
+
+    <div class='sessions' id='sessions'></div>
+
+    <nav class='drawer-nav'>
+      <button type='button' data-view='diary'>日记</button>
+      <button type='button' data-view='album'>相册</button>
+      <button type='button' data-view='memory'>记忆</button>
+      <button type='button' data-view='settings'>设置</button>
+    </nav>
   </div>
-</div>
+</aside>
 
-<div class='sheet' id='sheet' hidden>
-  <div class='sheet-in'>
-    <div class='sheet-head'>
-      <h3>接线的地方</h3>
-      <button class='mini' id='sheetClose' type='button'>关</button>
-    </div>
-
-    <div class='presets'>
-      <button class='chip' data-preset='deepseek' type='button'>DeepSeek</button>
-      <button class='chip' data-preset='openai' type='button'>OpenAI</button>
-      <button class='chip' data-preset='go' type='button'>OpenCode Go</button>
-    </div>
-
-    <label class='field'>
-      <span>接口地址</span>
-      <input id='cfgBase' placeholder='https://api.deepseek.com/v1' autocomplete='off' spellcheck='false'>
-    </label>
-    <label class='field'>
-      <span>Key</span>
-      <input id='cfgKey' type='password' placeholder='sk-…' autocomplete='off'>
-    </label>
-    <label class='field'>
-      <span>模型</span>
-      <input id='cfgModel' placeholder='deepseek-chat' autocomplete='off' spellcheck='false'>
-    </label>
-    <label class='field'>
-      <span>它怎么说话</span>
-      <textarea id='cfgSys' rows='5'></textarea>
-    </label>
-
-    <div class='row'>
-      <button class='ghost solid' id='cfgSave' type='button'>存好</button>
-      <button class='ghost' id='cfgTest' type='button'>试一下</button>
-      <button class='ghost' id='cfgClear' type='button'>清空对话</button>
-    </div>
-
-    <p class='tip' id='cfgTip'></p>
-    <p class='tip'>Key 只存在这台手机的浏览器里，不进仓库，也不会上传。</p>
-  </div>
-</div>
-
-<script>
-(function(){
-  var boot = document.getElementById('boot');
-
-  var slow = setTimeout(function(){
-    if (boot && !boot.hidden) boot.textContent = '网有点慢，3D 还在下载。下面那排先用着。';
-  }, 7000);
-
-  window.addEventListener('error', function(e){
-    if (boot && !boot.hidden){
-      clearTimeout(slow);
-      boot.textContent = '屋子里出了点问题：' + (e.message || '未知错误') + ' —— 告诉我就行。';
-    }
-  });
-
-  // 3D 一就绪，就让面板那边把天数牌挂上去
-  var timer = setInterval(function(){
-    if (window.LIWU3D && window.LIWU3D.setDays){
-      clearInterval(timer);
-      window.dispatchEvent(new Event('resize'));
-    }
-  }, 400);
-})();
-</script>
+<section class='view' id='view' hidden>
+  <header class='view-top'>
+    <button class='icon' id='viewBack' type='button' aria-label='回去'>←</button>
+    <span class='view-title' id='viewTitle'></span>
+    <span class='view-en' id='viewEn'></span>
+  </header>
+  <div class='view-body' id='viewBody'></div>
+</section>
 
 <script src='data.js'></script>
-<script src='assets/panel.js'></script>
-<script type='module' src='assets/room3d.js'></script>
+<script src='assets/app.js'></script>
 </body>
 </html>
