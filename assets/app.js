@@ -41,7 +41,10 @@
 
   var LS = {
     get: function(k, f){ try{ var v = localStorage.getItem(k); return v ? JSON.parse(v) : f; }catch(e){ return f; } },
-    set: function(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+    set: function(k, v){
+      try{ localStorage.setItem(k, JSON.stringify(v)); return true; }
+      catch(e){ try{ toast('存不下了，这台手机空间不够。'); }catch(_){} return false; }
+    }
   };
 
   function toast(text){
@@ -194,7 +197,7 @@
       '<div class="body">' + esc(m.content) + '</div>' +
       '<div class="acts">' +
         '<button data-act="copy" data-i="' + i + '">复制</button>' +
-        (me ? '<button data-act="resend" data-i="' + i + '">重发</button>' : '<button data-act="regen" data-i="' + i + '">重新生成</button>') +
+        (me ? '<button data-act="resend" data-i="' + i + '">再说一遍</button>' : '<button data-act="regen" data-i="' + i + '">重新生成</button>') +
         '<button data-act="del" data-i="' + i + '">删掉</button>' +
       '</div>' +
     '</div>';
@@ -221,13 +224,13 @@
       return;
     }
     var html = '<div class="thread-inner">';
-    for (var i = 0; i < s.messages.length; i++) hi: {
+    for (var i = 0; i < s.messages.length; i++){
       html += msgHtml(s.messages[i], i, i === s.messages.length - 1);
-      break hi;
     }
     html += '</div>';
     box.innerHTML = html;
     box.scrollTop = box.scrollHeight;
+    bindThreadScroll();
   }
 
   function renderAll(){
@@ -270,9 +273,20 @@
 
   function stop(){ if (ctrl){ try{ ctrl.abort(); }catch(e){} } }
 
+  var pinnedBottom = true;
+
+  function bindThreadScroll(){
+    var th = $('#thread');
+    if (!th || th._scrollBound) return;
+    th._scrollBound = true;
+    th.addEventListener('scroll', function(){
+      pinnedBottom = (th.scrollHeight - th.scrollTop - th.clientHeight) < 90;
+    });
+  }
+
   function paintLive(){
     var th = $('#thread');
-    if (th) th.scrollTop = th.scrollHeight;
+    if (th && pinnedBottom) th.scrollTop = th.scrollHeight;
   }
 
   async function run(s){
@@ -292,7 +306,19 @@
     save();
     renderAll();
 
+    /* P0：抓住这一次渲染出来的 live 节点。
+       流式期间切走会话，也不能靠全局 class 重查——会查到别的会话里去。 */
+    var liveEl = $('.msg.live');
+    var liveBody = liveEl ? liveEl.querySelector('.body') : null;
+    pinnedBottom = true;
+
     ctrl = new AbortController();
+
+    var timedOut = false;
+    var timeoutTimer = setTimeout(function(){
+      timedOut = true;
+      try{ ctrl.abort(); }catch(e){}
+    }, 45000);
 
     try{
       var res = await fetch(endpoint(cfg.base), {
@@ -301,18 +327,16 @@
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.key },
         body: JSON.stringify(buildBody(s, cfg.stream))
       });
+      clearTimeout(timeoutTimer);
 
       if (!res.ok){
         var raw = await res.text();
         throw new Error(res.status + ' · ' + raw.slice(0, 200));
       }
 
-      var live = $('.msg.live');
-      var liveBody = live ? live.querySelector('.body') : null;
-
       function ensureThink(){
-        if (!live) return null;
-        var d = live.querySelector('.think div');
+        if (!liveEl || !liveEl.isConnected) return null;
+        var d = liveEl.querySelector('.think div');
         if (d) return d;
         var box = document.createElement('details');
         box.className = 'think';
@@ -322,13 +346,13 @@
         var dv = document.createElement('div');
         box.appendChild(sm);
         box.appendChild(dv);
-        live.insertBefore(box, liveBody);
+        liveEl.insertBefore(box, liveBody);
         return dv;
       }
 
       function putText(t){
         reply.content = t;
-        if (liveBody) liveBody.textContent = t;
+        if (liveBody && liveBody.isConnected) liveBody.textContent = t;
         paintLive();
       }
       function putThink(t){
@@ -389,14 +413,18 @@
           var at = s.messages.indexOf(reply);
           if (at >= 0) s.messages.splice(at, 1);
         }
+        if (timedOut) toast('等了太久，先停了一下。');
       } else {
         var idx = s.messages.indexOf(reply);
         if (idx >= 0) s.messages.splice(idx, 1);
-        s.messages.push({ role: 'error', content: msg, at: Date.now() });
+        /* 会话里放短句，全文进 console —— API 返回不该永远躺在聊天里 */
+        try{ console.error('liwu run failed:', msg); }catch(e){}
+        s.messages.push({ role: 'error', content: '没连上。', at: Date.now() });
         toast('连不上：先看地址末尾是不是 /v1，再看 Key。跨域被挡就开本机中转（README 里有）。');
       }
       save();
     }finally{
+      clearTimeout(timeoutTimer);
       setBusy(false);
       ctrl = null;
       renderAll();
