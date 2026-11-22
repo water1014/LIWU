@@ -8,16 +8,16 @@
 }
 
 body[data-theme='paper']{
-  --bg:#F3F0E9;
-  --bg-2:#FBF8F2;
-  --bg-3:#ECE7DC;
-  --ink:#211F1C;
-  --ink-2:#6B665E;
-  --ink-3:#9E978A;
-  --line:rgba(33,31,28,.13);
-  --solid:rgba(255,255,255,.62);
-  --seal:#8A3B2C;
-  --shadow:rgba(33,31,28,.12);
+  --bg:#F2F6FD;
+  --bg-2:#FAFCFF;
+  --bg-3:#E7EDF8;
+  --ink:#28364F;
+  --ink-2:#687792;
+  --ink-3:#9AA8C0;
+  --line:rgba(73,97,142,.15);
+  --solid:rgba(255,255,255,.72);
+  --seal:#A18CCB;
+  --shadow:rgba(75,101,150,.12);
 }
 
 body[data-theme='night']{
