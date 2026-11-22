@@ -1,5 +1,10 @@
 /* 里屋 · 3D 主页
-   一间屋子当门面。点屋里的东西就进去：书是日记，相框是相册，书架是记忆，收音机是说话，台灯是设置，门是说话。
+   一间屋子当门面。点屋里的东西就进去：
+     门 / 收音机 → 说话（聊天）
+     桌上的书   → 日记
+     墙上相框   → 相册
+     右边书架   → 记忆
+     台灯       → 设置
    3D 只是壳。它崩了、网慢了、手机不支持 WebGL，下面那排照样能用。
    屋子的颜色在 COLORS。 */
 
@@ -37,10 +42,9 @@
   function setHome(on){
     if (on){
       document.body.classList.add('home');
+      paintDays();
       fit();
       kick();
-      var t = tip;
-      if (t && t.textContent === '') { t.textContent = '转一下，点东西'; }
     } else {
       document.body.classList.remove('home');
     }
@@ -82,20 +86,33 @@
   var sceneRef = null;
   var THREE_REF = null;
 
-  function paintDays(){
+  function sinceText(){
     var s = '';
     try{ s = JSON.parse(localStorage.getItem('liwu.since') || '""') || ''; }catch(e){}
     if (!s && window.LIWU) s = window.LIWU.since || '';
-    var hud = document.getElementById('stageDays');
-    if (!s){ if (hud) hud.textContent = ''; return; }
+    return s;
+  }
+
+  function dayCount(){
+    var s = sinceText();
+    if (!s) return null;
     var a = new Date(s + 'T00:00:00');
-    if (isNaN(a.getTime())) return;
+    if (isNaN(a.getTime())) return null;
     var n = new Date();
     var b = new Date(n.getFullYear(), n.getMonth(), n.getDate());
     var c = Math.floor((b - a) / 86400000) + 1;
-    if (c <= 0) return;
-    if (hud) hud.textContent = '第 ' + c + ' 天';
-    board(c);
+    return c > 0 ? c : null;
+  }
+
+  function paintDays(){
+    var c = dayCount();
+    var hud = document.getElementById('stageDays');
+    if (hud) hud.textContent = c ? ('第 ' + c + ' 天') : '';
+    if (c) board(c);
+    else if (dayBoard && sceneRef){
+      sceneRef.remove(dayBoard);
+      dayBoard = null;
+    }
   }
 
   function board(n){
@@ -112,8 +129,7 @@
     kick();
   }
 
-  setInterval(paintDays, 30000);
-  paintDays();
+  setInterval(paintDays, 8000);
 
   /* ---------- 拉 three ---------- */
 
@@ -264,7 +280,7 @@
   winLight.position.set(2.45, 1.75, 0.9);
   scene.add(winLight);
 
-  /* ---------- 门（去说话） ---------- */
+  /* ---------- 门（说话） ---------- */
 
   var door = new THREE.Group();
 
@@ -466,7 +482,7 @@
     camera.lookAt(target);
   }
 
-  /* ---------- 渲染循环 ---------- */
+  /* ---------- 渲染 ---------- */
 
   var running = false;
 
@@ -594,8 +610,7 @@
   paintDays();
 
   setTimeout(function(){
-    if (!tip) return;
-    tip.style.opacity = '0';
-  }, 1600);
+    if (tip) tip.textContent = '';
+  }, 1800);
 
 })();
