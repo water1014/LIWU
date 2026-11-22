@@ -1065,3 +1065,63 @@ body{
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* ---------- Message actions: tap the ellipsis or long-press a message ---------- */
+.msg-head{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:36px}
+.msg-head .meta{margin:0}
+.msg-more{
+  appearance:none;display:inline-flex;align-items:center;justify-content:center;
+  width:40px;height:40px;min-width:40px;min-height:40px;
+  border:0;border-radius:12px;background:transparent;
+  color:var(--ink-3);font-size:19px;letter-spacing:1px;cursor:pointer;
+}
+.msg-more:active{background:var(--bg-3);color:var(--ink)}
+.msg .acts{display:none!important}
+.message-action-backdrop{
+  position:fixed;inset:0;z-index:120;
+  display:flex;align-items:flex-end;justify-content:center;
+  padding-top:24px;background:rgba(10,15,22,.38);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  animation:sheet-fade .16s ease-out;
+}
+.message-action-sheet{
+  width:min(100%,560px);max-height:min(72dvh,620px);
+  overflow:auto;overscroll-behavior:contain;
+  padding:9px 18px calc(env(safe-area-inset-bottom,0px) + 18px);
+  border:1px solid var(--line);border-bottom:0;
+  border-radius:22px 22px 0 0;background:var(--bg-2);
+  box-shadow:0 -12px 42px var(--shadow);
+  animation:sheet-rise .22s cubic-bezier(.2,.75,.25,1);
+}
+.sheet-grab{width:38px;height:4px;border-radius:99px;background:var(--ink-3);opacity:.35;margin:2px auto 13px}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.sheet-head strong{font-size:14px;font-weight:650}
+.sheet-head button{
+  min-width:54px;min-height:42px;padding:7px 12px;
+  border:0;border-radius:11px;background:var(--bg-3);
+  color:var(--ink-2);font:13px var(--sans);
+}
+.sheet-preview{
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;
+  margin:12px 0 14px;padding:11px 13px;
+  border:1px solid var(--line);border-radius:12px;
+  background:var(--bg);color:var(--ink-2);
+  font-size:12px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;
+}
+.sheet-actions{display:flex;flex-direction:column;gap:7px}
+.sheet-actions button{
+  width:100%;min-height:54px;padding:9px 13px;
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;
+  border:1px solid var(--line);border-radius:13px;
+  background:var(--bg-2);color:var(--ink);text-align:left;
+}
+.sheet-actions button:active{background:var(--bg-3)}
+.sheet-actions button span{font-size:13px;font-weight:600}
+.sheet-actions button small{font-size:10.5px;color:var(--ink-3)}
+.sheet-actions button.sheet-danger span{color:#B65E62}
+@keyframes sheet-fade{from{opacity:0}to{opacity:1}}
+@keyframes sheet-rise{from{transform:translateY(24px);opacity:.7}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  .message-action-backdrop,.message-action-sheet{animation:none}
+}
