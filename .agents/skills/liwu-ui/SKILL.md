@@ -34,7 +34,7 @@ Apply the upstream UI/UX Pro Max approach in a project-specific way:
 ## Hard prohibitions
 - No feature deletion or silent content rewriting.
 - No localStorage/IndexedDB key changes, data clearing, or destructive migrations without explicit approval.
-- No bottom navigation bar.
+- A bottom navigation bar is permitted on the homepage only; hide it on every inner room and chat screen.
 - No generic bento dashboard, magazine/editorial layout, or 3D/WebGL scene unless explicitly requested.
 - No heavy blanket blur, purple-dominant gradients, cream/brown palette, emoji icons, or decorative UI that harms readability.
 - Never present an untested page as verified.
