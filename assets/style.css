@@ -1584,3 +1584,37 @@ body.room-open{overscroll-behavior:none}
  .drawer-in{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 18px)}
  .drawer-foot{margin-top:14px}
 }
+
+/* Worldbook notebooks */
+.worldbook-tools{display:flex;gap:9px;align-items:center;margin:16px 0;flex-wrap:wrap}
+.worldbook-tools input[type=search]{flex:1 1 170px;min-width:0}
+.worldbook-list{display:grid;gap:10px}
+.worldbook-card{width:100%;padding:16px;text-align:left;border:1px solid var(--line);border-radius:15px;background:var(--bg-2);color:var(--ink);cursor:pointer}
+.worldbook-card-top,.worldbook-card-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.worldbook-card-top strong{font-size:14px;font-weight:600}
+.worldbook-card-top small,.worldbook-card-bottom{font-size:11px;color:var(--ink-3)}
+.worldbook-card-bottom{margin-top:14px;padding-top:10px;border-top:1px solid var(--line)}
+.worldbook-head{margin-bottom:18px}
+.worldbook-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-top:16px}
+.worldbook-title-row h2{margin:0;font:500 25px/1.3 var(--serif);color:var(--ink)}
+.worldbook-title-row p{margin:5px 0 0;color:var(--ink-3);font-size:11px}
+.worldbook-switch{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--ink-2);white-space:nowrap}
+.worldbook-switch input,.worldbook-flags input,.worldbook-toggle input{accent-color:var(--seal)}
+.worldbook-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:2px 0 14px}
+.worldbook-entry{padding:15px 0;border-bottom:1px solid var(--line)}
+.worldbook-entry-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.worldbook-entry-head h3{margin:0;font-size:14px;font-weight:600}
+.worldbook-entry-head small{display:block;margin-top:5px;color:var(--ink-3);font-size:10px;line-height:1.7}
+.worldbook-entry>p{margin:10px 0;color:var(--ink-2);font-size:12px;line-height:1.85;white-space:pre-wrap;overflow-wrap:anywhere}
+.worldbook-toggle{display:flex;gap:5px;align-items:center;color:var(--ink-3);font-size:10px;white-space:nowrap}
+.worldbook-entry-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.worldbook-entry-actions .tip{margin-left:auto;font-size:10px}
+.worldbook-compose{margin:14px 0 20px;padding:16px;border:1px solid var(--line);border-radius:15px;background:var(--bg-2)}
+.worldbook-compose>strong{display:block;margin-bottom:12px;font-size:13px}
+.worldbook-compose>input,.worldbook-compose>textarea{width:100%;margin:5px 0;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:13px}
+.worldbook-flags{display:flex;gap:14px;flex-wrap:wrap;margin:12px 0;font-size:11px;color:var(--ink-2)}
+.worldbook-compose .field{margin:10px 0}
+.worldbook-compose select{width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink)}
+.worldbook-compose .row{margin-top:12px}
+.worldbook-actions .danger,.worldbook-entry-actions .danger{color:#a34e4e}
+@media(max-width:420px){.worldbook-title-row{flex-direction:column}.worldbook-tools{align-items:stretch}}
