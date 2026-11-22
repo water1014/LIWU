@@ -1754,3 +1754,66 @@ body.room-open{overscroll-behavior:none}
 .notice-meta{display:flex;justify-content:space-between;gap:10px;margin-bottom:6px;color:var(--ink-3);font-size:10px}
 .notice-main>strong{font-size:13px}
 .notice-main>p{margin:5px 0 10px;color:var(--ink-2);font-size:11px;line-height:1.7;overflow-wrap:anywhere}
+
+/* ---------- 账本 / 健康 / 经期 / 学习 / 课程表 ---------- */
+.ledger-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:15px 0 18px}
+.ledger-summary>div{min-width:0;padding:13px 11px;border:1px solid var(--line);border-radius:13px;background:var(--bg-2)}
+.ledger-summary small{display:block;color:var(--ink-3);font-size:10px}
+.ledger-summary strong{display:block;margin-top:5px;font:500 19px var(--num);color:var(--ink);overflow-wrap:anywhere}
+.ledger-toolbar{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:12px 0 16px}
+.ledger-toolbar label{display:grid;gap:5px;color:var(--ink-3);font-size:10px}
+.ledger-toolbar input{min-height:42px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--bg-2);color:var(--ink);font:inherit}
+.ledger-list{display:grid;gap:0}
+.ledger-row{display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--line)}
+.ledger-kind{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;border-radius:50%;background:var(--bg-3);font-size:16px}
+.ledger-kind.income,.ledger-amount.income{color:#4d8a71}
+.ledger-kind.expense,.ledger-amount.expense{color:var(--ink)}
+.ledger-copy{flex:1;min-width:0}
+.ledger-copy strong{display:block;font-size:13px}
+.ledger-copy small{display:block;margin-top:3px;color:var(--ink-3);font-size:10px;overflow-wrap:anywhere}
+.ledger-amount{white-space:nowrap;font:500 14px var(--num)}
+.ledger-row .planner-item-actions{gap:4px}
+.health-latest{margin:12px 0 18px;padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--bg-2)}
+.health-latest>small{color:var(--ink-3);font-size:10px}
+.health-latest>div{display:flex;gap:14px;flex-wrap:wrap;margin-top:9px}
+.health-latest span{color:var(--ink-2);font-size:11px}
+.health-latest strong{color:var(--ink);font:500 18px var(--num)}
+.health-history{display:grid;gap:0}
+.health-row{padding:14px 0;border-bottom:1px solid var(--line)}
+.health-row>time{font:12px var(--num);color:var(--ink-3)}
+.health-metrics{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px}
+.health-metrics span{padding:4px 8px;border-radius:99px;background:var(--bg-3);color:var(--ink-2);font-size:10px}
+.health-row>p{margin:8px 0;color:var(--ink-2);font-size:12px;white-space:pre-wrap}
+.health-row .planner-item-actions{margin-top:6px}
+.period-summary{display:grid;gap:5px;margin:16px 0;padding:19px;border:1px solid var(--line);border-radius:16px;background:var(--bg-2)}
+.period-summary small{font-size:10px;color:var(--ink-3);letter-spacing:.1em}
+.period-summary strong{font:500 27px var(--serif);color:var(--ink)}
+.period-summary span{font-size:11px;color:var(--ink-2)}
+.period-history{margin-top:22px}
+.period-history>h3{font:500 15px var(--serif);margin:0 0 8px}
+.period-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.period-row time{font:13px var(--num);color:var(--ink)}
+.period-row p{margin:4px 0 0;font-size:11px;color:var(--ink-3)}
+.study-list{display:grid;gap:4px}
+.study-list .planner-item{align-items:center}
+.study-list .todo-check{margin-top:0}
+.class-week{display:grid;gap:20px;margin-top:14px}
+.class-day>h3{margin:0 0 8px;padding-bottom:7px;border-bottom:1px solid var(--line);font:500 14px var(--serif);color:var(--ink-2)}
+.class-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.class-time{width:58px;flex:0 0 58px;text-align:center}
+.class-time strong{display:block;font:500 15px var(--num);color:var(--ink)}
+.class-time small{display:block;margin-top:2px;color:var(--ink-3);font:11px var(--num)}
+.class-copy{flex:1;min-width:0}
+.class-copy>strong{font-size:13px}
+.class-copy>p{margin:4px 0 0;color:var(--ink-3);font-size:10px;overflow-wrap:anywhere}
+@media(max-width:430px){
+ .ledger-summary{gap:6px}
+ .ledger-summary>div{padding:11px 8px}
+ .ledger-summary strong{font-size:16px}
+ .ledger-row{gap:7px;flex-wrap:wrap}
+ .ledger-row .ledger-copy{min-width:calc(100% - 50px)}
+ .ledger-row .ledger-amount{margin-left:40px}
+ .ledger-row .planner-item-actions{margin-left:auto}
+ .class-row{gap:8px}
+ .class-row .planner-item-actions{flex-direction:column;align-items:flex-end}
+}
