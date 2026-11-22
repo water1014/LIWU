@@ -1192,3 +1192,59 @@ body{
 .material-field > span{display:flex;justify-content:space-between;align-items:center;letter-spacing:.04em}
 .material-field output{font-variant-numeric:tabular-nums;color:var(--ink-3)}
 .material-field input[type=range]{padding:0;background:transparent;border:0;min-height:28px}
+
+/* ---------- 独立首页与仅首页可见的快捷底栏 ---------- */
+.home-screen{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);color:var(--ink)}
+.home-top{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 7px) 14px 8px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg-2) 76%,transparent);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.home-brand{flex:1;text-align:center;font-family:var(--serif);font-size:18px;letter-spacing:.24em}
+.home-day{min-width:64px;text-align:right;font-size:11px;color:var(--ink-3)}
+.home-content{width:min(100%,920px);flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin:0 auto;padding:clamp(22px,5vh,48px) clamp(18px,5vw,48px) 30px}
+.home-portrait{position:relative;text-align:center;padding:clamp(12px,3vh,30px) 10px 24px}
+.home-kicker{font-size:11px;letter-spacing:.2em;color:var(--ink-3)}
+.home-identity{display:flex;align-items:center;justify-content:center;gap:17px;margin:24px 0 13px}
+.home-avatar{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;font-family:var(--serif);font-size:26px;border:1px solid var(--line);box-shadow:0 8px 24px var(--shadow)}
+.home-avatar-you{background:linear-gradient(145deg,#fff,#e5ebf4);color:#65758e}
+.home-avatar-him{background:linear-gradient(145deg,#dce5ef,#aebdd0);color:#42536b}
+.home-heart{font-family:var(--serif);font-size:13px;color:var(--ink-3);letter-spacing:.18em}
+.home-portrait h1{margin:8px 0 5px;font-family:var(--serif);font-size:clamp(25px,5vw,34px);font-weight:400;letter-spacing:.12em}
+.home-quote{margin:0;color:var(--ink-2);font-size:13px;line-height:1.8}
+.home-count{display:flex;align-items:baseline;justify-content:center;gap:9px;margin-top:17px;color:var(--ink-3)}
+.home-count strong{font-family:var(--num);font-size:35px;font-weight:400;color:var(--ink)}
+.home-count span{font-size:11px;letter-spacing:.12em}
+.home-feature-row{display:grid;grid-template-columns:1.12fr .88fr;gap:12px;margin:14px 0 26px}
+.home-feature-row button{position:relative;min-height:130px;padding:18px 19px;border:1px solid var(--line);border-radius:18px;text-align:left;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:7px}
+.home-chat{background:linear-gradient(135deg,#dfe7f1,#cbd7e7);color:#34445d}
+.home-photo{background:linear-gradient(145deg,#eef2f7,#dce4ee);color:#52627a}
+.home-feature-kicker{font-size:10px;letter-spacing:.14em;opacity:.72}
+.home-feature-row strong{font-size:16px;font-weight:600;letter-spacing:.03em}
+.home-feature-arrow{position:absolute;right:17px;top:13px;font-size:20px;opacity:.65}
+.home-photo-mark{position:absolute;right:15px;top:8px;font-size:45px;opacity:.16}
+.home-lower{display:grid;grid-template-columns:1fr 1fr;gap:clamp(16px,4vw,38px);padding:0 2px 20px}
+.home-section{min-width:0}
+.home-section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--line);font-family:var(--serif);font-size:15px;letter-spacing:.08em}
+.home-section-head button{border:0;background:none;color:var(--ink-3);font:11px var(--sans);white-space:nowrap}
+.home-diary,.home-memory{padding:14px 0 8px;min-height:100px}
+.home-diary strong,.home-memory strong{font-size:13px;font-weight:600}
+.home-diary p,.home-memory p{margin:6px 0;color:var(--ink-2);font-size:12px;line-height:1.8}
+.home-diary time,.home-memory time{font-size:10px;color:var(--ink-3)}
+.home-empty{color:var(--ink-3)!important}
+.home-tabbar{flex:0 0 auto;display:flex;justify-content:space-around;align-items:center;gap:4px;padding:7px 12px calc(env(safe-area-inset-bottom,0px) + 7px);border-top:1px solid var(--line);background:color-mix(in srgb,var(--bg-2) 82%,transparent);-webkit-backdrop-filter:blur(22px) saturate(140%);backdrop-filter:blur(22px) saturate(140%)}
+.home-tab{min-width:60px;min-height:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border:0;border-radius:13px;background:transparent;color:var(--ink-3)}
+.home-tab span{font-size:20px;line-height:1.2}
+.home-tab small{font-size:10px;letter-spacing:.06em}
+.home-tab.active{color:var(--ink);background:var(--bg-3)}
+#app[hidden],#homeScreen[hidden]{display:none!important}
+@media(max-width:520px){
+ .home-content{padding:15px 17px 22px}
+ .home-portrait{padding:16px 8px 19px}
+ .home-identity{margin:18px 0 10px}
+ .home-avatar{width:68px;height:68px}
+ .home-count{margin-top:12px}
+ .home-feature-row{gap:9px;margin:10px 0 20px}
+ .home-feature-row button{min-height:116px;padding:14px;border-radius:15px}
+ .home-feature-row strong{font-size:14px}
+ .home-lower{grid-template-columns:1fr;gap:8px}
+ .home-section{padding:0 2px}
+ .home-diary,.home-memory{min-height:76px;padding-top:10px}
+}
+@media(prefers-reduced-motion:reduce){.home-screen *{scroll-behavior:auto!important;transition:none!important}}
