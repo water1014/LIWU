@@ -519,12 +519,47 @@
   function closeDrawer(){ drawer.hidden = true; scrim.hidden = true; }
   function closeView(){ view.hidden = true; }
 
+  var homeScreen = $('#homeScreen');
+  function paintHome(){
+    var count = dayCount();
+    $('#homeDays').textContent = count ? '相伴第 ' + count + ' 天' : '我们的里屋';
+    $('#homeCount').textContent = count || '∞';
+    $('#homeHero').textContent = D.hero || '屋子不大，够两个人住。';
+    var diaries = diaryItems();
+    var diary = $('#homeDiary');
+    diary.innerHTML = diaries.length ? '<strong>' + esc(diaries[0].title || '今天的日记') + '</strong><p>' + esc((diaries[0].body || '').slice(0,76) || '留下一点今天的记录。') + '</p><time>' + esc(diaries[0].date) + '</time>' : '<p class="home-empty">今天还没有写日记，留一句给未来的我们。</p>';
+    var memories = D.memory || [];
+    var memory = $('#homeMemory');
+    memory.innerHTML = memories.length ? '<strong>' + esc(memories[0].title || '一段记忆') + '</strong><p>' + esc((memories[0].body || '').slice(0,92)) + '</p><time>' + esc(memories[0].date || '') + '</time>' : '<p class="home-empty">重要的事，会慢慢收集起来。</p>';
+  }
+  function showHome(){
+    closeDrawer(); closeView(); $('#app').hidden = true; homeScreen.hidden = false; paintHome();
+    $('.home-tab').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-home-tab') === 'home'); });
+  }
+  function showChat(){ homeScreen.hidden = true; $('#app').hidden = false; closeView(); paintTop(); renderThread(); }
+  function goHomeTarget(target){
+    if (target === 'home'){ showHome(); return; }
+    if (target === 'chat'){ showChat(); $('#input').focus(); return; }
+    homeScreen.hidden = true; $('#app').hidden = true;
+    if (target === 'diary') viewDiary();
+    else if (target === 'album') viewAlbum();
+    else if (target === 'memory') viewMemory();
+    else if (target === 'settings') viewSettings();
+  }
+  $('#homeMenuBtn').addEventListener('click', openDrawer);
+  $('#homeScreen').addEventListener('click', function(ev){
+    var go = ev.target.closest('[data-home-go]');
+    if (go){ goHomeTarget(go.getAttribute('data-home-go')); return; }
+    var tab = ev.target.closest('[data-home-tab]');
+    if (tab) goHomeTarget(tab.getAttribute('data-home-tab'));
+  });
+
   $('#menuBtn').addEventListener('click', openDrawer);
   scrim.addEventListener('click', closeDrawer);
   $('#newBtn').addEventListener('click', newSession);
   $('#newChat').addEventListener('click', function(){ newSession(); closeDrawer(); });
   $('#search').addEventListener('input', renderSessions);
-  $('#viewBack').addEventListener('click', closeView);
+  $('#viewBack').addEventListener('click', function(){ showHome(); });
 
   $('#sessions').addEventListener('click', function(ev){
     var more = ev.target.closest('[data-more]');
@@ -660,7 +695,9 @@
     b.addEventListener('click', function(){
       var v = b.getAttribute('data-view');
       closeDrawer();
-      if (v === 'chat'){ closeView(); $('#input').focus(); }
+      if (v === 'home'){ showHome(); }
+      if (v === 'chat'){ showChat(); $('#input').focus(); }
+      if (v === 'diary' || v === 'album' || v === 'memory' || v === 'settings'){ homeScreen.hidden = true; $('#app').hidden = true; }
       if (v === 'diary') viewDiary();
       if (v === 'album') viewAlbum();
       if (v === 'memory') viewMemory();
@@ -993,6 +1030,7 @@
   }
 
   renderAll();
+  showHome();
 
   if (!wired()) toast('还没接线。点左上角 ≡ → 设置，把地址、Key、模型填上。');
 
