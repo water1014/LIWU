@@ -1817,3 +1817,48 @@ body.room-open{overscroll-behavior:none}
  .class-row{gap:8px}
  .class-row .planner-item-actions{flex-direction:column;align-items:flex-end}
 }
+
+/* ---------- 音乐 / 游戏 / 窗廊 ---------- */
+.music-now{display:grid;gap:5px;margin:16px 0;padding:16px;border:1px solid var(--line);border-radius:15px;background:var(--bg-2)}
+.music-now>small,.game-result>small{font-size:9px;letter-spacing:.14em;color:var(--ink-3)}
+.music-now>strong{font:500 18px var(--serif);color:var(--ink)}
+.music-now>span{font-size:11px;color:var(--ink-2)}
+.music-now audio{width:100%;height:38px;margin-top:8px}
+.music-list{display:grid;gap:0;margin-top:14px}
+.music-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line)}
+.music-index{width:25px;flex:0 0 25px;font:12px var(--num);color:var(--ink-3)}
+.music-copy{flex:1;min-width:0}
+.music-copy>strong{display:block;font-size:13px}
+.music-copy>small{display:block;margin-top:3px;color:var(--ink-3);font-size:10px}
+.music-copy>p{margin:5px 0 0;color:var(--ink-2);font-size:11px}
+.music-row .planner-item-actions{gap:5px;flex-wrap:wrap}
+.game-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:18px 0}
+.game-tile{display:flex;min-height:118px;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px;padding:14px 12px;border:1px solid var(--line);border-radius:15px;background:var(--bg-2);color:var(--ink);text-align:left;cursor:pointer}
+.game-symbol{display:grid;width:30px;height:30px;place-items:center;border-radius:10px;background:var(--bg-3);font:20px var(--num);color:var(--ink-2)}
+.game-tile>strong{font-size:12px}
+.game-tile>small{font-size:9px;color:var(--ink-3);line-height:1.4}
+.game-result{display:grid;gap:10px;min-height:145px;place-items:center;align-content:center;margin:16px 0 24px;padding:20px;border:1px solid var(--line);border-radius:17px;background:var(--bg-2);text-align:center}
+.game-result>div{font:500 22px/1.5 var(--serif);color:var(--ink);overflow-wrap:anywhere}
+.game-history{margin-top:20px}
+.game-history-row{display:grid;grid-template-columns:85px 75px 1fr;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:11px}
+.game-history-row time,.game-history-row span{color:var(--ink-3)}
+.game-history-row strong{font-weight:500;color:var(--ink-2);overflow-wrap:anywhere}
+.window-scene{position:relative;display:flex;min-height:245px;align-items:flex-end;overflow:hidden;margin:0 0 18px;padding:23px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(155deg,#dbe5ee 0%,#aebfd0 48%,#65788d 100%);background-size:cover;background-position:center}
+.window-scene:before{position:absolute;inset:14px;content:"";border:1px solid rgba(255,255,255,.55);border-radius:10px;box-shadow:inset 0 0 0 8px rgba(255,255,255,.07);pointer-events:none}
+.window-scene-copy{position:relative;z-index:1;max-width:80%;color:#fff;text-shadow:0 1px 10px rgba(0,0,0,.25)}
+.window-scene-copy>small{font-size:9px;letter-spacing:.16em;opacity:.8}
+.window-scene-copy h2{margin:8px 0 5px;font:400 27px var(--serif)}
+.window-scene-copy p{margin:0;font-size:11px;line-height:1.7;opacity:.9}
+.window-notes{display:grid;gap:0}
+.window-note{position:relative;padding:14px 65px 14px 0;border-bottom:1px solid var(--line)}
+.window-note>time{font:11px var(--num);color:var(--ink-3)}
+.window-note>p{margin:6px 0 0;font-size:13px;line-height:1.8;color:var(--ink-2);white-space:pre-wrap}
+.window-note>.mini{position:absolute;right:0;top:24px}
+@media(max-width:430px){
+ .game-grid{gap:6px}
+ .game-tile{min-height:108px;padding:10px 8px}
+ .music-row{gap:7px;flex-wrap:wrap}
+ .music-row .music-copy{min-width:calc(100% - 50px)}
+ .music-row .planner-item-actions{margin-left:36px}
+ .window-scene{min-height:215px;padding:18px}
+}
