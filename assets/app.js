@@ -1613,14 +1613,17 @@
     }
     render();
   }
+  var proactiveGenerating=false;
   async function maybeProactiveImage(session){
+    if(proactiveGenerating)return;
     var cfg=proactiveConfig(),p=profileData(),api=imageConfig();if(!cfg.enabled||!p.appearanceConfirmed||!p.appearance||!api.base||!api.key||!api.model)return;
     var user=session.messages.slice().reverse().find(function(m){return m.role==='user';}),reply=session.messages.slice().reverse().find(function(m){return m.role==='assistant'&&m.content;});if(!user||!reply)return;
     var keys=String(cfg.keywords||'').split(/[,，\n]/).map(function(x){return x.trim().toLowerCase();}).filter(Boolean),hay=(user.content+' '+reply.content).toLowerCase();if(cfg.mode!=='all'&&(!keys.length||!keys.some(function(k){return hay.indexOf(k)>=0;})))return;
     var gallery=imageGallery(),month=today().slice(0,7),dayCount=gallery.filter(function(x){return x.kind==='proactive'&&x.date===today();}).length,monthCount=gallery.filter(function(x){return x.kind==='proactive'&&(x.date||'').slice(0,7)===month;}).length;if(dayCount>=Number(cfg.dailyLimit)||monthCount>=Number(cfg.monthlyLimit))return;
     var last=gallery.filter(function(x){return x.kind==='proactive';}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);})[0];if(last&&Date.now()-(last.createdAt||0)<Number(cfg.cooldown||12)*3600000)return;
     var prompt='Create a natural companion image inspired by this conversation. Preserve character appearance. Avoid text and watermarks.\\nAppearance: '+p.appearance+'\\nUser: '+user.content+'\\nReply: '+reply.content+'\\nStyle: '+(cfg.prompt||'a candid everyday moment, natural light');
-    try{var item=await generateStudioImage(prompt,'proactive');session.messages.push({role:'assistant',content:'我想把刚才这一刻留成一张画面。',image:item.src,kind:'proactive-image',at:Date.now()});session.updatedAt=Date.now();save();renderAll();toast('主动生图完成，已经放进聊天和作品集。');}catch(e){toast('主动生图暂时没成功：'+String(e.message||e));}
+    proactiveGenerating=true;
+    try{var item=await generateStudioImage(prompt,'proactive');session.messages.push({role:'assistant',content:'我想把刚才这一刻留成一张画面。',image:item.src,kind:'proactive-image',at:Date.now()});session.updatedAt=Date.now();save();renderAll();toast('主动生图完成，已经放进聊天和作品集。');}catch(e){toast('主动生图暂时没成功：'+String(e.message||e));}finally{proactiveGenerating=false;}
   }
 
   /* ================= 世界书 · 笔记本与条目 ================= */
@@ -1875,7 +1878,7 @@
           '<button class="ghost" id="cImport" type="button">导入</button>' +
           '<button class="ghost" id="cWipe" type="button">清空对话</button>' +
         '</div>' +
-        '<p class="tip">导出 JSON 含会话、配置、日记、相册、世界书、日历、安排、待办和起算日。Key 也在里面，别乱发。</p>' +
+        '<p class="tip">导出 JSON 含会话、配置、日记、相册、记忆、收藏、语录、世界书、日历、安排、待办、倒计时、心情、账本、健康、经期、学习、课程表、音乐、游戏、窗廊、壁纸、人设、通知、生图作品和主动生图设置。Key 也在里面，别乱发。</p>' +
       '</div>' +
       '<div class="row"><button class="ghost solid" id="cSave" type="button">存好</button></div>' +
       '<p class="tip">改完不点存好，下次打开还是旧的。</p>';
