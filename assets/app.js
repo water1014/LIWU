@@ -264,7 +264,7 @@
     overlay.addEventListener('click', function(ev){
       if (ev.target === overlay || ev.target.closest('[data-sheet-close]') || ev.target.closest('[data-act]')) overlay.remove();
     });
-    document.body.appendChild(overlay);
+    $('#thread').appendChild(overlay);
     var close = overlay.querySelector('[data-sheet-close]');
     if (close) close.focus();
   }
