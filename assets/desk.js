@@ -1,11 +1,12 @@
 /* 里屋 · 桌面交互
-   抬头的时间、拍立得里的图、备忘、天数、主题切换，还有“点东西就进去”。 */
+   东西能拖。拖到哪存在这台手机里，下次打开还在。
+   双击抬头中间的时间 → 全部复位到原来的位置（拖乱了用这个）。 */
 
 (function(){
   'use strict';
 
   var D = window.LIWU || {};
-  var NL = String.fromCharCode(10);
+  var K_LAYOUT = 'liwu.desk.layout';
 
   function $(s){ return document.querySelector(s); }
 
@@ -15,7 +16,6 @@
   /* ---------- 时间 ---------- */
 
   var WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-
   function p2(n){ return n < 10 ? '0' + n : '' + n; }
 
   function paintClock(){
@@ -55,7 +55,14 @@
     if (el) el.textContent = c ? ('第 ' + c + ' 天') : '第 — 天';
   }
 
-  /* ---------- 天气 ---------- */
+  /* ---------- 天气 / 备忘 / 图 ---------- */
+
+  function esc(v){
+    return String(v == null ? '' : v)
+      .split('&').join('&amp;')
+      .split('<').join('&lt;')
+      .split('>').join('&gt;');
+  }
 
   function paintWeather(){
     var w = D.weather || {};
@@ -65,37 +72,22 @@
     if (s) s.textContent = w.text || '';
   }
 
-  /* ---------- 备忘 ---------- */
-
   function paintMemo(){
     var ul = $('#memoList');
     if (!ul) return;
     var items = (D.memory || []).slice(0, 4);
-    if (!items.length){
-      ul.innerHTML = '<li><b>还空着</b></li>';
-      return;
-    }
+    if (!items.length){ ul.innerHTML = '<li><b>还空着</b></li>'; return; }
     ul.innerHTML = items.map(function(it){
-      var sub = String(it.body || '').slice(0, 16);
+      var sub = String(it.body || '').slice(0, 15);
       return '<li><b>' + esc(it.title || '') + '</b>' + (sub ? '<i>' + esc(sub) + '</i>' : '') + '</li>';
     }).join('');
   }
-
-  function esc(v){
-    return String(v == null ? '' : v)
-      .split('&').join('&amp;')
-      .split('<').join('&lt;')
-      .split('>').join('&gt;');
-  }
-
-  /* ---------- 图 ---------- */
 
   function paintPhotos(){
     var list = D.album || [];
     var shot = $('#featureShot');
     var cap = $('#featureCap');
     var ph1 = $('#ph1');
-
     if (shot && list.length && list[0].src){
       shot.style.backgroundImage = 'url("' + list[0].src + '")';
       shot.innerHTML = '';
@@ -116,6 +108,7 @@
   var fromHome = false;
 
   function open(key){
+    if (!key) return;
     if (key === 'chat'){
       document.body.classList.remove('home');
       var inp = document.getElementById('input');
@@ -130,20 +123,119 @@
   }
 
   function setHome(on){
-    if (on){
-      document.body.classList.add('home');
-      refresh();
-    } else {
-      document.body.classList.remove('home');
-    }
+    if (on){ document.body.classList.add('home'); refresh(); }
+    else { document.body.classList.remove('home'); }
   }
 
-  document.addEventListener('click', function(ev){
-    var hit = ev.target.closest && ev.target.closest('[data-open]');
-    if (!hit) return;
-    var key = hit.getAttribute('data-open');
-    if (key) open(key);
-  });
+  /* ---------- 拖动 ---------- */
+
+  var layout = {};
+  try{ layout = JSON.parse(localStorage.getItem(K_LAYOUT) || '{}') || {}; }catch(e){ layout = {}; }
+
+  function saveLayout(){
+    try{ localStorage.setItem(K_LAYOUT, JSON.stringify(layout)); }catch(e){}
+  }
+
+  var dragging = false;
+
+  function bind(el, key){
+    if (!el) return;
+    var start = null;
+
+    if (layout[key]){
+      el.style.setProperty('--tx', layout[key].x + 'px');
+      el.style.setProperty('--ty', layout[key].y + 'px');
+    }
+
+    el.addEventListener('pointerdown', function(ev){
+      if (ev.button != null && ev.button !== 0) return;
+      start = {
+        x: ev.clientX, y: ev.clientY,
+        ox: (layout[key] && layout[key].x) || 0,
+        oy: (layout[key] && layout[key].y) || 0,
+        moved: false,
+        target: ev.target
+      };
+      try{ el.setPointerCapture(ev.pointerId); }catch(e){}
+    });
+
+    el.addEventListener('pointermove', function(ev){
+      if (!start) return;
+      var dx = ev.clientX - start.x;
+      var dy = ev.clientY - start.y;
+      if (!start.moved && (Math.abs(dx) > 7 || Math.abs(dy) > 7)){
+        start.moved = true;
+        dragging = true;
+        el.classList.add('lifting');
+      }
+      if (start.moved){
+        layout[key] = { x: start.ox + dx, y: start.oy + dy };
+        el.style.setProperty('--tx', layout[key].x + 'px');
+        el.style.setProperty('--ty', layout[key].y + 'px');
+      }
+    });
+
+    el.addEventListener('pointerup', function(){
+      if (!start) return;
+      var moved = start.moved;
+      var target = start.target;
+      start = null;
+      dragging = false;
+      el.classList.remove('lifting');
+
+      if (moved){ saveLayout(); return; }
+
+      var hit = (target && target.closest) ? target.closest('[data-open]') : null;
+      if (hit && el.contains(hit)){ open(hit.getAttribute('data-open')); return; }
+      var own = el.getAttribute('data-open');
+      if (own) open(own);
+    });
+
+    el.addEventListener('pointercancel', function(){
+      start = null;
+      dragging = false;
+      el.classList.remove('lifting');
+    });
+  }
+
+  bind($('.paper'), 'paper');
+  bind($('.polaroid'), 'polaroid');
+  bind($('.note'), 'note');
+  bind($('.vinyl-wrap'), 'vinyl');
+  bind($('.tag'), 'tag');
+
+  /* ---------- 双击时间，全部复位 ---------- */
+
+  var clockEl = $('.clock');
+  var lastTap = 0;
+  if (clockEl){
+    clockEl.addEventListener('click', function(){
+      var now = Date.now();
+      if (now - lastTap < 420){
+        layout = {};
+        saveLayout();
+        var all = document.querySelectorAll('.thing');
+        for (var i = 0; i < all.length; i++){
+          all[i].style.removeProperty('--tx');
+          all[i].style.removeProperty('--ty');
+        }
+        flash('摆回原来的位置了。');
+      }
+      lastTap = now;
+    });
+  }
+
+  function flash(text){
+    var old = document.querySelector('.desk-flash');
+    if (old) old.remove();
+    var d = document.createElement('div');
+    d.className = 'desk-flash';
+    d.textContent = text;
+    d.style.cssText = 'position:absolute;left:0;right:0;bottom:calc(env(safe-area-inset-bottom,0px) + 74px);z-index:95;text-align:center;font-size:10.5px;letter-spacing:.16em;color:rgba(74,67,56,.55);pointer-events:none;transition:opacity .4s';
+    document.getElementById('desk-wrap').appendChild(d);
+    setTimeout(function(){ d.style.opacity = '0'; }, 1200);
+    setTimeout(function(){ d.remove(); }, 1800);
+  }
 
   /* ---------- 主题胶囊 ---------- */
 
@@ -165,8 +257,7 @@
 
   if (modeBtn){
     modeBtn.addEventListener('click', function(){
-      var now = document.body.getAttribute('data-theme') === 'night' ? 'paper' : 'night';
-      setTheme(now);
+      setTheme(document.body.getAttribute('data-theme') === 'night' ? 'paper' : 'night');
     });
   }
 
@@ -175,38 +266,30 @@
     setTheme(c.theme === 'night' ? 'night' : 'paper');
   })();
 
-  /* ---------- 视差：手一动，桌子微微歪一下 ---------- */
+  /* ---------- 视差 ---------- */
 
-  var raf = null;
-  var idle = null;
+  var raf = null, idle = null;
 
-  function tilt(x, y){
-    if (!plane) return;
-    var rx = (-y * 2.4).toFixed(2);
-    var ry = (x * 2.8).toFixed(2);
-    plane.style.transform = 'rotateX(' + rx + 'deg) rotateY(' + ry + 'deg)';
-  }
-
-  function reset(){
-    if (plane) plane.style.transform = '';
-  }
+  function resetTilt(){ if (plane) plane.style.transform = ''; }
 
   window.addEventListener('pointermove', function(ev){
     if (!document.body.classList.contains('home')) return;
+    if (dragging) return;
     if (raf) return;
     raf = requestAnimationFrame(function(){
       raf = null;
+      if (!plane) return;
       var x = (ev.clientX / window.innerWidth - 0.5) * 2;
       var y = (ev.clientY / window.innerHeight - 0.5) * 2;
-      tilt(x, y);
+      plane.style.transform = 'rotateX(' + (-y * 2.2).toFixed(2) + 'deg) rotateY(' + (x * 2.6).toFixed(2) + 'deg)';
     });
     if (idle) clearTimeout(idle);
-    idle = setTimeout(reset, 1400);
+    idle = setTimeout(resetTilt, 1600);
   }, { passive: true });
 
   window.addEventListener('pointerup', function(){
     if (idle) clearTimeout(idle);
-    idle = setTimeout(reset, 500);
+    idle = setTimeout(resetTilt, 600);
   }, { passive: true });
 
   /* ---------- 抬头按钮 / 底部那排 / 回来 ---------- */
@@ -256,7 +339,7 @@
     }
   })();
 
-  /* ---------- 刷新一遍 ---------- */
+  /* ---------- 刷新 ---------- */
 
   function refresh(){
     paintClock();
