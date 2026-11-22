@@ -1,657 +1,603 @@
 <!doctype html>
-<html lang='zh-CN'>
+<html lang="zh-CN">
 <head>
-<meta charset='utf-8'>
-<meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1'>
-<meta name='theme-color' content='#0a0908'>
-<meta name='description' content='里屋 · 雨夜书房。屋子不大，够两个人住。'>
-<meta name='apple-mobile-web-app-capable' content='yes'>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#0a0908">
+<meta name="description" content="里屋 · 雨夜书房。屋子不大，够两个人住。">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>里屋</title>
-<link rel='icon' href='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%230a0908%27/%3E%3Crect x=%2715.4%27 y=%278%27 width=%271.2%27 height=%2716%27 fill=%27%23c9a84c%27/%3E%3C/svg%3E'>
-<link rel='preconnect' href='https://fonts.googleapis.com'>
-<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
-<link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500&display=swap' rel='stylesheet'>
-<link rel='stylesheet' href='assets/style.css?v=38'>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%230a0908%27/%3E%3Crect x=%2715.4%27 y=%278%27 width=%271.2%27 height=%2716%27 fill=%27%23c9a84c%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css?v=39">
 <style>
-:root{
-  --paper:#F8F4EB; --ink:#2B2823; --soft:#5A5348; --mute:#9A9285; --line:#E2DBCB; --red:#8A3B2C;
-  --sh:92,74,52;
-}
+/* ===== 基础覆盖 ===== */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;height:100%}
-body{
-  background:#0a0908; color:var(--ink); overflow:hidden;
-  font-family:'Noto Serif SC',serif; font-weight:300; -webkit-font-smoothing:antialiased;
-}
-body:not(.desk) .stage{display:none}
-body.desk #app,body.desk .view,body.desk .drawer{display:none}
+body{background:#0a0908;color:#e8e2d6;font-family:'Noto Serif SC',serif;font-weight:300;-webkit-font-smoothing:antialiased;overflow:hidden}
 
-/* ================= 雨夜书房 ================= */
-.stage{
-  position:fixed; inset:0; overflow:hidden; touch-action:none;
-  background:#0a0908;
-}
-.desk{
-  position:absolute; inset:0;
-  transform-style:preserve-3d;
-  perspective:1200px;
-}
+/* 3D 容器 */
+#scene-container{position:fixed;inset:0;z-index:1}
+#scene-container canvas{display:block;width:100%;height:100%;touch-action:none}
 
-/* ---- 墙面 ---- */
-.wall{
-  position:absolute; inset:0;
-  background:linear-gradient(180deg,#120f0c 0%,#1a1612 45%,#221d18 100%);
-}
-/* 墙面微妙纹理 */
-.wall::after{
-  content:''; position:absolute; inset:0; pointer-events:none; opacity:.35;
-  background-image:repeating-linear-gradient(90deg,transparent 0 120px,rgba(0,0,0,.08) 120px 121px);
-}
+/* 模式切换：desk 时显示 3D，隐藏 2D UI */
+body:not(.desk) #scene-container{display:none}
+body.desk #app,
+body.desk .scrim,
+body.desk .drawer,
+body.desk .view,
+body.desk .back-gate{display:none}
 
-/* ---- 窗户 ---- */
-.window-frame{
-  position:absolute; left:3%; top:4%; width:40%; height:58%;
-  border:10px solid #14100c;
-  border-radius:0 0 36px 36px;
-  background:linear-gradient(180deg,#1a2630 0%,#243440 35%,#1c2a35 70%,#162029 100%);
-  box-shadow:
-    inset 0 0 50px rgba(0,0,0,.55),
-    0 8px 28px rgba(0,0,0,.45);
-  overflow:hidden;
-}
-/* 窗外远处光 */
-.window-frame::before{
-  content:''; position:absolute; left:-20%; top:-10%; width:140%; height:70%;
-  background:radial-gradient(ellipse at 60% 30%,rgba(180,195,210,.08),transparent 55%);
-}
-/* 窗格 */
-.pane-h{
-  position:absolute; left:0; right:0; top:33%; height:2px;
-  background:rgba(10,8,6,.55);
-  box-shadow:0 1px 0 rgba(255,255,255,.04);
-}
-.pane-h2{ top:66%; }
-.pane-v{
-  position:absolute; top:0; bottom:0; left:50%; width:2px;
-  background:rgba(10,8,6,.55);
-  box-shadow:1px 0 0 rgba(255,255,255,.04);
-}
-/* 窗台 */
-.sill{
-  position:absolute; left:2%; top:62%; width:42%; height:3.5%;
-  background:linear-gradient(180deg,#2a1f16,#1f1710);
-  border-radius:0 0 4px 4px;
-  box-shadow:0 6px 14px rgba(0,0,0,.5);
-}
-/* 窗台上的小盆栽 */
-.plant-pot{
-  position:absolute; left:8%; top:59%; width:3.2%; aspect-ratio:1/1.1;
-  background:linear-gradient(180deg,#c4a882,#8f7355);
-  border-radius:30% 30% 40% 40%;
-  box-shadow:0 4px 10px rgba(0,0,0,.4);
-  z-index:5;
-}
-.plant-pot::after{
-  content:''; position:absolute; left:15%; top:-40%; width:70%; height:60%;
-  background:radial-gradient(circle at 40% 80%,#4a6b3a 0%,#2d4224 60%,transparent 61%);
-  border-radius:50% 50% 40% 40%;
-}
+/* 加载 */
+#loader{position:fixed;inset:0;z-index:200;background:#0a0908;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .8s}
+#loader .t{font-family:'Noto Serif SC',serif;font-size:20px;letter-spacing:.35em;color:#c9a84c}
+#loader .s{font-size:11px;color:#5a4e42;margin-top:14px;letter-spacing:.12em}
+#loader.done{opacity:0;pointer-events:none}
 
-/* ---- 雨滴 canvas ---- */
-#rainCanvas{
-  position:absolute; left:3%; top:4%; width:40%; height:58%;
-  pointer-events:none; z-index:3;
-}
+/* 标题 */
+.room-title{position:fixed;left:50%;top:22px;transform:translateX(-50%);z-index:10;text-align:center;pointer-events:none;transition:opacity .6s;opacity:0;animation:fadeInTitle 1.5s 1.2s forwards}
+.room-title .cn{font-family:'Noto Serif SC',serif;font-size:22px;letter-spacing:.28em;color:rgba(245,240,230,.65)}
+.room-title .en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:10px;letter-spacing:.18em;color:rgba(245,240,230,.35);margin-top:5px}
+@keyframes fadeInTitle{to{opacity:1}}
 
-/* ---- 桌面 ---- */
-.desk-surface{
-  position:absolute; left:-5%; top:64%; width:110%; height:40%;
-  background:linear-gradient(180deg,#3d2e22 0%,#2a1f16 60%,#1f1710 100%);
-  transform-origin:top center;
-  transform:perspective(900px) rotateX(6deg);
-  box-shadow:0 -12px 40px rgba(0,0,0,.55), inset 0 6px 12px rgba(0,0,0,.25);
-}
-/* 桌面木纹 */
-.desk-surface::before{
-  content:''; position:absolute; inset:0; opacity:.18; pointer-events:none;
-  background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(0,0,0,.06) 3px 4px);
-}
-
-/* ---- 台灯 ---- */
-.lamp{
-  position:absolute; right:10%; top:18%; width:90px; height:160px; z-index:8;
-  transform-origin:bottom center;
-}
-.lamp-shade{
-  position:absolute; left:5px; top:0; width:80px; height:50px;
-  background:linear-gradient(180deg,#f5e6c8 0%,#e8d5a8 60%,#d4c194 100%);
-  border-radius:50% 50% 8% 8%;
-  box-shadow:
-    0 0 100px 40px rgba(245,230,200,.18),
-    0 0 160px 80px rgba(245,230,200,.08),
-    inset 0 -4px 8px rgba(0,0,0,.08);
-  animation:lampBreath 5s ease-in-out infinite;
-}
-.lamp-shade::after{
-  content:''; position:absolute; left:10%; top:15%; width:80%; height:60%;
-  background:linear-gradient(180deg,rgba(255,255,255,.35),transparent);
-  border-radius:50% 50% 0 0;
-}
-.lamp-stem{
-  position:absolute; left:50%; top:48px; width:5px; height:70px; margin-left:-2.5px;
-  background:linear-gradient(90deg,#5c4a3a,#8a7560,#5c4a3a);
-  border-radius:3px;
-}
-.lamp-base{
-  position:absolute; left:50%; bottom:0; width:50px; height:18px; margin-left:-25px;
-  background:linear-gradient(180deg,#6b5440,#3d2e22);
-  border-radius:4px;
-  box-shadow:0 4px 10px rgba(0,0,0,.4);
-}
-/* 台灯光锥 */
-.light-cone{
-  position:absolute; right:0; top:30%; width:55%; height:55%;
-  background:radial-gradient(ellipse at 70% 20%,rgba(245,230,200,.10),transparent 60%);
-  pointer-events:none; z-index:4;
-  animation:coneBreath 5s ease-in-out infinite;
-}
-@keyframes lampBreath{
-  0%,100%{ filter:brightness(1); box-shadow:0 0 100px 40px rgba(245,230,200,.18),0 0 160px 80px rgba(245,230,200,.08),inset 0 -4px 8px rgba(0,0,0,.08);}
-  50%{ filter:brightness(1.06); box-shadow:0 0 110px 48px rgba(245,230,200,.22),0 0 180px 90px rgba(245,230,200,.10),inset 0 -4px 8px rgba(0,0,0,.08);}
-}
-@keyframes coneBreath{
-  0%,100%{ opacity:.85; }
-  50%{ opacity:1; }
-}
-
-/* ---- 通用物件 ---- */
-.item{
-  position:absolute; transform-style:preserve-3d;
-  cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none;
-  will-change:transform;
-  transition:box-shadow .3s ease, filter .3s ease, transform .25s cubic-bezier(.22,.61,.36,1);
-}
-.item.grabbing{ cursor:grabbing; filter:brightness(1.06) }
-.item .tagline{
-  position:absolute; left:50%; top:-18px; transform:translateX(-50%); white-space:nowrap;
-  font-size:7.5px; letter-spacing:.22em; color:rgba(245,240,230,.55);
-  text-shadow:0 1px 6px rgba(0,0,0,.6);
-  pointer-events:none;
-}
-
-/* ---- 日记本 diary ---- */
-.obj-diary{
-  width:19%; aspect-ratio:5/3.6;
-  background:linear-gradient(135deg,#5c3d2e,#3d2618);
-  border-radius:3px 6px 6px 3px;
-  box-shadow:0 10px 28px -6px rgba(0,0,0,.5),0 3px 8px rgba(0,0,0,.3);
-  display:flex; align-items:center; justify-content:center;
-}
-.obj-diary::before{
-  content:''; position:absolute; left:48%; top:6%; bottom:6%; width:2px;
-  background:rgba(0,0,0,.25); border-radius:1px;
-}
-.diary-page-l,.diary-page-r{
-  position:absolute; top:8%; bottom:8%; width:42%;
-  background:#f5f0e6;
-  border-radius:1px;
-}
-.diary-page-l{ left:5%; background:linear-gradient(90deg,#e8e2d6,#f5f0e6); }
-.diary-page-r{ right:5%; }
-.diary-lines{
-  position:absolute; left:8%; right:8%; top:14%; bottom:10%;
-  background:repeating-linear-gradient(0deg,transparent 0 10px,rgba(0,0,0,.06) 10px 11px);
-}
-.diary-scribble{
-  position:absolute; left:12%; top:22%; right:12%;
-  height:2px; background:rgba(0,0,0,.12); border-radius:1px;
-}
-.diary-scribble.s2{ top:38%; width:70%; }
-.diary-scribble.s3{ top:54%; width:55%; }
-
-/* ---- 唱片机 chat ---- */
-.obj-player{
-  width:20%; aspect-ratio:1/1;
-  background:linear-gradient(145deg,#2a1f16,#1f1710);
-  border-radius:10px;
-  box-shadow:0 12px 32px -8px rgba(0,0,0,.55),0 4px 10px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04);
-  display:flex; align-items:center; justify-content:center;
-}
-.player-platter{
-  width:68%; aspect-ratio:1/1; border-radius:50%;
-  background:linear-gradient(145deg,#1a1a1a,#0d0d0d);
-  box-shadow:inset 0 2px 6px rgba(0,0,0,.6),0 2px 4px rgba(255,255,255,.03);
-  display:flex; align-items:center; justify-content:center;
-  position:relative;
-}
-.vinyl{
-  width:78%; aspect-ratio:1/1; border-radius:50%;
-  background:
-    radial-gradient(circle at 50% 50%,#1a1a1a 0 8%,#222 9% 12%,#1a1a1a 13% 18%,#222 19% 22%,#1a1a1a 23% 28%,#222 29% 32%,#1a1a1a 33% 38%,#222 39% 42%,#1a1a1a 43% 48%,#0f0f0f 49% 100%);
-  animation:vinylSpin 4s linear infinite;
-  position:relative;
-}
-.vinyl::after{
-  content:''; position:absolute; left:50%; top:50%; width:18%; height:18%; margin:-9% 0 0 -9%;
-  background:#8A3B2C; border-radius:50%;
-}
-.player-arm{
-  position:absolute; right:10%; top:10%; width:4px; height:42%;
-  background:linear-gradient(90deg,#8a7560,#a08e78);
-  border-radius:2px; transform-origin:top center; transform:rotate(28deg);
-}
-.player-arm::after{
-  content:''; position:absolute; left:-3px; bottom:-4px; width:10px; height:10px;
-  background:#666; border-radius:50%;
-}
-@keyframes vinylSpin{ to{ transform:rotate(360deg);} }
-
-/* ---- 相框 album ---- */
-.obj-frame{
-  width:14%; aspect-ratio:3/4;
-  background:linear-gradient(145deg,#c9a84c,#a08438);
-  padding:2.5%;
-  border-radius:2px;
-  box-shadow:0 10px 28px -6px rgba(0,0,0,.45),0 3px 8px rgba(0,0,0,.3);
-  display:flex; align-items:center; justify-content:center;
-}
-.frame-inner{
-  width:100%; height:100%;
-  background:#2a2520;
-  border-radius:1px;
-  overflow:hidden;
-  position:relative;
-}
-.frame-inner img{
-  width:100%; height:100%; object-fit:cover; display:block;
-}
-.frame-stand{
-  position:absolute; left:50%; bottom:-6px; width:20%; height:6px; margin-left:-10%;
-  background:#6b5440; border-radius:0 0 2px 2px;
-}
-
-/* ---- 玻璃瓶 memory ---- */
-.obj-bottle{
-  width:9%; aspect-ratio:1/1.7;
-  background:rgba(200,220,230,.12);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:45% 45% 50% 50%;
-  box-shadow:
-    inset 0 0 20px rgba(255,255,255,.06),
-    0 8px 20px -4px rgba(0,0,0,.35);
-  display:flex; align-items:center; justify-content:center;
-  position:relative;
-}
-.bottle-neck{
-  position:absolute; left:35%; top:-14%; width:30%; height:16%;
-  background:rgba(200,220,230,.15);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:3px 3px 0 0;
-  border-bottom:0;
-}
-.bottle-cork{
-  position:absolute; left:38%; top:-18%; width:24%; height:6%;
-  background:#a08060; border-radius:2px;
-}
-.bottle-note{
-  position:absolute; left:15%; top:35%; width:70%; height:40%;
-  background:rgba(255,245,220,.75);
-  border-radius:1px;
-  transform:rotate(-6deg);
-  box-shadow:0 2px 6px rgba(0,0,0,.15);
-}
-.bottle-note::after{
-  content:''; position:absolute; left:10%; top:30%; width:80%; height:1px; background:rgba(0,0,0,.1);
-}
-
-/* ---- 设置盒 settings ---- */
-.obj-box{
-  width:11%; aspect-ratio:1/1;
-  background:linear-gradient(145deg,#3d2618,#2a1a10);
-  border-radius:4px;
-  box-shadow:0 8px 22px -5px rgba(0,0,0,.45),0 2px 6px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.04);
-  display:flex; align-items:center; justify-content:center;
-  position:relative;
-}
-.obj-box .box-lid{
-  position:absolute; left:-2%; top:-6%; width:104%; height:18%;
-  background:linear-gradient(180deg,#4a3020,#3d2618);
-  border-radius:3px 3px 1px 1px;
-  box-shadow:0 2px 6px rgba(0,0,0,.3);
-}
-.obj-box .box-mark{
-  font-family:'Noto Serif SC',serif; font-size:22px; color:rgba(245,240,230,.35);
-  letter-spacing:.1em;
-}
-
-/* ---- 咖啡杯（装饰） ---- */
-.obj-cup{
-  width:7%; aspect-ratio:1/1;
-  background:linear-gradient(145deg,#c4b8a8,#a69888);
-  border-radius:50%;
-  box-shadow:0 6px 14px -3px rgba(0,0,0,.4),inset 0 -2px 4px rgba(0,0,0,.1);
-  position:relative;
-}
-.obj-cup::after{
-  content:''; position:absolute; right:-28%; top:28%; width:28%; height:36%;
-  border:3px solid #b0a290; border-radius:0 40% 40% 0; border-left:0;
-}
-.cup-steam{
-  position:absolute; left:30%; top:-30%; width:40%; height:30%;
-  background:linear-gradient(0deg,rgba(255,255,255,.08),transparent);
-  border-radius:50%;
-  animation:steam 3s ease-in-out infinite;
-}
-@keyframes steam{
-  0%,100%{ transform:translateY(0) scale(1); opacity:.5; }
-  50%{ transform:translateY(-6px) scale(1.1); opacity:.2; }
-}
-
-/* ---- 底部提示 ---- */
-.hint-tap{ position:fixed; left:0; right:0; bottom:6px; text-align:center;
-  font-size:8px; letter-spacing:.28em; color:rgba(245,240,230,.25); z-index:400; pointer-events:none }
-
-.back-gate{ position:fixed; left:10px; bottom:14px; z-index:500;
-  padding:6px 14px; border-radius:999px; border:1px solid rgba(255,255,255,.12);
-  background:rgba(20,16,12,.6); color:#e8e2d6; font-family:inherit; font-size:11px;
-  transition:transform .28s; backdrop-filter:blur(6px);
-  letter-spacing:.08em;
-}
-.back-gate:active{ transform:scale(.93) }
-body.desk .back-gate{ display:none }
-
-/* 阴影跟随 z 的函数在 JS 里复用 */
+/* 提示 */
+.hint-3d{position:fixed;left:0;right:0;bottom:14px;text-align:center;font-size:10px;letter-spacing:.22em;color:rgba(245,240,230,.3);z-index:10;pointer-events:none;transition:opacity .6s;opacity:0;animation:fadeInHint 1.5s 2s forwards}
+@keyframes fadeInHint{to{opacity:1}}
 </style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
 </head>
-<body class='desk'>
+<body class="desk">
 
-<div class='stage' id='stage'>
-  <div class='desk' id='desk'>
-    <div class='wall'></div>
-
-    <!-- 窗户 -->
-    <div class='window-frame'>
-      <div class='pane-h'></div><div class='pane-h pane-h2'></div><div class='pane-v'></div>
-    </div>
-    <canvas id='rainCanvas'></canvas>
-    <div class='sill'></div>
-    <div class='plant-pot'></div>
-
-    <!-- 台灯光 -->
-    <div class='light-cone'></div>
-
-    <!-- 桌面 -->
-    <div class='desk-surface'></div>
-
-    <!-- 台灯 -->
-    <div class='item lamp' data-x='72' data-y='8' data-r='0' data-z='60'>
-      <div class='lamp-shade'></div>
-      <div class='lamp-stem'></div>
-      <div class='lamp-base'></div>
-    </div>
-
-    <!-- 日记本 -->
-    <div class='item obj-diary' data-go='diary' data-x='8' data-y='70' data-r='-4' data-z='44'>
-      <span class='tagline'>今日留字</span>
-      <div class='diary-page-l'></div>
-      <div class='diary-page-r'><div class='diary-lines'></div><div class='diary-scribble'></div><div class='diary-scribble s2'></div><div class='diary-scribble s3'></div></div>
-    </div>
-
-    <!-- 唱片机 -->
-    <div class='item obj-player' data-go='chat' data-x='34' data-y='68' data-r='2' data-z='48'>
-      <span class='tagline'>正在放此刻</span>
-      <div class='player-platter'><div class='vinyl'></div></div>
-      <div class='player-arm'></div>
-    </div>
-
-    <!-- 相框 -->
-    <div class='item obj-frame' data-go='album' data-x='60' data-y='72' data-r='-3' data-z='46'>
-      <span class='tagline'>记忆存档</span>
-      <div class='frame-inner' id='polPh'><div class='scene' style='width:100%;height:100%;background:linear-gradient(180deg,#2C3747,#3B4455,#22282F);'></div></div>
-      <div class='frame-stand'></div>
-    </div>
-
-    <!-- 玻璃瓶 -->
-    <div class='item obj-bottle' data-go='memory' data-x='80' data-y='74' data-r='5' data-z='42'>
-      <span class='tagline'>怕忘的事</span>
-      <div class='bottle-neck'></div><div class='bottle-cork'></div><div class='bottle-note'></div>
-    </div>
-
-    <!-- 设置盒 -->
-    <div class='item obj-box' data-go='settings' data-x='20' data-y='82' data-r='-2' data-z='40'>
-      <span class='tagline'>接线</span>
-      <div class='box-lid'></div>
-      <div class='box-mark'>里</div>
-    </div>
-
-    <!-- 咖啡杯（纯装饰） -->
-    <div class='item obj-cup' data-x='50' data-y='85' data-r='8' data-z='38'>
-      <div class='cup-steam'></div>
-    </div>
-
-  </div>
-  <div class='hint-tap'>拖一下 · 点一下</div>
+<!-- 加载 -->
+<div id="loader">
+  <div class="t">里屋</div>
+  <div class="s">正在布置雨夜书房……</div>
 </div>
 
-<!-- 以下保留原有 App 结构 -->
-<div id='app'>
-  <header class='top'>
-    <button class='icon' id='menuBtn' type='button' aria-label='会话列表'>≡</button>
-    <div class='top-mid'><span class='top-title' id='topTitle'>里屋</span><span class='top-sub' id='topSub'></span></div>
-    <div class='top-right'><span class='days' id='topDays'></span><button class='icon' id='newBtn' type='button' aria-label='新的一段'>＋</button></div>
+<!-- 3D 场景 -->
+<div id="scene-container"></div>
+
+<!-- 标题 -->
+<div class="room-title">
+  <div class="cn">里屋</div>
+  <div class="en">Rainy Night Study</div>
+</div>
+
+<!-- 提示 -->
+<div class="hint-3d">拖拽旋转视角 · 点击桌面物品</div>
+
+<!-- App —— 与原有结构完全一致 -->
+<div id="app">
+  <header class="top">
+    <button class="icon" id="menuBtn" type="button" aria-label="会话列表">≡</button>
+    <div class="top-mid"><span class="top-title" id="topTitle">里屋</span><span class="top-sub" id="topSub"></span></div>
+    <div class="top-right"><span class="days" id="topDays"></span><button class="icon" id="newBtn" type="button" aria-label="新的一段">＋</button></div>
   </header>
-  <main class='thread' id='thread'></main>
-  <footer class='composer'>
-    <form class='in-row' id='form'>
-      <textarea id='input' rows='1' placeholder='说一句' autocapitalize='off'></textarea>
-      <button class='send' id='sendBtn' type='submit' aria-label='发'>↑</button>
-      <button class='stop' id='stopBtn' type='button' aria-label='停' hidden>■</button>
+  <main class="thread" id="thread"></main>
+  <footer class="composer">
+    <form class="in-row" id="form">
+      <textarea id="input" rows="1" placeholder="说一句" autocapitalize="off"></textarea>
+      <button class="send" id="sendBtn" type="submit" aria-label="发">↑</button>
+      <button class="stop" id="stopBtn" type="button" aria-label="停" hidden>■</button>
     </form>
-    <div class='hint' id='hint'></div>
+    <div class="hint" id="hint"></div>
   </footer>
 </div>
 
-<div class='scrim' id='scrim' hidden></div>
+<div class="scrim" id="scrim" hidden></div>
 
-<aside class='drawer' id='drawer' hidden>
-  <div class='drawer-in'>
-    <div class='drawer-top'><span class='brandmark'>里屋</span><span class='drawer-days' id='drawerDays'></span></div>
-    <button class='newchat' id='newChat' type='button'>新的一段</button>
-    <input class='search' id='search' placeholder='找一段话' autocomplete='off'>
-    <div class='sessions' id='sessions'></div>
-    <nav class='drawer-nav'>
-      <button type='button' data-view='home'>回桌子</button>
-      <button type='button' data-view='diary'>日记</button>
-      <button type='button' data-view='album'>相册</button>
-      <button type='button' data-view='memory'>记忆</button>
-      <button type='button' data-view='settings'>设置</button>
+<aside class="drawer" id="drawer" hidden>
+  <div class="drawer-in">
+    <div class="drawer-top"><span class="brandmark">里屋</span><span class="drawer-days" id="drawerDays"></span></div>
+    <button class="newchat" id="newChat" type="button">新的一段</button>
+    <input class="search" id="search" placeholder="找一段话" autocomplete="off">
+    <div class="sessions" id="sessions"></div>
+    <nav class="drawer-nav">
+      <button type="button" data-view="home">回桌子</button>
+      <button type="button" data-view="diary">日记</button>
+      <button type="button" data-view="album">相册</button>
+      <button type="button" data-view="memory">记忆</button>
+      <button type="button" data-view="settings">设置</button>
     </nav>
   </div>
 </aside>
 
-<section class='view' id='view' hidden>
-  <header class='view-top'>
-    <button class='icon' id='viewBack' type='button' aria-label='回去'>←</button>
-    <span class='view-title' id='viewTitle'></span><span class='view-en' id='viewEn'></span>
+<section class="view" id="view" hidden>
+  <header class="view-top">
+    <button class="icon" id="viewBack" type="button" aria-label="回去">←</button>
+    <span class="view-title" id="viewTitle"></span><span class="view-en" id="viewEn"></span>
   </header>
-  <div class='view-body' id='viewBody'></div>
+  <div class="view-body" id="viewBody"></div>
 </section>
 
-<button class='back-gate' id='backGate' type='button'>回桌子</button>
+<button class="back-gate" id="backGate" type="button">回桌子</button>
 
 <script>
 window.addEventListener('error', function(e){
   var h = document.getElementById('hint');
   if (h) h.textContent = '出了点问题：' + (e.message || '未知');
 });
+window.addEventListener('unhandledrejection', function(e){
+  var h = document.getElementById('hint');
+  if (h) h.textContent = '出了点问题：' + (e.reason && e.reason.message || '未知');
+});
 </script>
-<script src='data.js?v=38'></script>
-<script src='assets/app.js?v=38'></script>
-<script>
-(function(){
-  var D = window.LIWU || {};
+<script src="data.js?v=39"></script>
+<script type="module">
+/* ============================================
+   里屋 3D 雨夜书房 — Three.js 场景
+   ============================================ */
 
-  /* ---- 雨滴 ---- */
-  var canvas = document.getElementById('rainCanvas');
-  var ctx = canvas.getContext('2d');
-  var rains = [];
-  var W, H;
-  function resizeRain(){
-    var rect = canvas.getBoundingClientRect();
-    W = canvas.width = rect.width;
-    H = canvas.height = rect.height;
-  }
-  resizeRain();
-  window.addEventListener('resize', resizeRain);
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-  for(var i=0;i<70;i++){
-    rains.push({
-      x: Math.random()*W,
-      y: Math.random()*H,
-      sp: 1.5 + Math.random()*3,
-      len: 6 + Math.random()*10,
-      op: 0.15 + Math.random()*0.25
-    });
+const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+
+const container = document.getElementById('scene-container');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0908);
+scene.fog = new THREE.Fog(0x0a0908, 6, 18);
+
+const camera = new THREE.PerspectiveCamera(
+  42, window.innerWidth / window.innerHeight, 0.1, 100
+);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.9;
+container.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.04;
+controls.target.set(0, 0.85, 0);
+controls.minDistance = 1.8;
+controls.maxDistance = 5.5;
+controls.maxPolarAngle = Math.PI / 2.08;
+controls.minPolarAngle = 0.35;
+controls.enablePan = false;
+
+/* ---- 灯光 ---- */
+const ambientLight = new THREE.AmbientLight(0x2a2330, 0.4);
+scene.add(ambientLight);
+
+const moonLight = new THREE.DirectionalLight(0x6688aa, 0.25);
+moonLight.position.set(-8, 6, -4);
+moonLight.castShadow = true;
+moonLight.shadow.mapSize.set(512, 512);
+scene.add(moonLight);
+
+const lampLight = new THREE.PointLight(0xf5dca8, 2.8, 9, 1.8);
+lampLight.position.set(1.1, 1.55, -0.3);
+lampLight.castShadow = true;
+lampLight.shadow.mapSize.set(768, 768);
+lampLight.shadow.bias = -0.001;
+scene.add(lampLight);
+
+const lampBounce = new THREE.PointLight(0xd4b896, 0.4, 5, 2);
+lampBounce.position.set(0, 2.5, 0);
+scene.add(lampBounce);
+
+/* ---- 材质 ---- */
+const mats = {
+  woodDark: new THREE.MeshStandardMaterial({ color: 0x2e2218, roughness: 0.92 }),
+  woodMid: new THREE.MeshStandardMaterial({ color: 0x4a3728, roughness: 0.88 }),
+  wall: new THREE.MeshStandardMaterial({ color: 0x15100c, roughness: 1.0 }),
+  wallSide: new THREE.MeshStandardMaterial({ color: 0x181410, roughness: 1.0 }),
+  metal: new THREE.MeshStandardMaterial({ color: 0x666666, metalness: 0.8, roughness: 0.3 }),
+  paper: new THREE.MeshStandardMaterial({ color: 0xf5f0e6, roughness: 0.9 }),
+  leather: new THREE.MeshStandardMaterial({ color: 0x5c3d2e, roughness: 0.85 }),
+  glass: new THREE.MeshStandardMaterial({ color: 0xaaccdd, transparent: true, opacity: 0.35, roughness: 0.05, metalness: 0.15 }),
+  gold: new THREE.MeshStandardMaterial({ color: 0xb8a88a, metalness: 0.35, roughness: 0.5 }),
+  ceramic: new THREE.MeshStandardMaterial({ color: 0xf5f0e6, roughness: 0.3 }),
+  plant: new THREE.MeshStandardMaterial({ color: 0x4a7c59, roughness: 0.8 }),
+  frameWood: new THREE.MeshStandardMaterial({ color: 0x3d3028, roughness: 0.9 }),
+  lampShade: new THREE.MeshStandardMaterial({ color: 0xf5e6c8, side: THREE.DoubleSide, transparent: true, opacity: 0.88 }),
+  lampBulb: new THREE.MeshBasicMaterial({ color: 0xfff8e7 }),
+  vinyl: new THREE.MeshStandardMaterial({ color: 0x151515, roughness: 0.25, metalness: 0.15 }),
+  vinylLabel: new THREE.MeshStandardMaterial({ color: 0xc9a84c }),
+  outside: new THREE.MeshBasicMaterial({ color: 0x0d1620 }),
+};
+
+/* ---- 房间 ---- */
+function buildRoom() {
+  const g = new THREE.Group();
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), mats.woodDark);
+  floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
+  g.add(floor);
+  const bw = new THREE.Mesh(new THREE.PlaneGeometry(20, 10), mats.wall);
+  bw.position.set(0, 5, -3); bw.receiveShadow = true; g.add(bw);
+  const lw = new THREE.Mesh(new THREE.PlaneGeometry(20, 10), mats.wallSide);
+  lw.position.set(-3.5, 5, 0); lw.rotation.y = Math.PI / 2; lw.receiveShadow = true; g.add(lw);
+  const rw = new THREE.Mesh(new THREE.PlaneGeometry(20, 10), mats.wallSide);
+  rw.position.set(3.5, 5, 0); rw.rotation.y = -Math.PI / 2; rw.receiveShadow = true; g.add(rw);
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: 0x0f0c0a, roughness: 1 }));
+  ceil.rotation.x = Math.PI / 2; ceil.position.y = 3.2; g.add(ceil);
+  return g;
+}
+scene.add(buildRoom());
+
+/* ---- 窗户 ---- */
+function buildWindow() {
+  const g = new THREE.Group();
+  const fc = mats.frameWood;
+  const vGeo = new THREE.BoxGeometry(0.08, 2.2, 0.08);
+  const hGeo = new THREE.BoxGeometry(0.08, 0.08, 1.7);
+  g.add(new THREE.Mesh(vGeo, fc)).children[0].position.set(0, 1.1, -0.85);
+  g.add(new THREE.Mesh(vGeo, fc)).children[1].position.set(0, 1.1, 0.85);
+  g.add(new THREE.Mesh(hGeo, fc)).children[2].position.set(0, 2.2, 0);
+  g.add(new THREE.Mesh(hGeo, fc)).children[3].position.set(0, 0, 0);
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(0.06, 2.2, 0.06), fc)).children[4].position.set(0, 1.1, 0);
+  g.add(new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 1.7), fc)).children[5].position.set(0, 1.1, 0);
+  const glass = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 2.2),
+    new THREE.MeshStandardMaterial({ color: 0x1a2a3a, transparent: true, opacity: 0.25, roughness: 0.02, metalness: 0.95 }));
+  glass.rotation.y = Math.PI / 2; glass.position.set(0.02, 1.1, 0); g.add(glass);
+  const out = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), mats.outside);
+  out.rotation.y = Math.PI / 2; out.position.set(-1, 1.1, 0); g.add(out);
+  const sill = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.06, 1.85), mats.woodMid);
+  sill.position.set(0.06, 0.03, 0); g.add(sill);
+  // 盆栽
+  const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.055, 0.09, 12), new THREE.MeshStandardMaterial({ color: 0x8b5a2b }));
+  pot.position.set(0.08, 0.075, 0.4); g.add(pot);
+  const soil = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.015, 12), new THREE.MeshStandardMaterial({ color: 0x3d2b1a }));
+  soil.position.set(0.08, 0.12, 0.4); g.add(soil);
+  for (let i = 0; i < 6; i++) {
+    const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.03 + Math.random() * 0.025, 6, 6), mats.plant);
+    leaf.position.set(0.08 + (Math.random() - 0.5) * 0.06, 0.16 + Math.random() * 0.08, 0.4 + (Math.random() - 0.5) * 0.06);
+    leaf.scale.y = 1.4; g.add(leaf);
   }
-  function drawRain(){
-    ctx.clearRect(0,0,W,H);
-    for(var i=0;i<rains.length;i++){
-      var r = rains[i];
-      ctx.beginPath();
-      ctx.strokeStyle = 'rgba(200,215,230,'+r.op+')';
-      ctx.lineWidth = 1;
-      ctx.moveTo(r.x, r.y);
-      ctx.lineTo(r.x, r.y + r.len);
-      ctx.stroke();
-      r.y += r.sp;
-      if(r.y > H){ r.y = -r.len; r.x = Math.random()*W; }
+  g.position.set(-3.45, 0, -0.3);
+  return g;
+}
+scene.add(buildWindow());
+
+/* ---- 桌面 ---- */
+const desk = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.06, 1.3), mats.woodMid);
+desk.position.set(0, 0.78, 0.2);
+desk.receiveShadow = true; desk.castShadow = true;
+scene.add(desk);
+
+const legGeo = new THREE.BoxGeometry(0.08, 0.78, 0.08);
+[[-1.15, 0.39, 0.55], [1.15, 0.39, 0.55], [-1.15, 0.39, -0.35], [1.15, 0.39, -0.35]].forEach(p => {
+  const leg = new THREE.Mesh(legGeo, mats.woodDark);
+  leg.position.set(...p); leg.castShadow = true; scene.add(leg);
+});
+
+/* ---- 交互物品 ---- */
+const interactives = [];
+function makeInteractive(group, key, label) {
+  group.userData = { go: key, label };
+  interactives.push(group);
+  scene.add(group);
+}
+
+// 日记
+function buildDiary() {
+  const g = new THREE.Group();
+  const b = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.02, 0.42), mats.leather);
+  const p = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.015, 0.38), mats.paper);
+  p.position.y = 0.017;
+  const t = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.02, 0.42), mats.leather);
+  t.position.set(0, 0.035, -0.04); t.rotation.x = -0.15;
+  g.add(b, p, t);
+  g.position.set(-0.7, 0.81, 0.35); g.rotation.y = 0.2;
+  return g;
+}
+makeInteractive(buildDiary(), 'diary', '今日留字');
+
+// 唱片机
+function buildTurntable() {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.1, 0.6), new THREE.MeshStandardMaterial({ color: 0x2a2520, roughness: 0.6 }));
+  body.position.y = 0.05;
+  const platter = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.015, 32), new THREE.MeshStandardMaterial({ color: 0x1a1a1a }));
+  platter.position.y = 0.11;
+  const vinyl = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.004, 32), mats.vinyl);
+  vinyl.position.y = 0.118;
+  const label = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.005, 16), mats.vinylLabel);
+  label.position.y = 0.121;
+  const armG = new THREE.Group();
+  const armBase = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.035, 8), mats.metal);
+  armBase.position.set(0.22, 0.11, -0.18);
+  const arm = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.012, 0.28), mats.metal);
+  arm.position.set(0.1, 0.02, 0.05); arm.rotation.y = 0.35;
+  armG.add(armBase, arm);
+  g.add(body, platter, vinyl, label, armG);
+  g.position.set(0.35, 0.81, -0.05); g.rotation.y = -0.1;
+  g.userData.platter = platter; g.userData.vinyl = vinyl; g.userData.label = label;
+  return g;
+}
+makeInteractive(buildTurntable(), 'chat', '你的声音');
+
+// 相框
+function buildFrame() {
+  const g = new THREE.Group();
+  const outer = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.015, 0.48), mats.gold);
+  const photo = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.4), new THREE.MeshStandardMaterial({ color: 0x3a5a7a }));
+  photo.rotation.x = -Math.PI / 2; photo.position.y = 0.008;
+  const stand = new THREE.Mesh(new THREE.BoxGeometry(0.015, 0.18, 0.04), mats.gold);
+  stand.position.set(0, -0.09, -0.24); stand.rotation.x = -0.4;
+  g.add(outer, photo, stand);
+  g.position.set(-0.15, 0.83, -0.35);
+  return g;
+}
+makeInteractive(buildFrame(), 'album', '回忆相簿');
+
+// 玻璃瓶
+function buildBottle() {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.22, 16), mats.glass);
+  body.position.y = 0.11;
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.07, 0.07, 16), mats.glass);
+  neck.position.y = 0.255;
+  const cork = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.045, 16), new THREE.MeshStandardMaterial({ color: 0x8b6914 }));
+  cork.position.y = 0.31;
+  const note = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.1, 0.004), mats.paper);
+  note.position.set(0.015, 0.13, 0); note.rotation.z = 0.25;
+  g.add(body, neck, cork, note);
+  g.position.set(0.85, 0.81, 0.2); g.rotation.y = 0.4;
+  return g;
+}
+makeInteractive(buildBottle(), 'memory', '漂流记忆');
+
+// 设置盒
+function buildBox() {
+  const g = new THREE.Group();
+  const box = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.16, 0.22), mats.woodDark);
+  box.position.y = 0.08;
+  const lid = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.025, 0.24), new THREE.MeshStandardMaterial({ color: 0x5a4738, roughness: 0.9 }));
+  lid.position.y = 0.172;
+  const mark = new THREE.Mesh(new THREE.PlaneGeometry(0.06, 0.06), new THREE.MeshStandardMaterial({ color: 0x1a1410 }));
+  mark.rotation.x = -Math.PI / 2; mark.position.set(0, 0.186, 0);
+  g.add(box, lid, mark);
+  g.position.set(-0.9, 0.81, -0.25); g.rotation.y = 0.3;
+  return g;
+}
+makeInteractive(buildBox(), 'settings', '偏好设置');
+
+// 咖啡杯（装饰）
+function buildCup() {
+  const g = new THREE.Group();
+  const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.045, 0.09, 16), mats.ceramic);
+  cup.position.y = 0.045;
+  const saucer = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.012, 16), mats.ceramic);
+  const handle = new THREE.Mesh(new THREE.TorusGeometry(0.03, 0.007, 8, 14, Math.PI), mats.ceramic);
+  handle.position.set(0.055, 0.045, 0); handle.rotation.y = Math.PI / 2;
+  g.add(saucer, cup, handle);
+  g.position.set(0.7, 0.81, 0.45);
+  return g;
+}
+scene.add(buildCup());
+
+// 台灯
+function buildLamp() {
+  const g = new THREE.Group();
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.02, 16), new THREE.MeshStandardMaterial({ color: 0x2a2520, metalness: 0.4 }));
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.01, 0.01, 0.5, 8), mats.metal);
+  pole.position.y = 0.26;
+  const shade = new THREE.Mesh(new THREE.ConeGeometry(0.16, 0.18, 16, 1, true), mats.lampShade);
+  shade.position.y = 0.52;
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.035), mats.lampBulb);
+  bulb.position.y = 0.46;
+  g.add(base, pole, shade, bulb, lampLight.clone());
+  g.children[4].position.set(0, 0.46, 0);
+  g.position.set(1.05, 0.81, -0.35);
+  return g;
+}
+const lampGroup = buildLamp();
+scene.add(lampGroup);
+
+/* ---- 雨滴 ---- */
+const rainCount = 250;
+const rainGeo = new THREE.BufferGeometry();
+const rainPos = new Float32Array(rainCount * 3);
+const rainSpeed = new Float32Array(rainCount);
+for (let i = 0; i < rainCount; i++) {
+  rainPos[i * 3] = -3.35 + Math.random() * 1.7;
+  rainPos[i * 3 + 1] = 0.2 + Math.random() * 2.8;
+  rainPos[i * 3 + 2] = -1.1 + Math.random() * 1.7;
+  rainSpeed[i] = 0.04 + Math.random() * 0.04;
+}
+rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3));
+const rainMat = new THREE.PointsMaterial({ color: 0x99bbcc, size: 0.018, transparent: true, opacity: 0.5, sizeAttenuation: true });
+const rainSystem = new THREE.Points(rainGeo, rainMat);
+scene.add(rainSystem);
+
+/* ---- 交互 ---- */
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2(-10, -10);
+let hovered = null;
+let tooltipEl = null;
+
+function showTooltip(text, x, y) {
+  if (!tooltipEl) {
+    tooltipEl = document.createElement('div');
+    tooltipEl.style.cssText = 'position:fixed;z-index:20;padding:4px 10px;border-radius:4px;background:rgba(20,16,12,.8);color:#e8e2d6;font-size:11px;letter-spacing:.1em;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px);white-space:nowrap;';
+    document.body.appendChild(tooltipEl);
+  }
+  tooltipEl.textContent = text;
+  tooltipEl.style.left = (x + 14) + 'px';
+  tooltipEl.style.top = (y - 28) + 'px';
+  tooltipEl.style.opacity = '1';
+}
+function hideTooltip() { if (tooltipEl) tooltipEl.style.opacity = '0'; }
+
+window.addEventListener('mousemove', e => {
+  mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+});
+
+function highlight(obj) {
+  obj.traverse(c => {
+    if (c.isMesh && c.material && !c.userData.origEmissive) {
+      c.userData.origEmissive = c.material.emissive ? c.material.emissive.clone() : new THREE.Color(0,0,0);
+      if (c.material.emissive) c.material.emissive.setHex(0x221a10);
     }
-    requestAnimationFrame(drawRain);
-  }
-  drawRain();
-
-  /* ---- 数据绑定 ---- */
-  if(D.weather){
-    // 天气已在 data.js 中，这里仅占位保持兼容
-  }
-  if(D.album && D.album[0] && D.album[0].src){
-    var ph = document.getElementById('polPh');
-    if(ph){
-      var img = document.createElement('img');
-      img.src = D.album[0].src;
-      img.alt = '';
-      img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;';
-      ph.innerHTML = '';
-      ph.appendChild(img);
+  });
+}
+function unhighlight(obj) {
+  obj.traverse(c => {
+    if (c.isMesh && c.material && c.userData.origEmissive) {
+      c.material.emissive.copy(c.userData.origEmissive);
+      delete c.userData.origEmissive;
     }
+  });
+}
+
+window.addEventListener('click', e => {
+  if (!document.body.classList.contains('desk')) return;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(interactives, true);
+  if (hits.length > 0) {
+    let obj = hits[0].object;
+    while (obj && !obj.userData.go) obj = obj.parent;
+    if (obj && obj.userData.go) enterView(obj.userData.go, obj);
   }
+});
 
-  /* ---- 桌面交互（兼容原有 desk8 存档） ---- */
-  var items = document.querySelectorAll('.item');
-  var store = {};
-  try{ store = JSON.parse(localStorage.getItem('liwu.desk8') || '{}') || {}; }catch(e){}
-
-  function shadowFor(z){
-    var k = Math.max(0, Math.min(1, z / 60));
-    var y = 8 + 12 * k;
-    var b = 18 + 26 * k;
-    var s = -6 - 5 * k;
-    var a1 = 0.30 + 0.18 * k;
-    var a2 = 0.12 + 0.07 * k;
-    return '0 ' + y.toFixed(1) + 'px ' + b.toFixed(1) + 'px ' + s.toFixed(1) + 'px rgba(0,0,0,' + a1.toFixed(2) + '), ' +
-           '0 ' + (y * 0.45).toFixed(1) + 'px ' + (b * 0.42).toFixed(1) + 'px rgba(0,0,0,' + a2.toFixed(2) + ')';
-  }
-
-  function place(el, lift){
-    el.style.left = el._x + '%';
-    el.style.top = el._y + '%';
-    var z = el._z + (lift || 0);
-    var sc = 1 + (lift ? 0.035 : 0);
-    el.style.transform = 'translateZ(' + z + 'px) rotate(' + el._r + 'deg) scale(' + sc + ') translate3d(0,0,0)';
-    el.style.zIndex = Math.round(z) + '';
-    el.style.boxShadow = shadowFor(z);
-  }
-
-  for(var i=0;i<items.length;i++){
-    (function(el){
-      var key = el.getAttribute('data-go') || el.className.replace('item ', '').replace(/obj-\w+/,'').trim().split(' ')[0];
-      var sv = store[key];
-      el._x = sv ? sv.x : parseFloat(el.getAttribute('data-x'));
-      el._y = sv ? sv.y : parseFloat(el.getAttribute('data-y'));
-      el._r = sv ? sv.r : parseFloat(el.getAttribute('data-r') || '0');
-      el._z = parseFloat(el.getAttribute('data-z') || '0');
-      place(el, 0);
-
-      var sx=0, sy=0, ox=0, oy=0, moved=false, down=false;
-
-      el.addEventListener('pointerdown', function(ev){
-        down = true; moved = false;
-        sx = ev.clientX; sy = ev.clientY; ox = el._x; oy = el._y;
-        el.classList.add('grabbing');
-        el.style.transition = 'none';
-        place(el, 28);
-        try{ el.setPointerCapture(ev.pointerId); }catch(e){}
-      });
-
-      el.addEventListener('pointermove', function(ev){
-        if(!down) return;
-        var dx = ev.clientX - sx, dy = ev.clientY - sy;
-        if(Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
-        var dw = document.getElementById('desk').offsetWidth || 1;
-        var dh = document.getElementById('desk').offsetHeight || 1;
-        el._x = Math.max(-4, Math.min(92, ox + (dx / dw) * 100));
-        el._y = Math.max(-2, Math.min(90, oy + (dy / dh) * 100));
-        el.style.left = el._x + '%';
-        el.style.top = el._y + '%';
-      });
-
-      function up(){
-        if(!down) return;
-        down = false;
-        el.classList.remove('grabbing');
-        el.style.transition = 'box-shadow .25s ease, transform .25s cubic-bezier(.22,.61,.36,1)';
-        place(el, 0);
-        if(key) store[key] = { x: el._x, y: el._y, r: el._r };
-        try{ localStorage.setItem('liwu.desk8', JSON.stringify(store)); }catch(e){}
-      }
-
-      el.addEventListener('pointerup', function(){
-        var wasMoved = moved;
-        up();
-        if(wasMoved) return;
-        var go = el.getAttribute('data-go');
-        if(go) open(go);
-      });
-      el.addEventListener('pointercancel', up);
-    })(items[i]);
-  }
-
-  /* 桌面轻微倾斜（取消指针跟随，雨夜书房不需要） */
-  var desk = document.getElementById('desk');
-  desk.style.transform = 'rotateX(2deg)';
-
-  function open(key){
-    document.body.classList.remove('desk');
-    if(key === 'chat'){
-      var inp = document.getElementById('input');
-      if(inp) setTimeout(function(){ inp.focus(); }, 200);
+/* 点击进入视图 */
+let isTransitioning = false;
+function enterView(goKey, targetObj) {
+  if (isTransitioning) return;
+  isTransitioning = true;
+  const objPos = new THREE.Vector3();
+  targetObj.getWorldPosition(objPos);
+  const camEnd = objPos.clone().add(new THREE.Vector3(0.2, 0.25, 0.7));
+  const lookEnd = objPos.clone();
+  const camStart = camera.position.clone();
+  const lookStart = controls.target.clone();
+  let t = 0;
+  function step() {
+    t += 0.025;
+    if (t >= 1) {
+      camera.position.copy(camEnd);
+      controls.target.copy(lookEnd);
+      setTimeout(() => {
+        document.body.classList.remove('desk');
+        if (goKey === 'chat') {
+          const inp = document.getElementById('input');
+          if (inp) setTimeout(() => inp.focus(), 200);
+        } else {
+          const map = { diary: 'diary', album: 'album', memory: 'memory', settings: 'settings' };
+          const viewKey = map[goKey];
+          if (viewKey) {
+            const btn = document.querySelector('.drawer-nav [data-view="' + viewKey + '"]');
+            if (btn) btn.click();
+          }
+        }
+        isTransitioning = false;
+      }, 250);
       return;
     }
-    var b = document.querySelector('.drawer-nav [data-view="' + key + '"]');
-    if(b) setTimeout(function(){ b.click(); }, 40);
+    const e = easeOutCubic(t);
+    camera.position.lerpVectors(camStart, camEnd, e);
+    controls.target.lerpVectors(lookStart, lookEnd, e);
+    requestAnimationFrame(step);
+  }
+  step();
+}
+
+/* 回桌子 */
+document.getElementById('backGate').addEventListener('click', () => {
+  document.body.classList.add('desk');
+  const v = document.getElementById('view');
+  if (v) v.hidden = true;
+});
+
+/* 回桌子导航按钮 */
+const homeNav = document.querySelector('.drawer-nav [data-view="home"]');
+if (homeNav) {
+  homeNav.addEventListener('click', () => {
+    setTimeout(() => {
+      document.body.classList.add('desk');
+      const v = document.getElementById('view');
+      if (v) v.hidden = true;
+    }, 20);
+  });
+}
+
+/* ---- 动画 ---- */
+let introT = 0;
+const introFrom = new THREE.Vector3(4.5, 3.5, 6);
+const introTo = new THREE.Vector3(2.2, 1.6, 3.5);
+camera.position.copy(introFrom);
+
+function animate() {
+  requestAnimationFrame(animate);
+  if (introT < 1) {
+    introT += 0.006;
+    const e = easeOutCubic(Math.min(introT, 1));
+    camera.position.lerpVectors(introFrom, introTo, e);
+  }
+  const positions = rainSystem.geometry.attributes.position.array;
+  for (let i = 0; i < rainCount; i++) {
+    positions[i * 3 + 1] -= rainSpeed[i];
+    if (positions[i * 3 + 1] < 0) {
+      positions[i * 3 + 1] = 2.8;
+      positions[i * 3] = -3.35 + Math.random() * 1.7;
+      positions[i * 3 + 2] = -1.1 + Math.random() * 1.7;
+    }
+  }
+  rainSystem.geometry.attributes.position.needsUpdate = true;
+
+  const turntable = interactives.find(i => i.userData.go === 'chat');
+  if (turntable && turntable.userData.vinyl) {
+    turntable.userData.vinyl.rotation.y += 0.008;
+    turntable.userData.label.rotation.y += 0.008;
+    turntable.userData.platter.rotation.y += 0.008;
   }
 
-  function toDesk(){
-    document.body.classList.add('desk');
-    var v = document.getElementById('view');
-    if(v) v.hidden = true;
-    desk.style.transform = 'rotateX(2deg)';
-  }
-  document.getElementById('backGate').addEventListener('click', toDesk);
-  var homeNav = document.querySelector('.drawer-nav [data-view="home"]');
-  if(homeNav) homeNav.addEventListener('click', function(){ setTimeout(toDesk, 20); });
+  const time = Date.now() * 0.001;
+  lampLight.intensity = 2.8 + Math.sin(time * 1.3) * 0.15;
 
-})();
+  if (document.body.classList.contains('desk') && !isTransitioning) {
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(interactives, true);
+    if (hits.length > 0) {
+      let obj = hits[0].object;
+      while (obj && !obj.userData.go) obj = obj.parent;
+      if (obj && obj !== hovered) {
+        if (hovered) unhighlight(hovered);
+        hovered = obj;
+        highlight(hovered);
+        showTooltip(hovered.userData.label,
+          (mouse.x + 1) * 0.5 * window.innerWidth,
+          (-mouse.y + 1) * 0.5 * window.innerHeight);
+      }
+    } else {
+      if (hovered) { unhighlight(hovered); hovered = null; hideTooltip(); }
+    }
+  }
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* 加载完成 */
+document.getElementById('loader').classList.add('done');
+setTimeout(() => { document.getElementById('loader').style.display = 'none'; }, 900);
 </script>
+<script src="assets/app.js?v=39"></script>
 </body>
 </html>
