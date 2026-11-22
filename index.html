@@ -171,9 +171,9 @@ container.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.04;
-controls.target.set(-1.65, 0.92, -0.45);
-controls.minDistance = 1.8;
-controls.maxDistance = 5.5;
+controls.target.set(-1.65, 0.96, -0.18);
+controls.minDistance = 1.45;
+controls.maxDistance = 6.2;
 controls.maxPolarAngle = Math.PI / 2.08;
 controls.minPolarAngle = 0.35;
 controls.enablePan = true;
@@ -225,34 +225,75 @@ const mats = {
 /* ---- 窗边场景：只保留桌面与窗户，不再搭建完整房间 ---- */
 function buildWindow() {
   const g = new THREE.Group();
-  const fc = mats.frameWood;
-  const vGeo = new THREE.BoxGeometry(0.08, 2.2, 0.08);
-  const hGeo = new THREE.BoxGeometry(0.08, 0.08, 1.7);
-  g.add(new THREE.Mesh(vGeo, fc)).children[0].position.set(0, 1.1, -0.85);
-  g.add(new THREE.Mesh(vGeo, fc)).children[1].position.set(0, 1.1, 0.85);
-  g.add(new THREE.Mesh(hGeo, fc)).children[2].position.set(0, 2.2, 0);
-  g.add(new THREE.Mesh(hGeo, fc)).children[3].position.set(0, 0, 0);
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(0.06, 2.2, 0.06), fc)).children[4].position.set(0, 1.1, 0);
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 1.7), fc)).children[5].position.set(0, 1.1, 0);
-  const glass = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 2.2),
-    new THREE.MeshStandardMaterial({ color: 0x1a2a3a, transparent: true, opacity: 0.25, roughness: 0.02, metalness: 0.95 }));
-  glass.rotation.y = Math.PI / 2; glass.position.set(0.02, 1.1, 0); g.add(glass);
-  const out = new THREE.Mesh(new THREE.PlaneGeometry(4, 4), mats.outside);
-  out.rotation.y = Math.PI / 2; out.position.set(0.075, 1.1, 0); g.add(out);
-  const sill = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.06, 1.85), mats.woodMid);
-  sill.position.set(0.06, 0.03, 0); g.add(sill);
-  // 盆栽
-  const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.055, 0.09, 12), new THREE.MeshStandardMaterial({ color: 0x8b5a2b }));
-  pot.position.set(0.08, 0.075, 0.4); g.add(pot);
-  const soil = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.065, 0.015, 12), new THREE.MeshStandardMaterial({ color: 0x3d2b1a }));
-  soil.position.set(0.08, 0.12, 0.4); g.add(soil);
-  for (let i = 0; i < 6; i++) {
-    const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.03 + Math.random() * 0.025, 6, 6), mats.plant);
-    leaf.position.set(0.08 + (Math.random() - 0.5) * 0.06, 0.16 + Math.random() * 0.08, 0.4 + (Math.random() - 0.5) * 0.06);
-    leaf.scale.y = 1.4; g.add(leaf);
+  const frame = new THREE.MeshStandardMaterial({ color: 0xc3cfe2, roughness: 0.72 });
+  const trim = new THREE.MeshStandardMaterial({ color: 0xeaf0fa, roughness: 0.62 });
+  const glass = new THREE.MeshStandardMaterial({
+    color: 0xa9c5e8, transparent: true, opacity: 0.16,
+    roughness: 0.12, metalness: 0.04, side: THREE.DoubleSide
+  });
+
+  // 窗户正对桌面和镜头，不再侧转。整体宽度与桌面接近。
+  const windowW = 2.28, windowH = 1.62, z = -1.02;
+  const pane = new THREE.Mesh(new THREE.PlaneGeometry(windowW, windowH), glass);
+  pane.position.set(-1.65, 1.72, z);
+  g.add(pane);
+
+  // 四周窗框与中间细分格
+  const bars = [
+    [windowW + 0.12, 0.075, 0.09, -1.65, 2.53, z],
+    [windowW + 0.12, 0.075, 0.09, -1.65, 0.91, z],
+    [0.075, windowH, 0.09, -2.82, 1.72, z],
+    [0.075, windowH, 0.09, -0.48, 1.72, z],
+    [0.045, windowH, 0.075, -1.65, 1.72, z - 0.012],
+    [windowW, 0.045, 0.075, -1.65, 1.72, z - 0.012]
+  ];
+  bars.forEach((p, i) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(p[0], p[1], p[2]), i < 4 ? frame : trim);
+    m.position.set(p[3], p[4], p[5]);
+    m.castShadow = true;
+    g.add(m);
+  });
+
+  // 窗外的天空、远山与树影，全部位于玻璃之后
+  const sky = new THREE.Mesh(
+    new THREE.PlaneGeometry(5.8, 3.4),
+    new THREE.MeshBasicMaterial({ color: 0x9fb9df })
+  );
+  sky.position.set(-1.65, 1.78, -1.28);
+  g.add(sky);
+
+  const farHillMat = new THREE.MeshBasicMaterial({ color: 0x8199bd });
+  const nearHillMat = new THREE.MeshBasicMaterial({ color: 0x718eaa });
+  const hill1 = new THREE.Mesh(new THREE.CircleGeometry(1.45, 48), farHillMat);
+  hill1.scale.set(1.25, 0.42, 1);
+  hill1.position.set(-2.05, 1.05, -1.24);
+  g.add(hill1);
+  const hill2 = new THREE.Mesh(new THREE.CircleGeometry(1.25, 48), nearHillMat);
+  hill2.scale.set(1.4, 0.34, 1);
+  hill2.position.set(-0.95, 0.96, -1.22);
+  g.add(hill2);
+
+  // 窗台
+  const sill = new THREE.Mesh(new THREE.BoxGeometry(2.48, 0.075, 0.22), trim);
+  sill.position.set(-1.65, 0.86, -0.91);
+  sill.castShadow = true;
+  sill.receiveShadow = true;
+  g.add(sill);
+
+  // 窗台上一盆小植物，尺寸克制
+  const pot = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.065, 0.052, 0.085, 16),
+    new THREE.MeshStandardMaterial({ color: 0xb8c4d8, roughness: 0.82 })
+  );
+  pot.position.set(-2.48, 0.94, -0.88);
+  g.add(pot);
+  const stemMat = new THREE.MeshStandardMaterial({ color: 0x829e91, roughness: 0.9 });
+  for (let i = 0; i < 5; i++) {
+    const leaf = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), stemMat);
+    leaf.scale.set(0.65, 1.5, 0.55);
+    leaf.position.set(-2.48 + Math.cos(i * 1.25) * 0.075, 1.04 + (i % 2) * 0.045, -0.88);
+    g.add(leaf);
   }
-  g.position.set(-1.65, 0, -1.22);
-  g.rotation.y = Math.PI / 2;
   return g;
 }
 scene.add(buildWindow());
@@ -535,8 +576,8 @@ function moveSceneCamera(position, target, activeButton) {
 }
 const deskViewBtn = document.getElementById('deskViewBtn');
 const windowViewBtn = document.getElementById('windowViewBtn');
-deskViewBtn.addEventListener('click', () => moveSceneCamera([-1.65, 2.15, 4.25], [-1.65, 0.92, -0.45], deskViewBtn));
-windowViewBtn.addEventListener('click', () => moveSceneCamera([-1.65, 1.95, 1.35], [-1.65, 1.35, -4.2], windowViewBtn));
+deskViewBtn.addEventListener('click', () => moveSceneCamera([-1.65, 2.25, 4.35], [-1.65, 0.98, -0.12], deskViewBtn));
+windowViewBtn.addEventListener('click', () => moveSceneCamera([-1.65, 1.78, 1.65], [-1.65, 1.62, -2.4], windowViewBtn));
 
 /* 回桌子 */
 document.getElementById('backGate').addEventListener('click', () => {
@@ -559,8 +600,8 @@ if (homeNav) {
 
 /* ---- 动画 ---- */
 let introT = 0;
-const introFrom = new THREE.Vector3(-1.65, 2.65, 5.8);
-const introTo = new THREE.Vector3(-1.65, 2.15, 4.25);
+const introFrom = new THREE.Vector3(-1.65, 2.45, 5.1);
+const introTo = new THREE.Vector3(-1.65, 2.25, 4.35);
 camera.position.copy(introFrom);
 
 function animate() {
