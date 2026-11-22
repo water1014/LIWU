@@ -217,6 +217,7 @@
       '<div class="msg-head"><div class="meta">' + (me ? '我' : '宋祁') + ' · ' + when(m.at) + '</div>' +
       '<button class="msg-more" type="button" data-menu="' + i + '" aria-label="消息操作">···</button></div>' +
       think +
+      (m.image ? '<div class="chat-image-wrap"><img class="chat-image" src="'+esc(m.image)+'" alt="主动生成的陪伴画面"></div>' : '') +
       '<div class="body">' + esc(m.content) + '</div>' +
       '<div class="acts">' +
         '<button data-act="copy" data-i="' + i + '">复制</button>' +
@@ -460,6 +461,7 @@
       }
       s.updatedAt = Date.now();
       save();
+      if(reply.content)maybeProactiveImage(s);
     }catch(err){
       var msg = String((err && err.message) || err);
       if (msg.toLowerCase().indexOf('abort') >= 0){
@@ -591,6 +593,8 @@
     else if (target === 'music') viewMusic();
     else if (target === 'game') viewGame();
     else if (target === 'window') viewWindow();
+    else if (target === 'imageStudio') viewImageStudio();
+    else if (target === 'proactiveImage') viewProactiveImage();
     else if (target === 'moments') viewMoments();
     else if (target === 'quotes') viewQuotes();
     else if (target === 'favorite') viewFavorites();
@@ -803,6 +807,8 @@
       else if (v === 'music') viewMusic();
       else if (v === 'game') viewGame();
       else if (v === 'window') viewWindow();
+      else if (v === 'imageStudio') viewImageStudio();
+      else if (v === 'proactiveImage') viewProactiveImage();
       else if (v === 'moments') viewMoments();
       else if (v === 'quotes') viewQuotes();
       else if (v === 'favorite') viewFavorites();
@@ -1253,11 +1259,11 @@
       '<form class="profile-form" id="profileForm">'+
       '<section class="profile-section"><small>IDENTITY</small><h3>基本信息</h3><label class="field"><span>名字</span><input id="pfName" maxlength="40" value="'+esc(p.name)+'"></label><label class="field"><span>关系与相处方式</span><textarea id="pfRelation" rows="2" placeholder="你们如何称呼彼此、如何相处…">'+esc(p.relationship)+'</textarea></label></section>'+
       '<section class="profile-section"><small>PERSONALITY</small><h3>性格与表达</h3><label class="field"><span>性格特征</span><textarea id="pfPersonality" rows="4" placeholder="性格、价值观、习惯与边界…">'+esc(p.personality)+'</textarea></label><label class="field"><span>说话方式</span><textarea id="pfSpeech" rows="3" placeholder="语气、句子长短、表达习惯…">'+esc(p.speech)+'</textarea></label></section>'+
-      '<section class="profile-section"><small>APPEARANCE</small><h3>外观档案</h3><p class="tip">外观描述保留为一整段文字，不拆成零散选项。建议用英文描述细节，方便后续生图保持一致。</p><textarea id="pfAppearance" rows="8" placeholder="A detailed English appearance description...">'+esc(p.appearance)+'</textarea></section>'+
+      '<section class="profile-section"><small>APPEARANCE</small><h3>外观档案</h3><p class="tip">外观描述保留为一整段文字，不拆成零散选项。建议用英文描述细节，方便后续生图保持一致。</p><textarea id="pfAppearance" rows="8" placeholder="A detailed English appearance description...">'+esc(p.appearance)+'</textarea><label class="worldbook-switch"><input id="pfAppearanceConfirmed" type="checkbox" '+(p.appearanceConfirmed?'checked':'')+'> 我已确认这段外观描述，可用于主动生图</label></section>'+
       '<section class="profile-section"><small>SHARED WORLD</small><h3>共同背景</h3><label class="field"><span>生活背景与重要设定</span><textarea id="pfBackground" rows="4" placeholder="居住环境、共同经历、长期设定…">'+esc(p.background)+'</textarea></label></section>'+
       '<div class="profile-save-row"><button class="ghost solid" type="submit">保存档案</button><span class="tip">只保存在本机，修改后会用于之后的聊天。</span></div></form>';
     openView('人设档案','Profile',html);
-    $('#viewBody').onsubmit=function(ev){if(ev.target.id!=='profileForm')return;ev.preventDefault();var next={name:$('#pfName').value.trim()||'宋祁',relationship:$('#pfRelation').value.trim(),personality:$('#pfPersonality').value.trim(),speech:$('#pfSpeech').value.trim(),appearance:$('#pfAppearance').value.trim(),background:$('#pfBackground').value.trim(),updatedAt:Date.now()};if(LS.set(K_PROFILE,next))toast('人设档案已保存，之后的聊天会带上这些设定。');};
+    $('#viewBody').onsubmit=function(ev){if(ev.target.id!=='profileForm')return;ev.preventDefault();var next={name:$('#pfName').value.trim()||'宋祁',relationship:$('#pfRelation').value.trim(),personality:$('#pfPersonality').value.trim(),speech:$('#pfSpeech').value.trim(),appearance:$('#pfAppearance').value.trim(),appearanceConfirmed:$('#pfAppearanceConfirmed').checked,background:$('#pfBackground').value.trim(),updatedAt:Date.now()};if(LS.set(K_PROFILE,next))toast('人设档案已保存，之后的聊天会带上这些设定。');};
   }
   function viewNotices(){
     var manual=LS.get(K_NOTICES,[]),read=LS.get(K_NOTICE_READ,[]),auto=[];
@@ -1555,6 +1561,66 @@
       body.onsubmit=function(ev){if(ev.target.id!=='pluginForm')return;ev.preventDefault();var name=$('#pluginName').value.trim();if(!name){toast('请填写插件名称。');return;}var list=manageList(key),item={id:editing||uid(),name:name,category:$('#pluginCategory').value,enabled:$('#pluginEnabled').value==='1',endpoint:$('#pluginEndpoint').value.trim(),description:$('#pluginDescription').value.trim(),createdAt:current?current.createdAt:Date.now()},idx=list.findIndex(function(x){return x.id===editing;});if(idx>=0)list[idx]=item;else list.push(item);if(manageSave(key,list)){editing='';render();toast('插件配置已保存。');}};
     }
     render();
+  }
+
+
+  /* ================= 生图室与主动生图 ================= */
+  var K_IMAGE_CFG='liwu.imageStudio.config',K_IMAGE_GALLERY='liwu.imageStudio.gallery',K_PROACTIVE='liwu.proactiveImage';
+  function imageConfig(){return Object.assign({base:'https://api.openai.com/v1',key:'',model:'gpt-image-1',size:'1024x1024',headers:''},LS.get(K_IMAGE_CFG,{}));}
+  function imageGallery(){var a=LS.get(K_IMAGE_GALLERY,[]);return Array.isArray(a)?a:[];}
+  function proactiveConfig(){return Object.assign({enabled:false,mode:'keywords',keywords:'想你,晚安,下雨,旅行,约会,想看你,拍照',cooldown:12,dailyLimit:1,monthlyLimit:6,prompt:''},LS.get(K_PROACTIVE,{}));}
+  function compressImageDataUrl(src){return new Promise(function(resolve,reject){var im=new Image();im.onload=function(){try{var sc=Math.min(1,1024/Math.max(im.naturalWidth||im.width,im.naturalHeight||im.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round((im.naturalWidth||im.width)*sc));c.height=Math.max(1,Math.round((im.naturalHeight||im.height)*sc));c.getContext('2d').drawImage(im,0,0,c.width,c.height);var q=.82,out=c.toDataURL('image/jpeg',q);while(out.length>850000&&q>.5){q-=.1;out=c.toDataURL('image/jpeg',q);}resolve(out);}catch(e){reject(e);}};im.onerror=function(){reject(new Error('图片解码失败'));};im.src=src;});}
+  async function generateStudioImage(prompt,kind){
+    var cfg=imageConfig();if(!cfg.base||!cfg.key||!cfg.model)throw new Error('请先填写生图接口地址、Key 和模型。');
+    var base=cfg.base.trim().replace(/\/+$/,''),url=/\/images\/generations$/i.test(base)?base:base+'/images/generations';
+    var headers={'Content-Type':'application/json','Authorization':'Bearer '+cfg.key};
+    if(cfg.headers){var custom=JSON.parse(cfg.headers);if(!custom||typeof custom!=='object'||Array.isArray(custom))throw new Error('自定义请求头必须是 JSON 对象。');Object.keys(custom).forEach(function(k){headers[k]=String(custom[k]);});}
+    var body={model:cfg.model,prompt:prompt,size:cfg.size||'1024x1024',n:1};if(/^dall-e/i.test(cfg.model))body.response_format='b64_json';
+    var res=await fetch(url,{method:'POST',headers:headers,body:JSON.stringify(body)});if(!res.ok)throw new Error('生图接口返回 '+res.status+'：'+(await res.text()).slice(0,160));
+    var json=await res.json(),data=json&&json.data&&json.data[0];if(!data)throw new Error('接口没有返回图片数据。');
+    var src=data.b64_json?await compressImageDataUrl('data:image/png;base64,'+data.b64_json):(data.url||'');if(!src)throw new Error('返回结果里没有图片地址。');
+    var all=imageGallery(),item={id:uid(),prompt:prompt,src:src,kind:kind||'manual',date:today(),createdAt:Date.now(),pinned:false};all.unshift(item);all=all.slice(0,4);if(!LS.set(K_IMAGE_GALLERY,all))throw new Error('本机空间不足，图片未能保存。');return item;
+  }
+  function viewImageStudio(){
+    var cfg=imageConfig();
+    function render(){
+      cfg=imageConfig();var all=imageGallery();
+      var html='<div class="planner-intro"><p class="lead">配置独立的图像 API，写下画面描述。作品会压缩后保存在本机。</p><div class="planner-stat"><strong>'+all.length+'</strong><span>张作品</span></div></div>'+
+      '<form class="planner-form" id="imageConfigForm"><strong>图像 API</strong><label>接口地址<input id="imageBase" value="'+esc(cfg.base)+'"></label><label>API Key<input id="imageKey" type="password" value="'+esc(cfg.key)+'"></label><div class="planner-fields"><label>模型<input id="imageModel" value="'+esc(cfg.model)+'"></label><label>尺寸<select id="imageSize"><option value="1024x1024">1024 × 1024</option><option value="1536x1024">1536 × 1024</option><option value="1024x1536">1024 × 1536</option></select></label></div><label>自定义请求头 JSON（可选）<textarea id="imageHeaders" rows="3">'+esc(cfg.headers)+'</textarea></label><button class="ghost solid" type="submit">保存接口设置</button></form>'+
+      '<form class="image-prompt-form" id="imagePromptForm"><strong>生成一张新图片</strong><textarea id="imagePrompt" rows="5" placeholder="描述人物、动作、场景、光线和氛围…"></textarea><div class="image-prompt-foot"><small>已确认的人设外观描述会自动附加。</small><button class="ghost solid" type="submit">生成图片</button></div><p class="tip" id="imageStatus"></p></form>'+
+      '<div class="planner-section-head"><div><small>GALLERY</small><h3>作品集</h3></div><span class="tip">最近 4 张</span></div>'+
+      (all.length?'<div class="image-gallery">'+all.map(function(x){return '<article class="image-work"><img src="'+esc(x.src)+'" alt="生成作品"><div class="image-work-copy"><small>'+esc(x.date)+(x.kind==='proactive'?' · 主动生成':' · 手动生成')+'</small><p>'+esc(x.prompt)+'</p></div><div class="planner-item-actions"><button class="mini" type="button" data-image-pin="'+esc(x.id)+'">'+(x.pinned?'取消锁定':'锁定记忆')+'</button><button class="mini danger" type="button" data-image-delete="'+esc(x.id)+'">删除</button></div></article>';}).join('')+'</div>':'<div class="blank">作品集还空着。第一次生成后，图片会保存在本机。</div>');
+      openView('生图室','Image Studio',html);$('#imageSize').value=cfg.size||'1024x1024';var body=$('#viewBody');
+      body.onclick=function(ev){var pin=ev.target.closest('[data-image-pin]');if(pin){var list=imageGallery(),x=list.find(function(a){return a.id===pin.getAttribute('data-image-pin');});if(x){x.pinned=!x.pinned;LS.set(K_IMAGE_GALLERY,list);render();}return;}var del=ev.target.closest('[data-image-delete]');if(del&&confirm('删除这张作品？')){LS.set(K_IMAGE_GALLERY,imageGallery().filter(function(x){return x.id!==del.getAttribute('data-image-delete');}));render();}};
+      body.onsubmit=async function(ev){
+        if(ev.target.id==='imageConfigForm'){ev.preventDefault();var next={base:$('#imageBase').value.trim(),key:$('#imageKey').value.trim(),model:$('#imageModel').value.trim(),size:$('#imageSize').value,headers:$('#imageHeaders').value.trim()};if(next.headers){try{var obj=JSON.parse(next.headers);if(!obj||typeof obj!=='object'||Array.isArray(obj))throw 0;}catch(e){toast('自定义请求头不是有效 JSON。');return;}}if(LS.set(K_IMAGE_CFG,next))toast('图像 API 设置已保存。');return;}
+        if(ev.target.id==='imagePromptForm'){ev.preventDefault();var prompt=$('#imagePrompt').value.trim();if(!prompt){toast('先描述你想生成的画面。');return;}var profile=profileData();if(profile.appearanceConfirmed&&profile.appearance)prompt+='\\n\\nCharacter appearance reference: '+profile.appearance;var status=$('#imageStatus'),btn=ev.target.querySelector('button[type=submit]');btn.disabled=true;status.textContent='正在生成，稍等一会儿…';try{await generateStudioImage(prompt,'manual');render();toast('图片生成并保存好了。');}catch(err){status.textContent=String(err.message||err);btn.disabled=false;toast('生成失败，请检查接口设置。');}}
+      };
+    }
+    render();
+  }
+  function viewProactiveImage(){
+    var cfg=proactiveConfig(),profile=profileData();
+    function render(){
+      cfg=proactiveConfig();profile=profileData();var gallery=imageGallery(),confirmed=!!(profile.appearanceConfirmed&&profile.appearance);
+      var todayCount=gallery.filter(function(x){return x.kind==='proactive'&&x.date===today();}).length,monthCount=gallery.filter(function(x){return x.kind==='proactive'&&(x.date||'').slice(0,7)===today().slice(0,7);}).length;
+      var html='<div class="planner-intro"><p class="lead">默认关闭。确认宋祁的外观描述后，才允许它在聊天中按规则主动生成画面。</p></div><div class="proactive-status"><strong>'+(cfg.enabled&&confirmed?'主动生图已开启':'主动生图未开启')+'</strong><small>今日 '+todayCount+'/'+cfg.dailyLimit+' 张 · 本月 '+monthCount+'/'+cfg.monthlyLimit+' 张</small></div>'+
+      (!confirmed?'<div class="proactive-warning">先到「人设档案」填写外观描述，并勾选确认。</div>':'')+
+      '<form class="planner-form" id="proactiveForm"><strong>触发与频率</strong><label class="worldbook-switch"><input id="proactiveEnabled" type="checkbox" '+(cfg.enabled?'checked':'')+' '+(!confirmed?'disabled':'')+'> 开启聊天情境主动生图</label><label>触发方式<select id="proactiveMode"><option value="keywords" '+(cfg.mode==='keywords'?'selected':'')+'>命中关键词时</option><option value="all" '+(cfg.mode==='all'?'selected':'')+'>每次回复后都判断</option></select></label><label>触发关键词<input id="proactiveKeywords" value="'+esc(cfg.keywords)+'"></label><div class="planner-fields"><label>冷却时间（小时）<input id="proactiveCooldown" type="number" min="1" max="168" value="'+esc(cfg.cooldown)+'"></label><label>每日上限<input id="proactiveDaily" type="number" min="0" max="5" value="'+esc(cfg.dailyLimit)+'"></label></div><label>每月上限<input id="proactiveMonthly" type="number" min="0" max="30" value="'+esc(cfg.monthlyLimit)+'"></label><label>画面偏好<textarea id="proactivePrompt" rows="3">'+esc(cfg.prompt)+'</textarea></label><div class="planner-form-actions"><button class="ghost solid" type="submit">保存设置</button><button class="ghost" id="proactiveTest" type="button">测试生成一次</button></div></form><p class="tip">需要先在生图室配置图像 API。自动生成受每日、每月额度和冷却时间限制。</p>';
+      openView('主动生图','Proactive Image',html);var body=$('#viewBody');
+      body.onsubmit=function(ev){if(ev.target.id!=='proactiveForm')return;ev.preventDefault();var next={enabled:$('#proactiveEnabled').checked,mode:$('#proactiveMode').value,keywords:$('#proactiveKeywords').value.trim(),cooldown:Math.max(1,Math.min(168,Number($('#proactiveCooldown').value)||12)),dailyLimit:Math.max(0,Math.min(5,Number($('#proactiveDaily').value)||0)),monthlyLimit:Math.max(0,Math.min(30,Number($('#proactiveMonthly').value)||0)),prompt:$('#proactivePrompt').value.trim()};if(next.enabled&&!confirmed){toast('请先确认外观描述。');return;}if(next.enabled&&(!imageConfig().base||!imageConfig().key||!imageConfig().model)){toast('请先配置生图室 API。');return;}if(LS.set(K_PROACTIVE,next)){toast('主动生图设置已保存。');render();}};
+      body.onclick=async function(ev){if(ev.target.id!=='proactiveTest')return;var s=cur(),last=s&&s.messages.slice().reverse().find(function(m){return m.role==='user';});if(!last){toast('先去聊天说一句，再回来测试。');return;}try{await generateStudioImage('Create a natural companion image inspired by this conversation. Appearance: '+profile.appearance+'\\nConversation: '+last.content+'\\n'+cfg.prompt,'proactive');toast('测试图片已生成。');}catch(e){toast('测试失败：'+String(e.message||e));}};
+    }
+    render();
+  }
+  async function maybeProactiveImage(session){
+    var cfg=proactiveConfig(),p=profileData(),api=imageConfig();if(!cfg.enabled||!p.appearanceConfirmed||!p.appearance||!api.base||!api.key||!api.model)return;
+    var user=session.messages.slice().reverse().find(function(m){return m.role==='user';}),reply=session.messages.slice().reverse().find(function(m){return m.role==='assistant'&&m.content;});if(!user||!reply)return;
+    var keys=String(cfg.keywords||'').split(/[,，\n]/).map(function(x){return x.trim().toLowerCase();}).filter(Boolean),hay=(user.content+' '+reply.content).toLowerCase();if(cfg.mode!=='all'&&(!keys.length||!keys.some(function(k){return hay.indexOf(k)>=0;})))return;
+    var gallery=imageGallery(),month=today().slice(0,7),dayCount=gallery.filter(function(x){return x.kind==='proactive'&&x.date===today();}).length,monthCount=gallery.filter(function(x){return x.kind==='proactive'&&(x.date||'').slice(0,7)===month;}).length;if(dayCount>=Number(cfg.dailyLimit)||monthCount>=Number(cfg.monthlyLimit))return;
+    var last=gallery.filter(function(x){return x.kind==='proactive';}).sort(function(a,b){return (b.createdAt||0)-(a.createdAt||0);})[0];if(last&&Date.now()-(last.createdAt||0)<Number(cfg.cooldown||12)*3600000)return;
+    var prompt='Create a natural companion image inspired by this conversation. Preserve character appearance. Avoid text and watermarks.\\nAppearance: '+p.appearance+'\\nUser: '+user.content+'\\nReply: '+reply.content+'\\nStyle: '+(cfg.prompt||'a candid everyday moment, natural light');
+    try{var item=await generateStudioImage(prompt,'proactive');session.messages.push({role:'assistant',content:'我想把刚才这一刻留成一张画面。',image:item.src,kind:'proactive-image',at:Date.now()});session.updatedAt=Date.now();save();renderAll();toast('主动生图完成，已经放进聊天和作品集。');}catch(e){toast('主动生图暂时没成功：'+String(e.message||e));}
   }
 
   /* ================= 世界书 · 笔记本与条目 ================= */
@@ -1887,7 +1953,7 @@
         });
       }
       if (ev.target.id === 'cExport'){
-        var data = { v: 13, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), memory: LS.get(K_MEMORY, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites'), profile: LS.get(K_PROFILE, {}), notices: LS.get(K_NOTICES, []), noticeRead: LS.get(K_NOTICE_READ, []), ledger: manageList(K_LEDGER), health: manageList(K_HEALTH), period: LS.get(K_PERIOD, {cycleLength:28,periodLength:5,lastStart:'',starts:[]}), study: manageList(K_STUDY), classes: manageList(K_CLASS), music: manageList(K_MUSIC), games: manageList(K_GAMES), window: LS.get(K_WINDOW, {title:'窗边',description:'给今天留一扇窗。',image:''}), windowNotes: manageList(K_WINDOW_NOTES), wallpaper: LS.get('liwu.wallpaper',''), mcpServers: manageList('liwu.mcp.servers'), plugins: manageList('liwu.plugins') };
+        var data = { v: 13, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), memory: LS.get(K_MEMORY, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites'), profile: LS.get(K_PROFILE, {}), notices: LS.get(K_NOTICES, []), noticeRead: LS.get(K_NOTICE_READ, []), ledger: manageList(K_LEDGER), health: manageList(K_HEALTH), period: LS.get(K_PERIOD, {cycleLength:28,periodLength:5,lastStart:'',starts:[]}), study: manageList(K_STUDY), classes: manageList(K_CLASS), music: manageList(K_MUSIC), games: manageList(K_GAMES), window: LS.get(K_WINDOW, {title:'窗边',description:'给今天留一扇窗。',image:''}), windowNotes: manageList(K_WINDOW_NOTES), wallpaper: LS.get('liwu.wallpaper',''), mcpServers: manageList('liwu.mcp.servers'), plugins: manageList('liwu.plugins'), imageStudioConfig: imageConfig(), imageGallery: imageGallery(), proactiveImage: proactiveConfig() };
         var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -1934,6 +2000,9 @@
               if (obj.window && typeof obj.window === 'object') LS.set(K_WINDOW, obj.window);
               if (Array.isArray(obj.windowNotes)) LS.set(K_WINDOW_NOTES, obj.windowNotes);
               if (typeof obj.wallpaper === 'string') LS.set('liwu.wallpaper', obj.wallpaper);
+              if (obj.imageStudioConfig && typeof obj.imageStudioConfig === 'object') LS.set(K_IMAGE_CFG, obj.imageStudioConfig);
+              if (Array.isArray(obj.imageGallery)) LS.set(K_IMAGE_GALLERY, obj.imageGallery);
+              if (obj.proactiveImage && typeof obj.proactiveImage === 'object') LS.set(K_PROACTIVE, obj.proactiveImage);
               if (Array.isArray(obj.mcpServers)) LS.set('liwu.mcp.servers', obj.mcpServers);
               if (Array.isArray(obj.plugins)) LS.set('liwu.plugins', obj.plugins);
               applyTheme();
