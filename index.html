@@ -12,66 +12,35 @@
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
 <link rel='preconnect' href='https://cdn.staticfile.net' crossorigin>
 <link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@300;400;500&display=swap' rel='stylesheet'>
-<link rel='stylesheet' href='assets/style.css?v=28'>
-<link rel='stylesheet' href='assets/desk.css?v=28'>
-<link rel='stylesheet' href='assets/smooth.css?v=28'>
+<link rel='stylesheet' href='assets/style.css?v=29'>
+<link rel='stylesheet' href='assets/desk.css?v=29'>
+<link rel='stylesheet' href='assets/smooth.css?v=29'>
 </head>
 <body data-theme='paper' class='home'>
-
 <script>
-(function(){
-  try{
-    if ('serviceWorker' in navigator){
-      navigator.serviceWorker.getRegistrations().then(function(list){
-        for (var i = 0; i < list.length; i++) list[i].unregister();
-      }).catch(function(){});
-    }
-    if (window.caches && caches.keys){
-      caches.keys().then(function(keys){
-        for (var i = 0; i < keys.length; i++) caches.delete(keys[i]);
-      }).catch(function(){});
-    }
-  }catch(e){}
-})();
+(function(){try{
+  if ('serviceWorker' in navigator){ navigator.serviceWorker.getRegistrations().then(function(l){ for(var i=0;i<l.length;i++) l[i].unregister(); }).catch(function(){}); }
+  if (window.caches && caches.keys){ caches.keys().then(function(k){ for(var i=0;i<k.length;i++) caches.delete(k[i]); }).catch(function(){}); }
+}catch(e){}})();
 </script>
-
 <div id='desk-wrap'>
   <canvas id='stage'></canvas>
-
   <div class='hud'>
     <button class='hud-btn' id='hudMenu' type='button' aria-label='会话'>≡</button>
-    <div class='clock'>
-      <span class='t' id='hudTime'>--:--</span>
-      <span class='d' id='hudDate'></span>
-    </div>
+    <div class='clock'><span class='t' id='hudTime'>--:--</span><span class='d' id='hudDate'></span></div>
     <button class='pill' id='hudMode' type='button'>预览：白天</button>
   </div>
-
   <div class='boot' id='boot'>正在推开窗……</div>
-
-  <div class='desk-foot'>
-    <span>屋子是自己搭的 · 念头借自 qiaosi 的窗台</span>
-  </div>
-
+  <div class='desk-foot'><span>屋子是自己搭的 · 念头借自 qiaosi 的窗台</span></div>
   <div class='desk-dock' id='deskDock'></div>
 </div>
-
 <div id='app'>
-
   <header class='top'>
     <button class='icon' id='menuBtn' type='button' aria-label='会话列表'>≡</button>
-    <div class='top-mid'>
-      <span class='top-title' id='topTitle'>里屋</span>
-      <span class='top-sub' id='topSub'></span>
-    </div>
-    <div class='top-right'>
-      <span class='days' id='topDays'></span>
-      <button class='icon' id='newBtn' type='button' aria-label='新的一段'>＋</button>
-    </div>
+    <div class='top-mid'><span class='top-title' id='topTitle'>里屋</span><span class='top-sub' id='topSub'></span></div>
+    <div class='top-right'><span class='days' id='topDays'></span><button class='icon' id='newBtn' type='button' aria-label='新的一段'>＋</button></div>
   </header>
-
   <main class='thread' id='thread'></main>
-
   <footer class='composer'>
     <form class='in-row' id='form'>
       <textarea id='input' rows='1' placeholder='说一句' autocapitalize='off'></textarea>
@@ -80,23 +49,14 @@
     </form>
     <div class='hint' id='hint'></div>
   </footer>
-
 </div>
-
 <div class='scrim' id='scrim' hidden></div>
-
 <aside class='drawer' id='drawer' hidden>
   <div class='drawer-in'>
-    <div class='drawer-top'>
-      <span class='brandmark'>里屋</span>
-      <span class='drawer-days' id='drawerDays'></span>
-    </div>
-
+    <div class='drawer-top'><span class='brandmark'>里屋</span><span class='drawer-days' id='drawerDays'></span></div>
     <button class='newchat' id='newChat' type='button'>新的一段</button>
     <input class='search' id='search' placeholder='找一段话' autocomplete='off'>
-
     <div class='sessions' id='sessions'></div>
-
     <nav class='drawer-nav'>
       <button type='button' data-view='home'>回桌子</button>
       <button type='button' data-view='diary'>日记</button>
@@ -106,28 +66,24 @@
     </nav>
   </div>
 </aside>
-
 <section class='view' id='view' hidden>
   <header class='view-top'>
     <button class='icon' id='viewBack' type='button' aria-label='回去'>←</button>
-    <span class='view-title' id='viewTitle'></span>
-    <span class='view-en' id='viewEn'></span>
+    <span class='view-title' id='viewTitle'></span><span class='view-en' id='viewEn'></span>
   </header>
   <div class='view-body' id='viewBody'></div>
 </section>
-
 <script>
 window.addEventListener('error', function(e){
   var h = document.getElementById('hint');
-  if (h) h.textContent = '出了点问题：' + (e.message || '未知') + (e.lineno ? '（第 ' + e.lineno + ' 行）' : '');
+  if (h) h.textContent = '出了点问题：' + (e.message || '未知');
   var b = document.getElementById('boot');
   if (b) b.textContent = '出了点问题：' + (e.message || '未知');
 });
 </script>
-
-<script src='data.js?v=28'></script>
-<script src='assets/app.js?v=28'></script>
-<script src='assets/smooth.js?v=28'></script>
-<script src='assets/room.js?v=28'></script>
+<script src='data.js?v=29'></script>
+<script src='assets/app.js?v=29'></script>
+<script src='assets/smooth.js?v=29'></script>
+<script src='assets/room.js?v=29'></script>
 </body>
 </html>
