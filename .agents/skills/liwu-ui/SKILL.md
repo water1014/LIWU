@@ -12,25 +12,31 @@ LIWU is a mobile-first private AI companion web app built with plain HTML, CSS, 
 
 ## Design method
 Apply the upstream UI/UX Pro Max approach in a project-specific way:
-- Choose a coherent design direction before styling.
-- Use semantic color and spacing tokens instead of scattered raw values.
+- Treat refined frosted glass as the confirmed material direction, not as a fixed page layout.
+- Keep layout exploration open. Do not impose a generic card grid, dashboard, magazine page, or virtual-phone shell.
+- Let each room's content and task determine its composition.
+- Use Apple Native Experience for interaction grammar and AI-Native UI for chat behavior.
+- Build glass with translucent layers, controlled backdrop blur, fine edges, restrained reflections, and clear text contrast.
+- Mix frosted surfaces with clear surfaces. Avoid full-screen blur, stacked glass cards, decorative stripes, and excessive glow.
+- Explore a light-first palette, but do not lock final colors before the user reviews them.
+- Use semantic color, spacing, and material tokens instead of scattered raw values.
 - Prioritize accessibility, touch interaction, responsive layout, and content clarity.
-- Use Apple Native Experience for interaction grammar, AI-Native UI for chat behavior, and Soft UI Evolution only for subtle visual finish.
-- Use LIWU's monochrome black-white palette with restrained blue-grey accents.
 
 ## Required workflow
-1. Inspect the current page, CSS, JavaScript event handlers, and all shared usages.
-2. Identify existing features and data contracts that must remain intact.
-3. Make the smallest coherent change.
-4. Verify mobile widths, safe areas, scrolling, composer position, focus, contrast, and reduced motion.
-5. Confirm that navigation and local data behavior still work.
+1. Read the LIWU design master.
+2. Inspect the current page, CSS, JavaScript event handlers, and all shared usages.
+3. Identify existing features and data contracts that must remain intact.
+4. When layout is undecided, prepare distinct, content-aware alternatives before implementing a global pattern.
+5. Make the smallest coherent change.
+6. Verify mobile widths, safe areas, scrolling, composer position, focus, contrast, and reduced motion.
+7. Confirm that navigation and local data behavior still work.
 
 ## Hard prohibitions
 - No feature deletion or silent content rewriting.
 - No localStorage/IndexedDB key changes, data clearing, or destructive migrations without explicit approval.
 - No bottom navigation bar.
-- No magazine/editorial layout, generic bento dashboard, or 3D/WebGL scene unless explicitly requested.
-- No heavy full-screen blur, purple-dominant gradients, cream/brown palette, emoji icons, or decorative UI that harms readability.
+- No generic bento dashboard, magazine/editorial layout, or 3D/WebGL scene unless explicitly requested.
+- No heavy blanket blur, purple-dominant gradients, cream/brown palette, emoji icons, or decorative UI that harms readability.
 - Never present an untested page as verified.
 
 ## Upstream attribution
