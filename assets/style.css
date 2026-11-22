@@ -1125,3 +1125,70 @@ body{
 @media (prefers-reduced-motion:reduce){
   .message-action-backdrop,.message-action-sheet{animation:none}
 }
+
+
+/* ---------- User-adjustable frosted glass material ---------- */
+:root{
+  --glass-opacity:48%;
+  --glass-blur:22px;
+  --glass-edge:42%;
+  --glass-shadow:.28;
+  --glass-radius:18px;
+}
+.top{
+  background:color-mix(in srgb,var(--bg-2) var(--glass-opacity),transparent);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(140%);
+  backdrop-filter:blur(var(--glass-blur)) saturate(140%);
+  border-bottom-color:color-mix(in srgb,var(--ink) calc(var(--glass-edge)*.22),transparent);
+}
+.composer{
+  background:color-mix(in srgb,var(--bg-2) var(--glass-opacity),transparent);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(140%);
+  backdrop-filter:blur(var(--glass-blur)) saturate(140%);
+}
+.in-row,.msg.you .body,.msg.me .body,.search,.sess.on,.sess:hover,.drawer-nav button:hover{
+  background:color-mix(in srgb,var(--bg-2) var(--glass-opacity),transparent);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(135%);
+  backdrop-filter:blur(var(--glass-blur)) saturate(135%);
+  border-color:color-mix(in srgb,var(--ink) calc(var(--glass-edge)*.24),var(--line));
+  border-radius:var(--glass-radius);
+  box-shadow:0 8px 26px color-mix(in srgb,var(--shadow) calc(var(--glass-shadow)*100%),transparent);
+}
+.drawer{
+  background:color-mix(in srgb,var(--bg-2) var(--glass-opacity),transparent);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(145%);
+  backdrop-filter:blur(var(--glass-blur)) saturate(145%);
+  border-right-color:color-mix(in srgb,var(--ink) calc(var(--glass-edge)*.28),var(--line));
+}
+.view{
+  background:color-mix(in srgb,var(--bg) 78%,transparent);
+  -webkit-backdrop-filter:blur(calc(var(--glass-blur)*.42)) saturate(125%);
+  backdrop-filter:blur(calc(var(--glass-blur)*.42)) saturate(125%);
+}
+.view-top{
+  background:color-mix(in srgb,var(--bg-2) var(--glass-opacity),transparent);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(140%);
+  backdrop-filter:blur(var(--glass-blur)) saturate(140%);
+}
+.material-preview{
+  position:relative;isolation:isolate;overflow:hidden;
+  min-height:132px;margin:0 0 20px;padding:18px;
+  display:flex;flex-direction:column;justify-content:center;gap:4px;
+  border:1px solid color-mix(in srgb,#fff var(--glass-edge),var(--line));
+  border-radius:var(--glass-radius);
+  background:color-mix(in srgb,var(--bg-2) var(--glass-opacity),transparent);
+  box-shadow:0 14px 34px color-mix(in srgb,var(--shadow) calc(var(--glass-shadow)*100%),transparent),inset 0 1px 0 color-mix(in srgb,#fff var(--glass-edge),transparent);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(145%);
+  backdrop-filter:blur(var(--glass-blur)) saturate(145%);
+}
+.material-preview:before{
+  content:"";position:absolute;z-index:-1;inset:0;pointer-events:none;
+  background:linear-gradient(135deg,color-mix(in srgb,#fff var(--glass-edge),transparent),transparent 48%);
+}
+.material-preview span{font-family:var(--num);font-size:10px;letter-spacing:.2em;color:var(--ink-3)}
+.material-preview strong{font-family:var(--serif);font-size:21px;font-weight:400;letter-spacing:.12em}
+.material-preview small{font-size:11px;color:var(--ink-3)}
+.material-field{margin-bottom:16px}
+.material-field > span{display:flex;justify-content:space-between;align-items:center;letter-spacing:.04em}
+.material-field output{font-variant-numeric:tabular-nums;color:var(--ink-3)}
+.material-field input[type=range]{padding:0;background:transparent;border:0;min-height:28px}
