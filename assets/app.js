@@ -1043,7 +1043,7 @@
       if (!book){
         selected = '';
         var html = '<div class="room-intro"><p class="lead">像整理笔记一样，一本一本收好设定。支持导入 Tavern / SillyTavern 导出的 JSON 世界书，内容保存在这台设备。</p><div class="room-stat"><strong>'+books.length+'</strong><span>本世界书</span></div></div>' +
-          '<div class="worldbook-tools"><button class="ghost solid" id="wbNew" type="button">＋ 新建世界书</button><label class="ghost" for="wbImport">导入 JSON<input id="wbImport" type="file" accept=".json,application/json" hidden></label></div>';
+          '<div class="worldbook-tools"><button class="ghost solid" id="wbNew" type="button">＋ 新建世界书</button><label class="ghost" for="wbImport">导入 JSON<input id="wbImport" type="file" accept=".json,application/json" hidden></label></div><form class="worldbook-compose" id="wbBookForm" hidden><strong>新建一本世界书</strong><input id="wbBookName" maxlength="80" placeholder="例如：宋祁的日常设定"><div class="row"><button class="ghost solid" type="submit">创建</button><button class="ghost" id="wbBookCancel" type="button">取消</button></div></form>';
         if(!books.length) html += '<div class="blank">这里还没有世界书。可以新建一本，或导入酒馆 JSON。</div>';
         else html += '<div class="worldbook-list">'+books.map(function(b){
           return '<button class="worldbook-card" type="button" data-wb-open="'+esc(b.id)+'"><span class="worldbook-card-top"><strong>'+esc(b.name)+'</strong><small>'+b.entries.length+' 个条目</small></span><span class="worldbook-card-bottom"><span>'+(b.enabled?'已启用':'已停用')+'</span><span>打开笔记本　↗</span></span></button>';
@@ -1053,13 +1053,14 @@
         body.onclick=function(ev){
           var open=ev.target.closest('[data-wb-open]');
           if(open){selected=open.getAttribute('data-wb-open');query='';editing='';render();return;}
-          if(ev.target.closest('#wbNew')){
-            var name=window.prompt('给这本世界书起个名字','新世界书');
-            if(name && name.trim()){
-              var all=worldbooks();var b={id:uid(),name:name.trim(),enabled:true,entries:[],createdAt:Date.now()};
-              all.push(b);if(saveWorldbooks(all)){selected=b.id;render();}
-            }return;
-          }
+          if(ev.target.closest('#wbNew')){$('#wbBookForm').hidden=false;$('#wbBookName').focus();return;}
+          if(ev.target.closest('#wbBookCancel')){$('#wbBookForm').hidden=true;return;}
+        };
+        body.onsubmit=function(ev){
+          if(ev.target.id!=='wbBookForm')return;
+          ev.preventDefault();var name=$('#wbBookName').value.trim();if(!name){toast('先给这本世界书起个名字。');return;}
+          var all=worldbooks();var b={id:uid(),name:name,enabled:true,entries:[],createdAt:Date.now()};all.push(b);
+          if(saveWorldbooks(all)){selected=b.id;render();toast('新世界书已创建。');}
         };
         body.onchange=async function(ev){
           if(ev.target.id!=='wbImport')return;
