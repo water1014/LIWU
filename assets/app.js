@@ -524,7 +524,10 @@
     var count = dayCount();
     $('#homeDays').textContent = count ? '相伴第 ' + count + ' 天' : '我们的里屋';
     $('#homeCount').textContent = count || '∞';
-    $('#homeHero').textContent = D.hero || '屋子不大，够两个人住。';
+    $('#homeHero').textContent = D.hero || '把日子过成我们自己的故事。';
+    var since = sinceValue();
+    $('#homeSinceLabel').textContent = since ? '我们的纪念日　' + since.replace(/-/g, '.') : '我们的纪念日　还没有设置';
+    $('#homeAgenda').innerHTML = '<p>今天的安排，等你们慢慢写进日常。</p>';
     var diaries = diaryItems();
     var diary = $('#homeDiary');
     diary.innerHTML = diaries.length ? '<strong>' + esc(diaries[0].title || '今天的日记') + '</strong><p>' + esc((diaries[0].body || '').slice(0,76) || '留下一点今天的记录。') + '</p><time>' + esc(diaries[0].date) + '</time>' : '<p class="home-empty">今天还没有写日记，留一句给未来的我们。</p>';
@@ -547,6 +550,14 @@
     else if (target === 'settings') viewSettings();
   }
   $('#homeMenuBtn').addEventListener('click', openDrawer);
+  $('#homePhotoPick').addEventListener('click', function(){ $('#homePhotoFile').click(); });
+  $('#homePhotoFile').addEventListener('change', function(ev){
+    var file = ev.target.files && ev.target.files[0];
+    if (!file) return;
+    var url = URL.createObjectURL(file);
+    $('#homePhotoImg').src = url;
+    $('#homePhotoWindow').classList.add('has-photo');
+  });
   $('#homeScreen').addEventListener('click', function(ev){
     var go = ev.target.closest('[data-home-go]');
     if (go){ goHomeTarget(go.getAttribute('data-home-go')); return; }
