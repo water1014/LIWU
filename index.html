@@ -436,10 +436,14 @@ function showTooltip(text, x, y) {
 }
 function hideTooltip() { if (tooltipEl) tooltipEl.style.opacity = '0'; }
 
-window.addEventListener('mousemove', e => {
+function updatePointer(e) {
   mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-});
+}
+// Pointer events cover mouse, touch and stylus. Keep the raycaster in sync on phones,
+// where a tap may not produce a mousemove before the click.
+window.addEventListener('pointermove', updatePointer, { passive: true });
+window.addEventListener('pointerdown', updatePointer, { passive: true });
 
 function highlight(obj) {
   obj.traverse(c => {
