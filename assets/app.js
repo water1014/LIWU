@@ -1486,7 +1486,7 @@
     var body=$('#viewBody'),inner=body.querySelector('.view-inner');
     Array.from(inner.children).forEach(function(node){
       if(node.classList&&node.classList.contains('group')){
-        var h=node.querySelector('h3');node.hidden=!h||h.textContent.trim()!==section;
+        var h=node.querySelector('h3');node.hidden=!h||h.textContent.trim().indexOf(section)!==0;
       }else if(node.classList&&node.classList.contains('row')){node.hidden=false;}
       else if(node.classList&&node.classList.contains('tip')){node.hidden=true;}
     });
@@ -1839,7 +1839,7 @@
         });
       }
       if (ev.target.id === 'cExport'){
-        var data = { v: 11, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), memory: LS.get(K_MEMORY, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites'), profile: LS.get(K_PROFILE, {}), notices: LS.get(K_NOTICES, []), noticeRead: LS.get(K_NOTICE_READ, []), ledger: manageList(K_LEDGER), health: manageList(K_HEALTH), period: LS.get(K_PERIOD, {cycleLength:28,periodLength:5,lastStart:'',starts:[]}), study: manageList(K_STUDY), classes: manageList(K_CLASS), music: manageList(K_MUSIC), games: manageList(K_GAMES), window: LS.get(K_WINDOW, {title:'窗边',description:'给今天留一扇窗。',image:''}), windowNotes: manageList(K_WINDOW_NOTES) };
+        var data = { v: 12, db: db, cfg: cfg, since: sinceValue(), diary: LS.get(K_DIARY, []), album: LS.get(K_ALBUM, []), memory: LS.get(K_MEMORY, []), worldbooks: LS.get(K_WORLDBOOKS, []), calendar: LS.get(PLANNER_KEYS.calendar, []), schedule: LS.get(PLANNER_KEYS.schedule, []), todo: LS.get(PLANNER_KEYS.todo, []), countdown: simpleList(K_COUNTDOWN), mood: simpleList(K_MOOD), moments: collectionList('liwu.moments'), quotes: collectionList('liwu.quotes'), favorites: collectionList('liwu.favorites'), profile: LS.get(K_PROFILE, {}), notices: LS.get(K_NOTICES, []), noticeRead: LS.get(K_NOTICE_READ, []), ledger: manageList(K_LEDGER), health: manageList(K_HEALTH), period: LS.get(K_PERIOD, {cycleLength:28,periodLength:5,lastStart:'',starts:[]}), study: manageList(K_STUDY), classes: manageList(K_CLASS), music: manageList(K_MUSIC), games: manageList(K_GAMES), window: LS.get(K_WINDOW, {title:'窗边',description:'给今天留一扇窗。',image:''}), windowNotes: manageList(K_WINDOW_NOTES), wallpaper: LS.get('liwu.wallpaper','') };
         var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
@@ -1885,6 +1885,7 @@
               if (Array.isArray(obj.games)) LS.set(K_GAMES, obj.games);
               if (obj.window && typeof obj.window === 'object') LS.set(K_WINDOW, obj.window);
               if (Array.isArray(obj.windowNotes)) LS.set(K_WINDOW_NOTES, obj.windowNotes);
+              if (typeof obj.wallpaper === 'string') LS.set('liwu.wallpaper', obj.wallpaper);
               applyTheme();
               renderAll();
               toast('导进来了。');
