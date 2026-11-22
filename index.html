@@ -11,7 +11,7 @@
 <link rel='preconnect' href='https://fonts.googleapis.com'>
 <link rel='preconnect' href='https://fonts.gstatic.com' crossorigin>
 <link href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500&display=swap' rel='stylesheet'>
-<link rel='stylesheet' href='assets/style.css?v=36'>
+<link rel='stylesheet' href='assets/style.css?v=37'>
 <style>
 :root{
   --paper:#F8F4EB; --ink:#2B2823; --soft:#5A5348; --mute:#9A9285; --line:#E2DBCB; --red:#8A3B2C;
@@ -379,8 +379,8 @@ window.addEventListener('error', function(e){
   if (h) h.textContent = '出了点问题：' + (e.message || '未知');
 });
 </script>
-<script src='data.js?v=36'></script>
-<script src='assets/app.js?v=36'></script>
+<script src='data.js?v=37'></script>
+<script src='assets/app.js?v=37'></script>
 <script>
 (function(){
   var D = window.LIWU || {};
@@ -396,7 +396,10 @@ window.addEventListener('error', function(e){
   paintClock(); setInterval(paintClock, 20000);
 
   function days(){
-    var s = D.since || localStorage.getItem('liwu.since') || '';
+    var s = D.since || '';
+    if (!s){
+      try{ s = JSON.parse(localStorage.getItem('liwu.since') || '""') || ''; }catch(e){ s = ''; }
+    }
     if (!s) return '';
     var t = Date.parse(String(s).replace(/\./g, '-'));
     if (isNaN(t)) return '';
